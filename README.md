@@ -18,7 +18,7 @@ Los usuarios enfrentan una búsqueda fragmentada y poco eficiente de eventos rel
 
 **Alternativas actuales:**
 - Redes sociales (Instagram, Facebook, WhatsApp)
-- Carteleras físicas en parroquias
+- Carteleras/folletos de manera física en parroquias
 - Comunicación boca a boca
 
 **Ventajas de nuestra propuesta:**
@@ -27,7 +27,6 @@ Los usuarios enfrentan una búsqueda fragmentada y poco eficiente de eventos rel
 - Filtros por tipo de evento y ubicación
 - Información actualizada desde una hoja de cálculo dinámica
 - Posibilidad de agregar eventos especiales (bingo, grupos juveniles, etc.)
-- Exportación futura a PDF o integración con calendarios personales
 
 ---
 
