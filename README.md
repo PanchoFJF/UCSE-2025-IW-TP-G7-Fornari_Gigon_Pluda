@@ -1,7 +1,5 @@
 # UCSE-2025-IW-TP-G7-Fornari_Gigon_Pluda
 
----
-
 ## 🛠️ Justificación del Proyecto
 
 ### 📌 Necesidad real
