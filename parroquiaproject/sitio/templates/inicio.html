@@ -1,2 +1,8 @@
 <h1>noticias.com</h1>
 <p>¡Bienvenido!</p>
+
+{% for iglesia in lista_iglesias %}
+    <h3>{{ iglesia.nombre }}</h3>
+    <h6>{{iglesia.direccion}}</h6>
+    <p>{{ iglesia.horarioMisa.texto }}</p>
+{% endfor %}
