@@ -1,4 +1,7 @@
 from sitio import views
 
 
-path('inicio/', views.inicio),
+urlpatterns = [
+    path('admin/', admin.site.urls),  # 👉 URL del panel de administración
+    path('inicio/', views.inicio),    # Tu vista personalizada
+]
