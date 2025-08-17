@@ -1,3 +1,5 @@
+<!--
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -7,4 +9,24 @@
     {{ form.as_p }}
     <button type="submit">Entrar</button>
 </form>
+{% endblock %}
+
+ -->
+
+{% extends "base.html" %}
+{% block title %}Ingresar{% endblock %}
+{% block content %}
+<h1>Ingresar</h1>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  {% if next %}
+    <input type="hidden" name="next" value="{{ next }}">
+  {% endif %}
+  <button type="submit">Ingresar</button>
+</form>
+<p>
+  <a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a><br>
+  ¿No tenés cuenta? <a href="{% url 'accounts:signup' %}">Registrate</a>
+</p>
 {% endblock %}

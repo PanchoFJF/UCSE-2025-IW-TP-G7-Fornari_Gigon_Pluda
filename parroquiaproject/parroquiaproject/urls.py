@@ -18,10 +18,20 @@ from django.contrib import admin
 from django.urls import include, path
 from sitio import views
 
+""""
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('inicio/', views.inicio, name='inicio'),
-    path("accounts/", include("django.contrib.auth.urls")),
+    path("dashboard/", views.dashboard, name="dashboard"),  # privada
     path("accounts/", include("django.contrib.auth.urls")),  # rutas login/logout
     path("accounts/", include("accounts.urls")),  # nuestra ruta signup
 ]
+"""
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("accounts/", include("accounts.urls")),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("", include("sitio.urls")),  # inicio y dashboard
+]
+
