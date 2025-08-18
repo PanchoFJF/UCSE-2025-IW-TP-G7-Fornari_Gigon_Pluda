@@ -12,13 +12,14 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.models import User
 from django.http import HttpResponse
-from django.core.mail import send_mail
+# from django.core.mail import send_mail
 
 class SignUpView(generic.CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy("login")  # después de registrarse va al login
     template_name = "registration/signup.html"
 
+"""
     def form_valid(self, form):
         user = form.save(commit=False)
         # Usuario inactivo hasta que confirme el email
@@ -57,3 +58,4 @@ def activate(request, uidb64, token):
         return render(request, "registration/activation_complete.html", {"user": user})
     else:
         return render(request, "registration/activation_invalid.html", status=400)
+"""

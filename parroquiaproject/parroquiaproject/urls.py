@@ -21,6 +21,7 @@ from sitio import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.inicio, name='inicio'),
+    path('dashboard/', views.dashboard, name='dashboard'),
     path('accounts/', include('django.contrib.auth.urls')), # Autenticación básica (login/logout/password reset)
     path('accounts/', include('accounts.urls')),     # Rutas personalizadas de tu app accounts (ej. registro)
 ]
