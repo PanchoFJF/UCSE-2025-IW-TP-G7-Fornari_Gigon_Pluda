@@ -12,7 +12,3 @@ dependencies = [
     "whitenoise[brotli]>=6.9.0",
 ]
 
-[tool.uv.workspace]
-members = [
-    "parroquiaproject",
-]
