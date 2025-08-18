@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h2>Iniciar sesión</h2>
+<h1>Iniciar sesión</h1>
 <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Entrar</button>
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="hidden" name="next" value="{{ next }}">
+  <button type="submit">Entrar</button>
 </form>
+<p>¿Sin cuenta? <a href="{% url 'signup' %}">Registrate</a></p>
 {% endblock %}

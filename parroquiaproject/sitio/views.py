@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from sitio.models import HorarioMisa, Iglesia
 from datetime import datetime
 
@@ -15,5 +16,9 @@ from datetime import datetime
 def inicio(request):
     iglesias = Iglesia.objects.all()
     return render(request, 'inicio.html', {'lista_iglesias': iglesias})
+
+@login_required
+def privado(request):
+    return render(request, 'publicacion.html')
 
 

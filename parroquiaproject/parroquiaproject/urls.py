@@ -15,13 +15,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import path, include
 from sitio import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('inicio/', views.inicio, name='inicio'),
-    path("accounts/", include("django.contrib.auth.urls")),
-    path("accounts/", include("django.contrib.auth.urls")),  # rutas login/logout
-    path("accounts/", include("accounts.urls")),  # nuestra ruta signup
+    path('', views.inicio, name='inicio'),
+    path('accounts/', include('django.contrib.auth.urls')), # Autenticación básica (login/logout/password reset)
+    path('accounts/', include('accounts.urls')),     # Rutas personalizadas de tu app accounts (ej. registro)
 ]

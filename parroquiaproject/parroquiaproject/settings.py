@@ -105,12 +105,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = 'en-ar'
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -140,3 +137,7 @@ if 'RENDER' in os.environ:
                       'whitenoise.middleware.WhiteNoiseMiddleware')
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+LOGIN_URL = 'login'                   # provisto por auth.urls
+LOGIN_REDIRECT_URL = 'publicacion'        # destino post-login si no hay ?next
+LOGOUT_REDIRECT_URL = 'inicio'        # destino post-logout
