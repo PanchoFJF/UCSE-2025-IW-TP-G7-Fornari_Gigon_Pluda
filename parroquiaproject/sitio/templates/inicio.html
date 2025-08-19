@@ -20,10 +20,7 @@
         <h3>{{ iglesia.nombre }}</h3>
         <h6>{{ iglesia.direccion }}</h6>
         <p>{{ iglesia.horarioMisa.texto }}</p>
-        
-        {% if iglesia.imagen %}
-          <img src="{{ iglesia.imagen.url }}" alt="Imagen de {{ iglesia.nombre }}" style="max-width: 100%; height: auto; border-radius: 8px;">
-        {% endif %}
+        <img src="{{ iglesia.imagen_url }}" alt="Imagen de {{ iglesia.nombre }}" style="max-width:240px; height: auto; border-radius: 8px;">
       </div>
     {% empty %}
       <p>No hay iglesias cargadas.</p>

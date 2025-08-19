@@ -9,7 +9,7 @@ class Iglesia(models.Model):
     direccion = models.CharField(max_length=100)
     horarioMisa = models.ForeignKey('HorarioMisa', blank=True, null=True, on_delete=models.CASCADE)
     listaActividades = models.ManyToManyField('Actividades', blank=True)
-    imagen = models.ImageField(upload_to='iglesias/', blank=True, null=True)
+    imagen_url = models.URLField(blank=True, null=True)
 
 class HorarioMisa(models.Model):
     texto = models.CharField(max_length=1000)
