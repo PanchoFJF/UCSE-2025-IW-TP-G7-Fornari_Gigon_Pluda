@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from sitio import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,3 +27,5 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')), # Autenticación básica (login/logout/password reset)
     path('accounts/', include('accounts.urls')),     # Rutas personalizadas de tu app accounts (ej. registro)
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -141,3 +141,6 @@ if 'RENDER' in os.environ:
 LOGIN_URL = 'login'                   # provisto por auth.urls
 LOGIN_REDIRECT_URL = 'dashboard'        # destino post-login si no hay ?next
 LOGOUT_REDIRECT_URL = 'inicio'        # destino post-logout
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
