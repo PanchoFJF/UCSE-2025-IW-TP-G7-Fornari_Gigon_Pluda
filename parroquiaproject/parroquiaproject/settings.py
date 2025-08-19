@@ -144,3 +144,10 @@ LOGOUT_REDIRECT_URL = 'inicio'        # destino post-logout
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATIC_URL = '/static/'
+
+# Solo si trabajás en desarrollo y querés apuntar a una carpeta propia
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
