@@ -35,6 +35,15 @@ def inicio(request):
     return render(request, 'inicio.html', {
         'actividades_por_dia': actividades_por_dia
     })
+
+def iglesias(request):
+    # Traemos todas las iglesias
+    iglesias = Iglesia.objects.all()
+
+    return render(request, "iglesias.html", {
+        "iglesias": iglesias
+    })
+
 @login_required
 @never_cache
 def dashboard(request):

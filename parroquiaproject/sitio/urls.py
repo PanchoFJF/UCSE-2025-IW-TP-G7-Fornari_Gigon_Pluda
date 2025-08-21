@@ -6,4 +6,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),  # 👉 URL del panel de administración
     path("", views.inicio, name="inicio"),    # Tu vista personalizada
     path("dashboard/", views.dashboard, name="dashboard"),  # privado
+    path('iglesias/', views.iglesias, name='iglesias'),
 ]

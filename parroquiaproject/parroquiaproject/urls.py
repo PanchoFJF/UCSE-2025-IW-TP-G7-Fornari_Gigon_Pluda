@@ -26,6 +26,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('accounts/', include('django.contrib.auth.urls')), # Autenticación básica (login/logout/password reset)
     path('accounts/', include('accounts.urls')),     # Rutas personalizadas de tu app accounts (ej. registro)
+    path('iglesias/', views.iglesias, name='iglesias'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
