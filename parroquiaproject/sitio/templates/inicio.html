@@ -1,36 +1,36 @@
-<!--
+{% extends "base.html" %}
+{% load static %}
 
-<h1>noticias.com</h1>
-<p>¡Bienvenido!</p>
+{% block title %}Lista de Actividades{% endblock %}
 
-{% for iglesia in lista_iglesias %}
-    <h3>{{ iglesia.nombre }}</h3>
-    <h6>{{iglesia.direccion}}</h6>
-    <p>{{ iglesia.horarioMisa.texto }}</p>
-{% endfor %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}
 
- -->
-<p><a href="{% url 'login' %}">Iniciá sesión aquí</a></p>
 {% block content %}
-<h1>Bienvenido a Parroquias Rafaela</h1>
+<h1>Lista de Actividades</h1>
 
-<div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-    {% for iglesia in lista_iglesias %}
-      <div style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; max-width: 400px; text-align: center; box-shadow: 2px 2px 8px rgba(0,0,0,0.1);">
-        <h3>{{ iglesia.nombre }}</h3>
-        <h6>{{ iglesia.direccion }}</h6>
-        <h4>Horarios de Misa:</h4>
-        <p>{{ iglesia.horarioMisa.texto }}</p>
-        {% if iglesia.listaActividades.all %}
-            <h4>Actividades:</h4>
-            {% for actividad in iglesia.listaActividades.all %}
-                <p>{{ actividad.titulo }}: {{ actividad.texto }}</p>
-            {% endfor %}
-        {% endif %}
-        <img src="{{ iglesia.imagen_url }}" alt="Imagen de {{ iglesia.nombre }}" style="max-width:240px; height: auto; border-radius: 8px;">
-      </div>
-    {% empty %}
-      <p>No hay iglesias cargadas.</p>
-    {% endfor %}
-  </div>
-  {% endblock %}
+{% for dia, acts in actividades_por_dia.items %}
+    {% if acts %}
+        <h2>{{ dia|capfirst }}</h2>
+        <table class="actividades">
+            <thead>
+                <tr>
+                    <th>Actividad</th>
+                    <th>Hora</th>
+                    <th>Iglesia</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for actividad in acts %}
+                    <tr>
+                        <td>{{ actividad.categoria }}</td>
+                        <td>{{ actividad.hora }}</td>
+                        <td>{{ actividad.iglesia.nombre }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endfor %}
+{% endblock %}

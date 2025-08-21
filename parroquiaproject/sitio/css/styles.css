@@ -1,0 +1,19 @@
+.actividades {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.actividades th, .actividades td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+.actividades th {
+    background-color: #f2f2f2;
+}
+
+.actividades tr:nth-child(even) {
+    background-color: #fafafa;
+}
