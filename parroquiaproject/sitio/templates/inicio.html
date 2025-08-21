@@ -5,10 +5,9 @@
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
     .accordion-button {
-        background-color: #FADC8C !important;
+        background-color: #D9E7F7 ;
     }
 </style>
 {% endblock %}
@@ -44,11 +43,11 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th>Actividad 
-                                        <button class="btn btn-sm btn-warning ms-2">+</button>
+                                        <button class="btn btn-sm btn-warning ms-2">➕</button>
                                     </th>
                                     <th>Hora</th>
                                     <th>Iglesia 
-                                        <button class="btn btn-sm btn-warning ms-2">+</button>
+                                        <button class="btn btn-sm btn-warning ms-2">➕</button>
                                     </th>
                                     <th>Acciones</th>
                                 </tr>
@@ -60,8 +59,8 @@
                                     <td>{{ actividad.hora }}</td>
                                     <td>{{ actividad.iglesia.nombre }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-warning me-1">✏️</button>
-                                        <button class="btn btn-sm btn-danger">🗑️</button>
+                                        <button class="btn btn-sm btn-warning me-1">✏️ Editar</button>
+                                        <button class="btn btn-sm btn-danger">🗑️ Eliminar</button>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -75,5 +74,4 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
