@@ -46,7 +46,7 @@ def iglesias(request):
 from collections import defaultdict
 from django.shortcuts import render
 from django.template.defaultfilters import capfirst
-from .models import Actividades
+from .models import Actividades, UsuarioIglesias
 
 def inicio(request):
     # Obtener parámetros de la URL
@@ -90,5 +90,17 @@ def inicio(request):
 @login_required
 @never_cache
 def dashboard(request):
-    return render(request, "dashboard.html")
+    try:
+        usuario_iglesias = UsuarioIglesias.objects.get(usuario=request.user)
+        iglesias = usuario_iglesias.iglesias_suscripto.all()
+        actividades = Actividades.objects.filter(iglesia__in=iglesias)
+    except UsuarioIglesias.DoesNotExist:
+        iglesias = []
+        actividades = []
+
+    context = {
+        "iglesias": iglesias,
+        "actividades": actividades,
+    }
+    return render(request, "dashboard.html", context)
     

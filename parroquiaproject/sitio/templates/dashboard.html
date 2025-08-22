@@ -2,4 +2,19 @@
 {% block content %}
 <h1>Bienvenido {{ user.username }}</h1>
 <p>Esta es la sección privada.</p>
+<h2>Mis Iglesias</h2>
+<ul>
+  {% for iglesia in iglesias %}
+    <li>{{ iglesia.nombre }}</li>
+  {% endfor %}
+</ul>
+
+<h2>Actividades relacionadas</h2>
+<ul>
+  {% for actividad in actividades %}
+    <li>{{ actividad.categoria }} - {{ actividad.dia }} {{ actividad.hora }} - {{ actividad.iglesia.nombre }}</li>
+  {% empty %}
+    <li>No hay actividades</li>
+  {% endfor %}
+</ul>
 {% endblock %}

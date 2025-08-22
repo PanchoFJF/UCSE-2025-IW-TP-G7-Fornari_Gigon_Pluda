@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from sitio.models import Iglesia, HorarioMisa, Actividades
+from sitio.models import Iglesia, HorarioMisa, Actividades, UsuarioIglesias
 
 @admin.register(Iglesia)
 class AdminNoticia(admin.ModelAdmin):
@@ -20,3 +20,9 @@ class AdminActividades(admin.ModelAdmin):
     #list_filter = ('archivada', 'fecha', 'categoria')
     #search_fields = ('texto', )
     #date_hierarchy = 'fecha'
+
+
+@admin.register(UsuarioIglesias)
+class UsuariosIglesiasAdmin(admin.ModelAdmin):
+    list_display = ("usuario",)
+    filter_horizontal = ("iglesias_suscripto", "iglesias_admin")
