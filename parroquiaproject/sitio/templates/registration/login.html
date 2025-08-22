@@ -1,11 +1,55 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Iniciar sesión{% endblock %}
+
 {% block content %}
-<h1>Iniciar sesión</h1>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <input type="hidden" name="next" value="{{ next }}">
-  <button type="submit">Entrar</button>
-</form>
-<p>¿Sin cuenta? <a href="{% url 'signup' %}">Registrate</a></p>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <div class="card shadow rounded-3">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4 fw-bold">Ingresar</h2>
+
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+
+                        <!-- Mensajes de error -->
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                Usuario o contraseña incorrectos. Intenta de nuevo.
+                            </div>
+                        {% endif %}
+
+                        <!-- Campo usuario -->
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">Usuario</label>
+                            {{ form.username|add_class:"form-control" }}
+                        </div>
+
+                        <!-- Campo contraseña -->
+                        <div class="mb-3">
+                            <label for="{{ form.password.id_for_label }}" class="form-label">Contraseña</label>
+                            {{ form.password|add_class:"form-control" }}
+                        </div>
+
+                        <!-- Botón -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn" style="background-color:#5DADE2; color:white;"">Iniciar sesión</button>
+                        </div>
+                    </form>
+
+                    <!-- Link a registro -->
+                    <div class="text-center mt-3">
+                        <small>¿No tienes cuenta?
+                            <a href="{% url 'signup' %}">Regístrate aquí</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 {% endblock %}

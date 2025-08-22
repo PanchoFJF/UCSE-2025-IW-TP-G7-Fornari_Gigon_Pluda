@@ -48,3 +48,4 @@ def iglesias(request):
 @never_cache
 def dashboard(request):
     return render(request, "dashboard.html")
+    
