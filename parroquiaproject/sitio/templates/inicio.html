@@ -21,6 +21,12 @@
             <button class="btn btn-primary">🔍 Filtrar</button>
         </div>
     </h2>
+    <form method="get" class="mb-4">
+      <input type="text" name="dia" placeholder="Día" value="{{ filtros.dia|default_if_none:'' }}">
+      <input type="text" name="categoria" placeholder="Categoría" value="{{ filtros.categoria|default_if_none:'' }}">
+      <input type="text" name="parroquia" placeholder="Parroquia" value="{{ filtros.parroquia|default_if_none:'' }}">
+      <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
 
     <div class="accordion" id="weeklyAccordion">
         {% for dia, acts in actividades_por_dia.items %}
