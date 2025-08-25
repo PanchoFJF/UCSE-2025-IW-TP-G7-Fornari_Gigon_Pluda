@@ -1,37 +1,162 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iglesias{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<style>
+  .accordion-button {
+    background-color: #D9E7F7;
+    color: var(--bs-body-color);
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4 d-flex justify-content-between align-items-center">Iglesias
-        <div>
-            <button class="btn btn-warning me-2">➕ Añadir</button>
-        </div>
-    </h2>
-    <style>
-    .accordion-button {
-        background-color: #D9E7F7 ;
-    }
-    </style>
 
-    <div class="accordion" id="accordionIglesias">
-        {% for iglesia in iglesias %}
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}">
-                    {{ iglesia.nombre }}
-                </button>
-            </h2>
-            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#accordionIglesias">
-                <div class="accordion-body text-center">
-                    {% if iglesia.imagen %}
-                        <img src="{{ iglesia.imagen.url }}" alt="{{ iglesia.nombre }}" class="img-fluid mb-3" style="max-height: 300px;">
-                    {% endif %}
-                    <p><strong>Dirección:</strong> {{ iglesia.direccion }}</p>
-                    <p><strong>Contacto Secretaría:</strong> {{ iglesia.contacto_secretaria }}</p>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+  <h2 class="mb-4 d-flex justify-content-between align-items-center">
+    Iglesias
+    <div>
+      <button class="btn btn-warning" data-bs-toggle="collapse" data-bs-target="#formIglesia">
+        ➕ Añadir
+      </button>
     </div>
+  </h2>
+
+  <!-- FORMULARIO AÑADIR IGLESIA -->
+  <div id="formIglesia" class="collapse mb-4">
+    <div class="card card-body">
+      <h4>Añadir Nueva Iglesia</h4>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="crear">
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Guardar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- LISTA DE IGLESIAS -->
+  <div class="accordion" id="accordionIglesias">
+    {% for iglesia in iglesias %}
+    <div class="accordion-item border-0 shadow-sm mb-3 rounded-3">
+
+<h2 class="accordion-header" id="heading{{ forloop.counter }}">
+  <button
+    class="accordion-button collapsed rounded-top-3"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#collapse{{ forloop.counter }}"
+    aria-expanded="false"
+    aria-controls="collapse{{ forloop.counter }}">
+    {{ iglesia.nombre }}
+  </button>
+</h2>
+
+      <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse"
+           data-bs-parent="#accordionIglesias">
+        <div class="accordion-body">
+
+          <!-- Imagen izquierda / Info derecha -->
+          <div class="row g-3 align-items-start">
+            <div class="col-md-4">
+              {% if iglesia.imagen %}
+                <img src="{{ iglesia.imagen.url }}" alt="{{ iglesia.nombre }}"
+                     class="img-fluid rounded border" style="max-height: 260px; object-fit: cover;">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center bg-light border rounded"
+                     style="height: 200px;">
+                  <span class="text-muted">Sin imagen</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-8">
+              <p class="mb-1"><strong>Dirección:</strong> {{ iglesia.direccion }}</p>
+              <p class="mb-3">
+                <strong>Contacto Secretaría:</strong>
+                {% if iglesia.contacto_secretaria %}
+                  {{ iglesia.contacto_secretaria }}
+                {% else %}
+                  <span class="text-muted">No disponible</span>
+                {% endif %}
+              </p>
+
+              <!-- Botones acciones -->
+              <div class="d-flex gap-2">
+                <!-- Editar (modal) -->
+                <button class="btn btn-sm btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editarIglesia{{ iglesia.id }}">
+                  ✏️ Editar
+                </button>
+
+                <!-- Eliminar -->
+                <form method="post" class="d-inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="eliminar">
+                  <input type="hidden" name="iglesia_id" value="{{ iglesia.id }}">
+                  <button type="submit" class="btn btn-sm btn-danger"
+                          onclick="return confirm('¿Seguro que deseas eliminar {{ iglesia.nombre }}?')">
+                    🗑 Eliminar
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR IGLESIA -->
+    <div class="modal fade" id="editarIglesia{{ iglesia.id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="editar">
+            <input type="hidden" name="iglesia_id" value="{{ iglesia.id }}">
+
+            <div class="modal-header">
+              <h5 class="modal-title">Editar Iglesia</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" name="nombre" class="form-control" value="{{ iglesia.nombre }}" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Dirección</label>
+                <input type="text" name="direccion" class="form-control" value="{{ iglesia.direccion }}">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Contacto Secretaría</label>
+                <input type="text" name="contacto_secretaria" class="form-control" value="{{ iglesia.contacto_secretaria }}">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Imagen</label>
+                <input type="file" name="imagen" class="form-control">
+                <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Guardar cambios</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% empty %}
+      <p class="text-muted">No hay iglesias registradas.</p>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

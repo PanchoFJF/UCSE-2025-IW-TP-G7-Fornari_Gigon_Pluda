@@ -5,6 +5,9 @@ from sitio.models import Actividades, HorarioMisa, Iglesia
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Iglesia
+from .forms import IglesiaForm
 
 
 #h = HorarioMisa(texto="Domingos a las 10:00 AM")
@@ -27,12 +30,44 @@ def inicio(request):
     return render(request, "inicio.html")
 
 def iglesias(request):
-    # Traemos todas las iglesias
-    iglesias = Iglesia.objects.all()
+    if request.method == "POST":
+        action = request.POST.get("action")
 
+        # Crear nueva iglesia
+        if action == "crear":
+            form = IglesiaForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+                return redirect("iglesias")
+
+        # Editar iglesia
+        elif action == "editar":
+            iglesia_id = request.POST.get("iglesia_id")
+            iglesia = get_object_or_404(Iglesia, id=iglesia_id)
+            iglesia.nombre = request.POST.get("nombre")
+            iglesia.direccion = request.POST.get("direccion")
+            iglesia.contacto_secretaria = request.POST.get("contacto_secretaria")
+            if request.FILES.get("imagen"):
+                iglesia.imagen = request.FILES["imagen"]
+            iglesia.save()
+            return redirect("iglesias")
+
+        # Eliminar iglesia
+        elif action == "eliminar":
+            iglesia_id = request.POST.get("iglesia_id")
+            iglesia = get_object_or_404(Iglesia, id=iglesia_id)
+            iglesia.delete()
+            return redirect("iglesias")
+
+    else:
+        form = IglesiaForm()
+
+    iglesias = Iglesia.objects.all()
     return render(request, "iglesias.html", {
-        "iglesias": iglesias
+        "iglesias": iglesias,
+        "form": form
     })
+
 
 def calendario(request):
     return render(request, "calendario.html", {
