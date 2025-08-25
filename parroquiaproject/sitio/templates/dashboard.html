@@ -1,20 +1,52 @@
 {% extends "base.html" %}
-{% block content %}
-<h1>Bienvenido {{ user.username }}</h1>
-<p>Esta es la sección privada.</p>
-<h2>Mis Iglesias</h2>
-<ul>
-  {% for iglesia in iglesias %}
-    <li>{{ iglesia.nombre }}</li>
-  {% endfor %}
-</ul>
+{% load static %}
 
-<h2>Actividades relacionadas</h2>
-<ul>
-  {% for actividad in actividades %}
-    <li>{{ actividad.categoria }} - {{ actividad.dia }} {{ actividad.hora }} - {{ actividad.iglesia.nombre }}</li>
-  {% empty %}
-    <li>No hay actividades</li>
-  {% endfor %}
-</ul>
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-3">Bienvenido, {{ user.username }} 👋</h1>
+    <p>En esta sección puedes ver tus permisos:</p>
+
+    <!-- Mis Iglesias -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Mis Iglesias</h4>
+        </div>
+        <div class="card-body">
+            {% if iglesias %}
+                <ul class="list-group list-group-flush">
+                    {% for iglesia in iglesias %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ iglesia.nombre }}
+                            <!-- Si querés, podés agregar un badge o icono -->
+                            <span class="badge bg-secondary rounded-pill">Permiso</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No tienes permiso en ninguna iglesia.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Actividades relacionadas -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">Actividades relacionadas</h4>
+        </div>
+        <div class="card-body">
+            {% if actividades %}
+                <ul class="list-group list-group-flush">
+                    {% for actividad in actividades %}
+                        <li class="list-group-item">
+                            <strong>{{ actividad.categoria }}</strong> - {{ actividad.dia }} {{ actividad.hora }}<br>
+                            <small class="text-muted">{{ actividad.iglesia.nombre }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No tienes permiso en ninguna actividad.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}
