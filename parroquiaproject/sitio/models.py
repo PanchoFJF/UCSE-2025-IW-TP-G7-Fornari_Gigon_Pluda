@@ -8,11 +8,15 @@ class Iglesia(models.Model):
     direccion = models.CharField(max_length=100)
     #horarioMisa = models.ForeignKey('HorarioMisa', blank=True, null=True, on_delete=models.CASCADE)
     imagen_url = models.URLField(blank=True, null=True)
+    def __str__(self):
+        return self.nombre
 
 class HorarioMisa(models.Model):
     dia = models.CharField(max_length=20, null=True, blank=True)
     hora = models.TimeField(null=True, blank=True)
     iglesia = models.ForeignKey(Iglesia, blank=True, null=True, on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.dia} a las {self.hora}"
 
 class Actividades(models.Model):
     categoria = models.CharField(max_length=50, blank=True, null=True)
@@ -22,6 +26,8 @@ class Actividades(models.Model):
     titulo = models.CharField(max_length=50)
     texto = models.CharField(max_length=200)
     fechaVencimiento = models.DateTimeField()
+    def __str__(self):
+        return self.titulo
 
 class UsuarioIglesias(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name="perfil_iglesias")
@@ -32,5 +38,3 @@ class UsuarioIglesias(models.Model):
     def __str__(self):
         return self.usuario.username
     
-def __str__(self):
-    return self.nombre
