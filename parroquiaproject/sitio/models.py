@@ -18,7 +18,16 @@ class HorarioMisa(models.Model):
     iglesia = models.ForeignKey(Iglesia, blank=True, null=True, on_delete=models.CASCADE)
     def __str__(self):
         return f"{self.dia} a las {self.hora}"
+    
+class Noticia(models.Model):
+    titulo = models.CharField(max_length=20)
+    descripcion = models.TextField()
+    imagen = models.ImageField(upload_to="inicio/", blank=True, null=True)
+    fecha = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.titulo
+ 
 class Actividades(models.Model):
     categoria = models.CharField(max_length=50, blank=True, null=True)
     dia = models.CharField(max_length=20, null=True, blank=True)

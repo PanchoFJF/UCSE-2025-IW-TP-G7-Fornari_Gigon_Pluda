@@ -1,52 +1,122 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Inicio - Noticias{% endblock %}
+{% block title %}Inicio{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 <style>
-    .card-news {
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        transition: transform 0.2s ease;
-    }
-    .card-news:hover {
-        transform: translateY(-3px);
-    }
+  .post-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.1);
+    margin-bottom: 1rem;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <h2 class="mb-4 d-flex justify-content-between align-items-center">
-        📰 Noticias
-        <div>
-            <a class="btn btn-warning me-2">➕ Añadir</a>
-            <a class="btn btn-primary">✏️ Editar</a>
-        </div>
-    </h2>
+<div class="container mt-4">
 
-    <div class="row">
-        {% for noticia in noticias %}
-        <div class="col-md-6 mb-4">
-            <div class="card card-news h-100">
-                {% if noticia.imagen %}
-                <img src="{{ noticia.imagen.url }}" class="card-img-top" alt="{{ noticia.titulo }}">
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ noticia.titulo }}</h5>
-                    <p class="card-text">{{ noticia.contenido|truncatewords:30 }}</p>
-                    <a  class="btn btn-sm btn-outline-primary">Leer más</a>
-                </div>
-                <div class="card-footer text-muted">
-                    Publicado el {{ noticia.fecha|date:"d/m/Y" }}
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <p class="text-muted text-center">No hay noticias publicadas.</p>
-        {% endfor %}
+  <h2 class="mb-4 d-flex justify-content-between align-items-center">
+    Noticias & Anuncios
+    <div>
+      <button class="btn btn-warning" data-bs-toggle="collapse" data-bs-target="#formNoticia">
+        ➕ Publicar
+      </button>
     </div>
+  </h2>
+
+  <!-- FORM NUEVA NOTICIA -->
+  <div id="formNoticia" class="collapse mb-4">
+    <div class="card card-body">
+      <h4>Nueva Publicación</h4>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="crear">
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Publicar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- LISTA DE PUBLICACIONES -->
+  {% for noticia in noticias %}
+  <div class="card post-card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between">
+        <h5 class="card-title">{{ noticia.titulo }}</h5>
+        <small class="text-muted">{{ noticia.fecha|date:"d/m/Y H:i" }}</small>
+      </div>
+      <p class="card-text">{{ noticia.descripcion }}</p>
+
+      {% if noticia.imagen %}
+        <img src="{{ noticia.imagen.url }}" class="img-fluid rounded mb-3" alt="Imagen noticia">
+      {% endif %}
+
+      <!-- Acciones -->
+      <div class="d-flex gap-2">
+        <!-- Editar -->
+        <button class="btn btn-sm btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#editarNoticia{{ noticia.id }}">
+          ✏️ Editar
+        </button>
+
+        <!-- Eliminar -->
+        <form method="post" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="eliminar">
+          <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
+          <button type="submit" class="btn btn-sm btn-danger"
+                  onclick="return confirm('¿Seguro que deseas eliminar esta publicación?')">
+            🗑 Eliminar
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR -->
+  <div class="modal fade" id="editarNoticia{{ noticia.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="editar">
+          <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
+
+          <div class="modal-header">
+            <h5 class="modal-title">Editar Publicación</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Título</label>
+              <input type="text" name="titulo" class="form-control" value="{{ noticia.titulo }}" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Descripción</label>
+              <textarea name="descripcion" class="form-control" rows="3" required>{{ noticia.descripcion }}</textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Imagen</label>
+              <input type="file" name="imagen" class="form-control">
+              <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Guardar cambios</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% empty %}
+    <p class="text-muted">No hay publicaciones todavía.</p>
+  {% endfor %}
 </div>
 {% endblock %}

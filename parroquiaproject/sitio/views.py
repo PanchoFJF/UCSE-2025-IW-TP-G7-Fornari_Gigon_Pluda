@@ -25,9 +25,36 @@ from collections import defaultdict
 from django.shortcuts import render
 from django.template.defaultfilters import capfirst
 from .models import Actividades, UsuarioIglesias
+from .models import Noticia
+from .forms import NoticiaForm
 
 def inicio(request):
-    return render(request, "inicio.html")
+    noticias = Noticia.objects.order_by("-fecha")  # timeline descendente
+    form = NoticiaForm()
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        if action == "crear":
+            form = NoticiaForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+                return redirect("inicio")
+
+        elif action == "editar":
+            noticia = get_object_or_404(Noticia, pk=request.POST.get("noticia_id"))
+            form = NoticiaForm(request.POST, request.FILES, instance=noticia)
+            if form.is_valid():
+                form.save()
+                return redirect("inicio")
+
+        elif action == "eliminar":
+            noticia = get_object_or_404(Noticia, pk=request.POST.get("noticia_id"))
+            noticia.delete()
+            return redirect("inicio")
+
+    return render(request, "inicio.html", {"noticias": noticias, "form": form})
+
 
 def iglesias(request):
     if request.method == "POST":
