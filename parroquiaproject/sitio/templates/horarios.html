@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Lista de Actividades{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<style>
+    .accordion-button {
+        background-color: #D9E7F7 ;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h2 class="mb-4 d-flex justify-content-between align-items-center">
+        Lista de Actividades
+        <div>
+            <button class="btn btn-warning me-2">➕ Añadir</button>
+            <button class="btn btn-primary">🔍 Filtrar</button>
+        </div>
+    </h2>
+    <form method="get" class="mb-4">
+      <input type="text" name="dia" placeholder="Día" value="{{ filtros.dia|default_if_none:'' }}">
+      <input type="text" name="categoria" placeholder="Categoría" value="{{ filtros.categoria|default_if_none:'' }}">
+      <input type="text" name="parroquia" placeholder="Parroquia" value="{{ filtros.parroquia|default_if_none:'' }}">
+      <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+
+    <div class="accordion" id="weeklyAccordion">
+        {% for dia, acts in actividades_por_dia.items %}
+            {% if acts %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#collapse{{ forloop.counter }}" 
+                            aria-expanded="false" 
+                            aria-controls="collapse{{ forloop.counter }}">
+                        {{ dia|capfirst }}
+                    </button>
+                </h2>
+                <div id="collapse{{ forloop.counter }}" 
+                     class="accordion-collapse collapse" 
+                     aria-labelledby="heading{{ forloop.counter }}" 
+                     data-bs-parent="#weeklyAccordion">
+                    <div class="accordion-body">
+                        <table class="table table-bordered table-striped text-center align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Actividad 
+                                        <button class="btn btn-sm btn-info ms-2">ℹ️</button>
+                                    </th>
+                                    <th>Hora</th>
+                                    <th>Iglesia 
+                                        <a href="/iglesias/" class="btn btn-sm btn-info ms-2">ℹ️</a>
+                                    </th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for actividad in acts %}
+                                <tr>
+                                    <td>{{ actividad.categoria }}</td>
+                                    <td>{{ actividad.hora }}</td>
+                                    <td>{{ actividad.iglesia.nombre }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning me-1">✏️ Editar</button>
+                                        <button class="btn btn-sm btn-danger">🗑️ Eliminar</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

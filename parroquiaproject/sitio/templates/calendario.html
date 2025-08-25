@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Calendario{% endblock %}
+
+{% block head %}
+  <!-- FullCalendar CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  <style>
+    #calendar {
+      max-width: 900px;
+      margin: 40px auto;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <h2 class="text-center mb-3">📅 Calendario de Actividades (Proximamente)</h2>
+  <div id="calendar"></div>
+{% endblock %}
+
+{% block extra_js %}
+  <!-- FullCalendar JS -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var calendarEl = document.getElementById('calendar');
+
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth', // vista mensual
+        locale: 'es', // idioma español
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        events: [
+          {
+            title: 'Día del Catequista',
+            start: '2025-08-21',
+            color: '#28a745' // verde (permanente)
+          },
+          {
+            title: 'Pascua',
+            start: '2025-04-20',
+            color: '#f39c12' // naranja (variable)
+          }
+        ],
+        dateClick: function(info) {
+          alert("Fecha seleccionada: " + info.dateStr);
+          // aquí podrías abrir un modal para añadir evento
+        }
+      });
+
+      calendar.render();
+    });
+  </script>
+{% endblock %}

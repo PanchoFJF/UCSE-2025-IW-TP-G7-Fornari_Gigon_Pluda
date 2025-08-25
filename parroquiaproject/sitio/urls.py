@@ -7,4 +7,7 @@ urlpatterns = [
     path("", views.inicio, name="inicio"),    # Tu vista personalizada
     path("dashboard/", views.dashboard, name="dashboard"),  # privado
     path('iglesias/', views.iglesias, name='iglesias'),
+    path('calendario/', views.calendario, name='calendario'),
+    path('horarios/', views.horarios, name='horarios'),
+    path('actividades/', views.actividades, name='actividades'),
 ]
