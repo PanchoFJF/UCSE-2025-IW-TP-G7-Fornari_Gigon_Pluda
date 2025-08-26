@@ -23,36 +23,36 @@
   </button>
 </h2>
 
-
-  <!-- FORMULARIO AÑADIR IGLESIA -->
-  <div id="formIglesia" class="collapse mb-4">
-    <div class="card card-body">
-      <h4>Añadir Nueva Iglesia</h4>
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="crear">
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Guardar</button>
-      </form>
-    </div>
+<!-- FORMULARIO AÑADIR IGLESIA -->
+<div id="formIglesia" class="collapse mb-4">
+  <div class="card card-body w-100">
+    <h4>Añadir Nueva Iglesia</h4>
+    <form method="post" enctype="multipart/form-data" class="needs-validation">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="crear">
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-success w-100">Guardar</button>
+    </form>
   </div>
+</div>
 
 <!-- LISTA DE IGLESIAS -->
 <div class="row">
   {% for iglesia in iglesias %}
-  <div class="col-md-4 mb-3">
-    <div class="card shadow-sm rounded-3">
-    {% if iglesia.imagen %}
-      <img src="{{ iglesia.imagen.url }}" class="card-img-top" alt="{{ iglesia.nombre }}"
+  <div class="col-12 col-sm-6 col-md-4 mb-3">
+    <div class="card shadow-sm rounded-3 h-100 d-flex flex-column">
+      {% if iglesia.imagen %}
+      <img src="{{ iglesia.imagen.url }}" class="card-img-top img-fluid" alt="{{ iglesia.nombre }}"
         style="height: 250px; object-fit: cover; width: 100%;">
-    {% else %}
+      {% else %}
       <div class="d-flex align-items-center justify-content-center bg-light border rounded" style="height: 250px;">
-          <span class="text-muted">Sin imagen</span>
+        <span class="text-muted">Sin imagen</span>
       </div>
-    {% endif %}
-      <div class="card-body">
+      {% endif %}
+
+      <div class="card-body flex-grow-1">
         <h4 class="card-title fw-bold">{{ iglesia.nombre }}</h4>
-        <ul class="list-styled mb-0">
+        <ul class="list-unstyled mb-3">
           <li><strong>Dirección:</strong> {{ iglesia.direccion }}</li>
           <li><strong>Contacto Secretaría:</strong>
             {% if iglesia.contacto_secretaria %}
@@ -63,29 +63,30 @@
           </li>
         </ul>
       </div>
-      <div class="card-body d-flex justify-content-center gap-2">
-  <a href="#" class="btn btn-primary">Suscribirse</a>
 
-  <button class="btn btn-warning"
-    data-bs-toggle="modal"
-    data-bs-target="#editarIglesia{{ iglesia.id }}">
-    ✏️
-  </button>
+      <div class="card-body d-flex flex-wrap justify-content-center gap-2">
+        <a href="#" class="btn btn-primary">Suscribirse</a>
 
-  <form method="post" class="d-inline">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="eliminar">
-    <input type="hidden" name="iglesia_id" value="{{ iglesia.id }}">
-    <button type="submit" class="btn btn-danger"
-      onclick="return confirm('¿Seguro que deseas eliminar {{ iglesia.nombre }}?')">🗑</button>
-  </form>
-</div>
+        <button class="btn btn-warning"
+          data-bs-toggle="modal"
+          data-bs-target="#editarIglesia{{ iglesia.id }}">
+          ✏️
+        </button>
+
+        <form method="post" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="eliminar">
+          <input type="hidden" name="iglesia_id" value="{{ iglesia.id }}">
+          <button type="submit" class="btn btn-danger"
+            onclick="return confirm('¿Seguro que deseas eliminar {{ iglesia.nombre }}?')">🗑</button>
+        </form>
+      </div>
     </div>
   </div>
 
   <!-- MODAL EDITAR IGLESIA -->
   <div class="modal fade" id="editarIglesia{{ iglesia.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
@@ -117,9 +118,9 @@
             </div>
           </div>
 
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-success">Guardar cambios</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <div class="modal-footer flex-column gap-2">
+            <button type="submit" class="btn btn-success w-100">Guardar cambios</button>
+            <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
           </div>
         </form>
       </div>
