@@ -151,13 +151,16 @@ def dashboard(request):
     try:
         usuario_iglesias = UsuarioIglesias.objects.get(usuario=request.user)
         iglesias = usuario_iglesias.iglesias_suscripto.all()
+        permisos_iglesias = usuario_iglesias.iglesias_admin.all()
         actividades = Actividades.objects.filter(iglesia__in=iglesias)
     except UsuarioIglesias.DoesNotExist:
         iglesias = []
+        permisos_iglesias = []
         actividades = []
 
     context = {
         "iglesias": iglesias,
+        "permisos_iglesias": permisos_iglesias,
         "actividades": actividades,
     }
     return render(request, "dashboard.html", context)
