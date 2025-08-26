@@ -22,9 +22,36 @@
         </div>
     </h2>
     <form method="get" class="mb-4">
-      <input type="text" name="dia" placeholder="Día" value="{{ filtros.dia|default_if_none:'' }}">
-      <input type="text" name="categoria" placeholder="Categoría" value="{{ filtros.categoria|default_if_none:'' }}">
-      <input type="text" name="parroquia" placeholder="Parroquia" value="{{ filtros.parroquia|default_if_none:'' }}">
+        <select name="dia">
+            <option value="">-- Seleccionar día --</option>
+            <option value="Lunes" {% if filtros.dia == "Lunes" %}selected{% endif %}>Lunes</option>
+            <option value="Martes" {% if filtros.dia == "Martes" %}selected{% endif %}>Martes</option>
+            <option value="Miercoles" {% if filtros.dia == "Miercoles" %}selected{% endif %}>Miercoles</option>
+            <option value="Jueves" {% if filtros.dia == "Jueves" %}selected{% endif %}>Jueves</option>
+            <option value="Viernes" {% if filtros.dia == "Viernes" %}selected{% endif %}>Viernes</option>
+            <option value="Sabado" {% if filtros.dia == "Sabado" %}selected{% endif %}>Sabado</option>
+            <option value="Domingo" {% if filtros.dia == "Domingo" %}selected{% endif %}>Domingo</option>
+          </select>
+          <!-- Categoría -->
+          <select name="categoria">
+                <option value="">-- Selecciona una categoría --</option>
+                {% for c in categorias %}
+                <option value="{{ c.id }}" {% if filtros.categoria == c.id|stringformat:"s" %}selected{% endif %}>
+                    {{ c.nombre }}
+                </option>
+                {% endfor %}
+            </select>
+  
+            <!-- Parroquia -->
+            <select name="parroquia">
+                <option value="">-- Selecciona una parroquia --</option>
+                {% for p in parroquias %}
+                <option value="{{ p.id }}" {% if filtros.parroquia == p.id|stringformat:"s" %}selected{% endif %}>
+                    {{ p.nombre }}
+                </option>
+                {% endfor %}
+            </select>
+            
       <button type="submit" class="btn btn-primary">Filtrar</button>
     </form>
 

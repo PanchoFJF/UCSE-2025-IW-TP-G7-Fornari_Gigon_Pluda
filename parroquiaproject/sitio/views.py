@@ -141,8 +141,14 @@ def horarios(request):
 def actividades(request):
     actividades = Actividades.objects.all()
 
+    # Filtros dinámicos
+    categorias = Actividades.objects.values_list("categoria", flat=True).distinct()
+    parroquias = Iglesia.objects.all()
+
     return render(request, "actividades.html", {
-        "actividades": actividades
+        "actividades": actividades,
+        "categorias": categorias,
+        "parroquias": parroquias,
     })
 
 @login_required
