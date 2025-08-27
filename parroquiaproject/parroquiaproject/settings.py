@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'sitio',
     'accounts',
     'widget_tweaks',
@@ -127,6 +130,12 @@ import os
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get("dxzubuzas"),
+    'API_KEY': os.environ.get("187626398887445"),
+    'API_SECRET': os.environ.get("uFol1IhEd5_WkfyDbD7FKq9JEFo")
+}
+
 import dj_database_url
 
 if 'RENDER' in os.environ:
@@ -136,6 +145,14 @@ if 'RENDER' in os.environ:
     DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
     MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
                       'whitenoise.middleware.WhiteNoiseMiddleware')
+    MEDIA_URL = '/media/'
+    STORAGES = {
+        'default': {
+            'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'},
+
+        'staticfiles': {                                                 
+            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+    }
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
