@@ -24,3 +24,10 @@
 .actividades th:nth-child(2), .actividades td:nth-child(2) { width: 40%; } /* Texto */
 .actividades th:nth-child(3), .actividades td:nth-child(3) { width: 15%; } /* Hora */
 .actividades th:nth-child(4), .actividades td:nth-child(4) { width: 25%; } /* Iglesia */
+
+@media (max-width: 768px) {
+    body, .container, .content-wrapper {
+        border: none !important;
+        box-shadow: none !important; /* por si también hay sombras */
+    }
+}

@@ -18,3 +18,11 @@
     background-color: #fafafa;
 }
 
+/* Quitar borde global en mobile */
+@media (max-width: 768px) {
+    body, .container, .content-wrapper {
+        border: none !important;
+        box-shadow: none !important; /* por si también hay sombras */
+    }
+}
+
