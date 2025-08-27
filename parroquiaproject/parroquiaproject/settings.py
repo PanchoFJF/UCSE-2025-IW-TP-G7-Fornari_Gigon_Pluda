@@ -92,9 +92,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# --- MEDIA ---
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+MEDIA_URL = '/media/'  # solo sirve para desarrollo local
+MEDIA_ROOT = BASE_DIR / 'media'  # solo para desarrollo local
 
 # --- CLOUDINARY ---
 CLOUDINARY_STORAGE = {
