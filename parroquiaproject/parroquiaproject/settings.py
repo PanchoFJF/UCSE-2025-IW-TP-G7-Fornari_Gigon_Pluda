@@ -94,7 +94,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-MEDIA_URL = '/media/'  # solo sirve para desarrollo local
 MEDIA_ROOT = BASE_DIR / 'media'  # solo para desarrollo local
 
 # --- CLOUDINARY ---
@@ -109,7 +108,25 @@ if 'RENDER' in os.environ:
     print("USING RENDER.COM SETTINGS!")
     DEBUG = False
     ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
+
+    # Middleware Whitenoise
+    MIDDLEWARE.insert(
+        MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
+        'whitenoise.middleware.WhiteNoiseMiddleware'
+    )
     
+    MEDIA_URL= "/media/"
+
+    STORAGES = {
+        "default":
+                {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+
+        "staticfiles":
+                {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    }
+
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
     # Base de datos en Render
     DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
     
@@ -118,12 +135,6 @@ if 'RENDER' in os.environ:
     
     # Whitenoise para static
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    
-    # Middleware Whitenoise
-    MIDDLEWARE.insert(
-        MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
-        'whitenoise.middleware.WhiteNoiseMiddleware'
-    )
 
 # --- AUTH REDIRECTS ---
 LOGIN_URL = 'login'
