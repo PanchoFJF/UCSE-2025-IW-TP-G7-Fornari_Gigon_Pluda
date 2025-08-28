@@ -31,3 +31,34 @@
         box-shadow: none !important; /* por si también hay sombras */
     }
 }
+
+.accordion-button {
+        background-color: #E8E3D0 ;
+    }
+.accordion-button:not(.collapsed) {
+    background-color: #E8E3D0 !important;
+    color: #000 !important;
+    box-shadow: none !important; /* quita el sombreado azul */
+    }
+
+  .card-iglesia {
+    background-color: #E8E3D0;
+  }
+
+  /* Tarjetas más compactas en móviles */
+  @media (max-width: 575.98px) {
+    .card-body ul {
+      padding-left: 0;
+      font-size: 0.9rem;
+    }
+    .card-body h4 {
+      font-size: 1.2rem;
+    }
+    .card-img-top {
+      height: 180px !important;
+    }
+    .btn {
+      font-size: 0.85rem;
+      padding: 0.35rem 0.5rem;
+    }
+  }
