@@ -9,8 +9,11 @@
 
 {% block content %}
 <div class="container my-4">
-    <h2 class="mb-4 text-center">
+    <h2>
         Lista de Actividades
+            <button class="btn btn-warning mt-2 mt-sm-0 float-end" data-bs-toggle="collapse">
+            ➕ Añadir
+            </button>
     </h2>
     <form method="get" class="mb-4 text-center">
         <select name="dia">
@@ -44,21 +47,20 @@
             </select>
             
       <button type="submit" class="btn btn-primary btn-sm">🔍 Filtrar</button>
-      <button class="btn btn-warning btn-sm">➕ Añadir</button>
     </form>
 
     <div class="accordion" id="weeklyAccordion">
         {% for dia, acts in actividades_por_dia.items %}
             {% if acts %}
             <div class="accordion-item">
-                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                <h3 class="accordion-header" id="heading{{ forloop.counter }}">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
                             data-bs-target="#collapse{{ forloop.counter }}" 
                             aria-expanded="false" 
                             aria-controls="collapse{{ forloop.counter }}">
                         {{ dia|capfirst }}
                     </button>
-                </h2>
+                </h3>
                 <div id="collapse{{ forloop.counter }}" 
                      class="accordion-collapse collapse" 
                      aria-labelledby="heading{{ forloop.counter }}" 

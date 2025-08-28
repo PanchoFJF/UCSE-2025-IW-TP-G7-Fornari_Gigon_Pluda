@@ -62,3 +62,17 @@
       padding: 0.35rem 0.5rem;
     }
   }
+
+/* Titulo */
+  h2 {
+    font-weight: 700;             /* fw-bold */
+    text-align: center;           /* text-center */
+    padding-bottom: 1rem;         /* pb-3 → 16px */
+    margin-bottom: 1.5rem;        /* mb-4 → 24px */
+    border-bottom: 1px solid #dee2e6; /* border-bottom de Bootstrap */
+}
+
+#calendar {
+      max-width: 900px;
+      margin: 40px auto;
+}
