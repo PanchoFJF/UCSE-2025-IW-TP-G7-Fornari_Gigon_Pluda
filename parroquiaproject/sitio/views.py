@@ -1,22 +1,14 @@
 from collections import defaultdict
+from django.contrib import messages
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from sitio.models import Actividades, HorarioMisa, Iglesia
-from datetime import datetime
+from sitio.models import Actividades, Iglesia
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Iglesia
-from .forms import IglesiaForm
-
-
-#h = HorarioMisa(texto="Domingos a las 10:00 AM")
-#h.save()
-
-
-#i = Iglesia(nombre="Iglesia San Juan", direccion="Calle Falsa 123", horarioMisa=h)
-#i.save()
-
+from .forms import AutorizacionForm, IglesiaForm
+from django.contrib.auth.models import User
 
 # Create your views here.
 ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
@@ -170,4 +162,30 @@ def dashboard(request):
         "actividades": actividades,
     }
     return render(request, "dashboard.html", context)
-    
+
+
+@login_required
+def autorizacion_view(request):
+    if request.method == "POST":
+        form = AutorizacionForm(request.POST, user=request.user)  # <-- pasar user como keyword arg
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            iglesia = form.cleaned_data['iglesia_id']
+
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={'username': email.split('@')[0]}
+            )
+
+            usuario_iglesias, _ = UsuarioIglesias.objects.get_or_create(usuario=user)
+            if iglesia not in usuario_iglesias.iglesias_admin.all():
+                usuario_iglesias.iglesias_admin.add(iglesia)
+                messages.success(request, f"{user.email} ahora es admin de {iglesia.nombre}.")
+            else:
+                messages.info(request, f"{user.email} ya era admin de {iglesia.nombre}.")
+
+            return redirect("autorizacion")
+    else:
+        form = AutorizacionForm(user=request.user)  # <-- también aquí
+
+    return render(request, "autorizacion.html", {"form": form})
