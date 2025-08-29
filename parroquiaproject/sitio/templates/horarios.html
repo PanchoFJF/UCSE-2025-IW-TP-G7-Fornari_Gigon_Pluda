@@ -11,7 +11,7 @@
 <div class="container my-4">
     <h2>
         Lista de Actividades
-            <button class="btn btn-warning mt-2 mt-sm-0 float-end" data-bs-toggle="modal" data-bs-target="#actividadModal">
+            <button class="btn btn-warning mt-2 mt-sm-0 float-end" data-bs-toggle="collapse">
             ➕ Añadir
             </button>
     </h2>
@@ -27,20 +27,21 @@
             <option value="Domingo" {% if filtros.dia == "Domingo" %}selected{% endif %}>Domingo</option>
           </select>
           <!-- Categoría -->
-          <select name="categoria">
+            <select name="categoria" >
                 <option value="">-- Selecciona una categoría --</option>
                 {% for c in categorias %}
-                <option value="{{ c.categoria }}" {% if filtros.categoria == c.categoria %}selected{% endif %}>
-                    {{ c.categoria }}
+                <option value="{{ c }}" {% if filtros.categoria == c %}selected{% endif %}>
+                    {{ c }}
                 </option>
                 {% endfor %}
             </select>
+        
   
             <!-- Parroquia -->
             <select name="parroquia">
                 <option value="">-- Selecciona una parroquia --</option>
                 {% for p in parroquias %}
-                <option value="{{ p.id }}" {% if filtros.parroquia == p.id|stringformat:"s" %}selected{% endif %}>
+                <option value="{{ p.nombre }}" {% if filtros.parroquia == p.nombre %}selected{% endif %}>
                     {{ p.nombre }}
                 </option>
                 {% endfor %}
