@@ -27,13 +27,13 @@
             <option value="Domingo" {% if filtros.dia == "Domingo" %}selected{% endif %}>Domingo</option>
           </select>
           <!-- Categoría -->
-          <select name="categoria">
-                <option value="">-- Selecciona una categoría --</option>
-                {% for c in categorias %}
-                <option value="{{ c.id }}" {% if filtros.categoria == c.id|stringformat:"s" %}selected{% endif %}>
-                    {{ c.nombre }}
-                </option>
-                {% endfor %}
+          <select name="categoria" class="form-select">
+            <option value="">-- Selecciona una categoría --</option>
+            {% for c in categorias %}
+            <option value="{{ c.nombre }}" {% if filtros.categoria == c.nombre %}selected{% endif %}>
+                {{ c.nombre }}
+            </option>
+            {% endfor %}
             </select>
   
             <!-- Parroquia -->
