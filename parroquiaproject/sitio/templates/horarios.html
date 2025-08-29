@@ -11,7 +11,7 @@
 <div class="container my-4">
     <h2>
         Lista de Actividades
-            <button class="btn btn-warning mt-2 mt-sm-0 float-end" data-bs-toggle="collapse">
+            <button class="btn btn-warning mt-2 mt-sm-0 float-end" data-bs-toggle="modal" data-bs-target="#actividadModal">
             ➕ Añadir
             </button>
     </h2>
@@ -30,8 +30,8 @@
           <select name="categoria">
                 <option value="">-- Selecciona una categoría --</option>
                 {% for c in categorias %}
-                <option value="{{ c.id }}" {% if filtros.categoria == c.id|stringformat:"s" %}selected{% endif %}>
-                    {{ c.nombre }}
+                <option value="{{ c.categoria }}" {% if filtros.categoria == c.categoria %}selected{% endif %}>
+                    {{ c.categoria }}
                 </option>
                 {% endfor %}
             </select>

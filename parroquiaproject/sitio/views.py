@@ -93,41 +93,37 @@ def calendario(request):
     })
 
 def horarios(request):
-    # Obtener parámetros de la URL
-    dia = request.GET.get("dia")                # ejemplo: ?dia=Lunes
-    categoria = request.GET.get("categoria")    # ejemplo: ?categoria=Catequesis
-    parroquia_nombre = request.GET.get("parroquia")  # ejemplo: ?parroquia=San Juan
+    dia = request.GET.get("dia")
+    categoria_id = request.GET.get("categoria")  
+    parroquia_id = request.GET.get("parroquia")  
 
-    # Obtener todas las actividades con JOIN a iglesia
     actividades = Actividades.objects.select_related("iglesia").all()
 
-    # Aplicar filtros si vienen
     if dia:
         actividades = actividades.filter(dia__iexact=dia)
-    if categoria:
-        actividades = actividades.filter(categoria__iexact=categoria)
-    if parroquia_nombre:
-        actividades = actividades.filter(iglesia__nombre__iexact=parroquia_nombre)
+    if categoria_id:
+        actividades = actividades.filter(id=categoria_id)  # O mejor: usar tabla Categoría si la tenés
+    if parroquia_id:
+        actividades = actividades.filter(iglesia__id=parroquia_id)
 
-    # Ordenar por hora
     actividades = actividades.order_by("hora")
 
-    # Agrupar por día (primera letra mayúscula)
     actividades_por_dia = defaultdict(list)
     for act in actividades:
         dia_normalizado = capfirst(act.dia.strip().lower())
         actividades_por_dia[dia_normalizado].append(act)
 
-    # Ordenar días
-    orden_dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+    orden_dias = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
     actividades_por_dia_ordenadas = {
-        dia: actividades_por_dia[dia] 
-        for dia in orden_dias if dia in actividades_por_dia
+        d: actividades_por_dia[d]
+        for d in orden_dias if d in actividades_por_dia
     }
 
     return render(request, "horarios.html", {
         "actividades_por_dia": actividades_por_dia_ordenadas,
-        "filtros": {"dia": dia, "categoria": categoria, "parroquia": parroquia_nombre},
+        "filtros": {"dia": dia, "categoria": categoria_id, "parroquia": parroquia_id},
+        "categorias": Actividades.objects.values("categoria").distinct(),
+        "parroquias": Iglesia.objects.all(),
     })
 
 def actividades(request):

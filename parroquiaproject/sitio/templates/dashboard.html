@@ -1,9 +1,18 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-3">Bienvenido, {{ user.username }} 👋</h2>
+    <h2 
+        class="mb-3">Bienvenido, {{ user.username }} 👋 
+        <button class="btn btn-warning mt-2 mt-sm-0 float-end" onclick="window.location.href='/autorizacion/'">
+        👤 Identificate
+        </button>
+    </h2>
     <p>En esta sección puedes ver tus suscripciones:</p>
 
     <!-- Mis Iglesias Suscriptas -->
