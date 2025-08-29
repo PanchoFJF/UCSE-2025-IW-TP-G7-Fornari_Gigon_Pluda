@@ -63,8 +63,12 @@
     }
   }
 
+
 /* Titulo */
   h2 {
+    font-family: "Playfair Display", serif;
+    font-style: italic;
+    font-size: 2.5rem;
     font-weight: 700;             /* fw-bold */
     text-align: center;           /* text-center */
     padding-bottom: 1rem;         /* pb-3 → 16px */

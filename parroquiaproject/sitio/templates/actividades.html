@@ -15,7 +15,41 @@
             ➕ Añadir
         </button>
     </h2>
+    <div class="row mb-2">
+  {% for actividad in actividades %}
+    <div class="col-md-6 mb-4"> <!-- Cada actividad ocupa media fila -->
+      <div class="row g-0 border rounded overflow-hidden flex-md-row shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <h3 class="mb-0">{{ actividad.titulo }}</h3>
+          <div class="mb-1 text-body-secondary">Fecha: {{ actividad.dia }}</div>
+          <div class="mb-1 text-body-secondary">Hora: {{ actividad.hora }}</div>
+          <p class="card-text mb-auto">Descripción: {{ actividad.texto }}</p>
+        </div>
+        <div class="col-auto d-none d-lg-block">
+          {% if actividad.imagen %}
+            <img src="{{ actividad.imagen.url }}" alt="{{ actividad.titulo }}"
+              class="img-fluid mb-3"
+              style="max-height: 300px; width: 200px; height: 250px; object-fit: cover;">
+          {% else %}
+            <svg aria-label="Placeholder: Thumbnail"
+              class="bd-placeholder-img"
+              width="200" height="250"
+              preserveAspectRatio="xMidYMid slice"
+              role="img" xmlns="http://www.w3.org/2000/svg">
+              <title>Placeholder</title>
+              <rect width="100%" height="100%" fill="#55595c"></rect>
+              <text x="50%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
+            </svg>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <p class="text-muted text-center">No hay actividades vigentes.</p>
+  {% endfor %}
+</div>
 
+    <!-- LISTA DE ACTVIDADES DISEÑO VIEJO -->
     <div class="accordion" id="accordionActividades">
         {% for actividad in actividades %}
         <div class="accordion-item">
