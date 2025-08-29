@@ -47,21 +47,3 @@ class AutorizacionForm(forms.Form):
                 self.fields['iglesia_id'].queryset = usuario_iglesias.iglesias_admin.all()
             except UsuarioIglesias.DoesNotExist:
                 self.fields['iglesia_id'].queryset = Iglesia.objects.none()
-
-class ActividadForm(forms.ModelForm):
-    class Meta:
-        model = Actividades
-        fields = ["categoria", "dia", "hora", "iglesia", "titulo", "texto", "detalles", "fechaVencimiento"]
-        widgets = {
-            "categoria": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: Catequesis, Grupo juvenil..."}),
-            "dia": forms.Select(attrs={"class": "form-control"}, choices=[
-                ("Lunes","Lunes"),("Martes","Martes"),("Miércoles","Miércoles"),
-                ("Jueves","Jueves"),("Viernes","Viernes"),("Sábado","Sábado"),("Domingo","Domingo")
-            ]),
-            "hora": forms.TimeInput(attrs={"class": "form-control", "type": "time"}),
-            "iglesia": forms.Select(attrs={"class": "form-control"}),   # 👈 Select automático con las iglesias
-            "titulo": forms.TextInput(attrs={"class": "form-control"}),
-            "texto": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
-            "detalles": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Detalles adicionales"}),
-            "fechaVencimiento": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
-        }
