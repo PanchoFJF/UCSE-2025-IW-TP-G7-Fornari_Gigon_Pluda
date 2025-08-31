@@ -27,8 +27,8 @@ class Actividades(models.Model):
     iglesia = models.ForeignKey(Iglesia, blank=True, null=True, on_delete=models.CASCADE)
     titulo = models.CharField(max_length=50)
     texto = models.CharField(max_length=200)
+    fechaVencimiento = models.DateTimeField(null=True)
     
-    fechaVencimiento = models.DateTimeField()
     def __str__(self):
         return self.titulo
 

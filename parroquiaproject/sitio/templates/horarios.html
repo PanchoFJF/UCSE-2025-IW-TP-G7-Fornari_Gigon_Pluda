@@ -11,45 +11,49 @@
 <div class="container my-4">
     <h2>
         Lista de Actividades
-            <button class="btn btn-warning mt-2 mt-sm-0 float-end" data-bs-toggle="collapse">
+        <button class="btn btn-warning mt-2 mt-sm-0 float-end" data-bs-toggle="collapse">
             ➕ Añadir
-            </button>
+        </button>
     </h2>
+
+    <!-- Formulario de filtros -->
     <form method="get" class="mb-4 text-center">
+        <!-- Día -->
         <select name="dia">
             <option value="">-- Seleccionar día --</option>
             <option value="Lunes" {% if filtros.dia == "Lunes" %}selected{% endif %}>Lunes</option>
             <option value="Martes" {% if filtros.dia == "Martes" %}selected{% endif %}>Martes</option>
-            <option value="Miercoles" {% if filtros.dia == "Miercoles" %}selected{% endif %}>Miercoles</option>
+            <option value="Miercoles" {% if filtros.dia == "Miercoles" %}selected{% endif %}>Miércoles</option>
             <option value="Jueves" {% if filtros.dia == "Jueves" %}selected{% endif %}>Jueves</option>
             <option value="Viernes" {% if filtros.dia == "Viernes" %}selected{% endif %}>Viernes</option>
-            <option value="Sabado" {% if filtros.dia == "Sabado" %}selected{% endif %}>Sabado</option>
+            <option value="Sabado" {% if filtros.dia == "Sabado" %}selected{% endif %}>Sábado</option>
             <option value="Domingo" {% if filtros.dia == "Domingo" %}selected{% endif %}>Domingo</option>
-          </select>
-          <!-- Categoría -->
-            <select name="categoria" >
-                <option value="">-- Selecciona una categoría --</option>
-                {% for c in categorias %}
-                <option value="{{ c }}" {% if filtros.categoria == c %}selected{% endif %}>
-                    {{ c }}
-                </option>
-                {% endfor %}
-            </select>
-        
-  
-            <!-- Parroquia -->
-            <select name="parroquia">
-                <option value="">-- Selecciona una parroquia --</option>
-                {% for p in parroquias %}
-                <option value="{{ p.nombre }}" {% if filtros.parroquia == p.nombre %}selected{% endif %}>
-                    {{ p.nombre }}
-                </option>
-                {% endfor %}
-            </select>
-            
-      <button type="submit" class="btn btn-primary btn-sm">🔍 Filtrar</button>
+        </select>
+
+        <!-- Categoría -->
+        <select name="categoria">
+            <option value="">-- Selecciona una categoría --</option>
+            {% for c in categorias %}
+            <option value="{{ c }}" {% if filtros.categoria == c %}selected{% endif %}>
+                {{ c }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- Parroquia -->
+        <select name="parroquia">
+            <option value="">-- Selecciona una parroquia --</option>
+            {% for p in parroquias %}
+            <option value="{{ p.nombre }}" {% if filtros.parroquia == p.nombre %}selected{% endif %}>
+                {{ p.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-primary btn-sm">🔍 Filtrar</button>
     </form>
 
+    <!-- Accordion de actividades -->
     <div class="accordion" id="weeklyAccordion">
         {% for dia, acts in actividades_por_dia.items %}
             {% if acts %}
@@ -70,20 +74,31 @@
                         <table class="table table-bordered table-striped text-center align-middle">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Actividad 
-                                        <button class="btn btn-sm btn-info ms-2">ℹ️</button>
-                                    </th>
+                                    <th>Actividad</th>
                                     <th>Hora</th>
-                                    <th>Iglesia 
-                                        <a href="/iglesias/" class="btn btn-sm btn-info ms-2">ℹ️</a>
-                                    </th>
+                                    <th>Iglesia</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for actividad in acts %}
                                 <tr>
-                                    <td>{{ actividad.categoria }}</td>
+                                    <td>
+                                        {{ actividad.categoria }}
+                                        <button 
+                                            class="btn btn-sm btn-info ms-2" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#detalleModal"
+                                            data-titulo="{{ actividad.titulo }}"
+                                            data-categoria="{{ actividad.categoria }}"
+                                            data-dia="{{ actividad.dia }}"
+                                            data-hora="{{ actividad.hora }}"
+                                            data-iglesia="{{ actividad.iglesia.nombre }}"
+                                            data-texto="{{ actividad.texto }}"
+                                            data-fechavencimiento="{{ actividad.fechaVencimiento|date:'d/m/Y H:i' }}">
+                                            ℹ️
+                                        </button>
+                                    </td>
                                     <td>{{ actividad.hora }}</td>
                                     <td>{{ actividad.iglesia.nombre }}</td>
                                     <td>
@@ -102,4 +117,44 @@
     </div>
 </div>
 
+<!-- Modal Detalle Actividad -->
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title">Detalle de la Actividad</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Título:</strong> <span id="detalleTitulo"></span></p>
+        <p><strong>Categoría:</strong> <span id="detalleCategoria"></span></p>
+        <p><strong>Día:</strong> <span id="detalleDia"></span></p>
+        <p><strong>Hora:</strong> <span id="detalleHora"></span></p>
+        <p><strong>Iglesia:</strong> <span id="detalleIglesia"></span></p>
+        <p><strong>Descripción:</strong> <span id="detalleTexto"></span></p>
+        <p><strong>Fecha de Vencimiento:</strong> <span id="detalleFecha"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script para rellenar modal -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var detalleModal = document.getElementById('detalleModal')
+    detalleModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget
+        document.getElementById('detalleTitulo').textContent = button.getAttribute('data-titulo')
+        document.getElementById('detalleCategoria').textContent = button.getAttribute('data-categoria')
+        document.getElementById('detalleDia').textContent = button.getAttribute('data-dia')
+        document.getElementById('detalleHora').textContent = button.getAttribute('data-hora')
+        document.getElementById('detalleIglesia').textContent = button.getAttribute('data-iglesia')
+        document.getElementById('detalleTexto').textContent = button.getAttribute('data-texto')
+        document.getElementById('detalleFecha').textContent = button.getAttribute('data-fechavencimiento')
+    })
+})
+</script>
 {% endblock %}
