@@ -127,12 +127,10 @@
       </div>
       <div class="modal-body">
         <p><strong>Título:</strong> <span id="detalleTitulo"></span></p>
-        <p><strong>Categoría:</strong> <span id="detalleCategoria"></span></p>
         <p><strong>Día:</strong> <span id="detalleDia"></span></p>
         <p><strong>Hora:</strong> <span id="detalleHora"></span></p>
         <p><strong>Iglesia:</strong> <span id="detalleIglesia"></span></p>
         <p><strong>Descripción:</strong> <span id="detalleTexto"></span></p>
-        <p><strong>Fecha de Vencimiento:</strong> <span id="detalleFecha"></span></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -148,12 +146,10 @@ document.addEventListener('DOMContentLoaded', function () {
     detalleModal.addEventListener('show.bs.modal', function (event) {
         var button = event.relatedTarget
         document.getElementById('detalleTitulo').textContent = button.getAttribute('data-titulo')
-        document.getElementById('detalleCategoria').textContent = button.getAttribute('data-categoria')
         document.getElementById('detalleDia').textContent = button.getAttribute('data-dia')
         document.getElementById('detalleHora').textContent = button.getAttribute('data-hora')
         document.getElementById('detalleIglesia').textContent = button.getAttribute('data-iglesia')
         document.getElementById('detalleTexto').textContent = button.getAttribute('data-texto')
-        document.getElementById('detalleFecha').textContent = button.getAttribute('data-fechavencimiento')
     })
 })
 </script>
