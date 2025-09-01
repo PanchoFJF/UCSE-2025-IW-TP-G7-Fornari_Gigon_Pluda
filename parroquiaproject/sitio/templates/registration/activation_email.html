@@ -1,0 +1,5 @@
+Hola {{ user.username }},
+
+Por favor activá tu cuenta ingresando en el siguiente link:
+
+http://{{ domain }}{% url 'activate' uidb64=uid token=token %}

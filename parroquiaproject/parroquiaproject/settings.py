@@ -152,3 +152,11 @@ MESSAGE_TAGS = {
     messages.WARNING: "warning",
     messages.ERROR: "error",
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # o tu proveedor
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'parroquiasingweb@gmail.com'
+EMAIL_HOST_PASSWORD = '1989Gigon'
+DEFAULT_FROM_EMAIL = 'parroquiasingweb@gmail.com'
