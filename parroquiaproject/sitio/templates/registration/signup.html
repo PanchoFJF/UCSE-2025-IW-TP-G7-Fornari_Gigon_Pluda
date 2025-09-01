@@ -22,15 +22,6 @@
               </div>
             {% endif %}
 
-            <!-- Username -->
-            <div class="mb-3">
-              <label for="{{ form.username.id_for_label }}" class="form-label">Usuario</label>
-              {{ form.username|add_class:"form-control" }}
-              {% for error in form.username.errors %}
-                <div class="text-danger small">{{ error }}</div>
-              {% endfor %}
-            </div>
-
             <!-- Email -->
             <div class="mb-3">
               <label for="{{ form.email.id_for_label }}" class="form-label">Correo electrónico</label>
@@ -41,6 +32,14 @@
               <div class="form-text">
                 Necesario para activar tu cuenta.
               </div>
+            </div>
+            <!-- Username -->
+            <div class="mb-3">
+              <label for="{{ form.username.id_for_label }}" class="form-label">Usuario</label>
+              {{ form.username|add_class:"form-control" }}
+              {% for error in form.username.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
             </div>
 
             <!-- Password1 -->
