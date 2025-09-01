@@ -158,10 +158,10 @@ import os
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-EMAIL_HOST = "smtp.office365.com"   # Servidor SMTP de Outlook
-EMAIL_PORT = 587                    # Puerto TLS
-EMAIL_USE_TLS = True                # Requiere TLS
-EMAIL_USE_SSL = False               # No usar SSL
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")  # tu email de Outlook
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")  # tu contraseña o app password
+EMAIL_HOST = "smtp.gmail.com"          # Servidor SMTP de Gmail
+EMAIL_PORT = 587                        # Puerto TLS
+EMAIL_USE_TLS = True                    # Requiere TLS
+EMAIL_USE_SSL = False                   # No usar SSL
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")       # tu email de Gmail
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")   # tu app password de Gmail
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
