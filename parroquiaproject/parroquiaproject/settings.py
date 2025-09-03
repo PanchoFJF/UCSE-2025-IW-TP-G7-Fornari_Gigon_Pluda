@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --- SECURITY ---
 SECRET_KEY = 'django-insecure-%otf)a5xa#z8$o-5#^cf4wh7vtkfae-p$s50az@(%m*w1br^ax'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"] # "parroquia-ingweb.onrender.com"
 
 # --- APPS ---
 INSTALLED_APPS = [
