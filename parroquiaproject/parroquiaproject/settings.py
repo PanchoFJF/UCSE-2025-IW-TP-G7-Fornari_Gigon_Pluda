@@ -156,12 +156,17 @@ MESSAGE_TAGS = {
 
 import os
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# detectar entorno (por ejemplo por variable de entorno)
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")  # "development" o "production"
 
-EMAIL_HOST = "smtp.gmail.com"          # Servidor SMTP de Gmail
-EMAIL_PORT = 587                        # Puerto TLS
-EMAIL_USE_TLS = True                    # Requiere TLS
-EMAIL_USE_SSL = False                   # No usar SSL
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")       # tu email de Gmail
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")   # tu app password de Gmail
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+if ENVIRONMENT == "development":
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp.gmail.com"
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_USE_SSL = False
+    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

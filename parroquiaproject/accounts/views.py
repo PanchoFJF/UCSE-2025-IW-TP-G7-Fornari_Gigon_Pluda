@@ -1,4 +1,5 @@
-from django.shortcuts import render
+# accounts/views.py
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib import messages
@@ -7,37 +8,44 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.contrib.auth.models import User
-from django.conf import settings
+from django.core.mail import EmailMessage
+from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
-
 from .forms import SignUpForm
+
+User = get_user_model()
 
 # --- Registro con confirmación por email ---
 class SignUpView(generic.CreateView):
     form_class = SignUpForm
     template_name = "registration/signup.html"
-    success_url = reverse_lazy("login")  # redirige al login tras enviar email
+    success_url = reverse_lazy("login")  # Vista que muestra mensaje "revisa tu correo"
 
     def form_valid(self, form):
         user = form.save(commit=False)
-        user.is_active = False  # 👈 queda inactivo hasta confirmar
+        user.is_active = False  # usuario inactivo hasta confirmar
         user.save()
 
         # enviar email de activación
         current_site = get_current_site(self.request)
-        subject = "Activa tu cuenta"
+        mail_subject = "Activa tu cuenta"
         message = render_to_string("registration/activation_email.html", {
             "user": user,
             "domain": current_site.domain,
             "uid": urlsafe_base64_encode(force_bytes(user.pk)),
             "token": default_token_generator.make_token(user),
         })
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+
+        email = EmailMessage(mail_subject, message, to=[user.email])
+        email.content_subtype = "html"
+        email.send()
 
         messages.success(self.request, "¡Cuenta creada! Revisa tu correo para activarla.")
         return super().form_valid(form)
+
+# --- Vista de mensaje "email enviado" ---
+class EmailVerificationSentView(generic.TemplateView):
+    template_name = "registration/email_verification_sent.html"
 
 # --- Login y Logout personalizados ---
 class CustomLoginView(LoginView):
@@ -58,7 +66,7 @@ class CustomLogoutView(LogoutView):
 # --- Activación de usuario ---
 def activate(request, uidb64, token):
     try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
+        uid = int(force_str(urlsafe_base64_decode(uidb64)))  # ⚡ corregido: convertir a entero
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
@@ -66,7 +74,8 @@ def activate(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        messages.success(request, "¡Cuenta activada correctamente! Ya podés iniciar sesión.")
-        return render(request, "registration/activation_success.html")
+        messages.success(request, "Tu cuenta fue activada correctamente. Ya podés iniciar sesión.")
+        return redirect("login")
     else:
-        return render(request, "registration/activation_invalid.html")
+        messages.error(request, "El enlace de activación no es válido o expiró.")
+        return redirect("signup")
