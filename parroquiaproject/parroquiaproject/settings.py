@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --- SECURITY ---
 SECRET_KEY = 'django-insecure-%otf)a5xa#z8$o-5#^cf4wh7vtkfae-p$s50az@(%m*w1br^ax'
 DEBUG = True
-ALLOWED_HOSTS = ["*"] # "parroquia-ingweb.onrender.com"
+ALLOWED_HOSTS = []
 
 # --- APPS ---
 INSTALLED_APPS = [
@@ -24,8 +24,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
-
 
     'cloudinary_storage',
     'cloudinary',
@@ -34,7 +32,6 @@ INSTALLED_APPS = [
     'accounts',
     'widget_tweaks',
 ]
-SITE_ID = 1
 
 # --- MIDDLEWARE ---
 MIDDLEWARE = [
@@ -157,10 +154,11 @@ MESSAGE_TAGS = {
     messages.ERROR: "error",
 }
 
+import os
+
 # detectar entorno (por ejemplo por variable de entorno)
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")  # "development" o "production"
 
-# --- EMAIL SETUP ---
 if ENVIRONMENT == "development":
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
