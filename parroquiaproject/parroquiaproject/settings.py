@@ -12,12 +12,9 @@ from django.contrib.messages import constants as messages
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- SECURITY ---
-SECRET_KEY = os.environ.get("SECRET_KEY", "insecure-key")
-DEBUG      = os.environ.get("ENVIRONMENT", "development") == "development"
-
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-if not DEBUG:
-    ALLOWED_HOSTS = [os.environ.get("DOMAIN", "parroquia-ingweb.onrender.com")]
+SECRET_KEY = 'django-insecure-%otf)a5xa#z8$o-5#^cf4wh7vtkfae-p$s50az@(%m*w1br^ax'
+DEBUG = True
+ALLOWED_HOSTS = ["*"] # "parroquia-ingweb.onrender.com"
 
 # --- APPS ---
 INSTALLED_APPS = [
@@ -160,20 +157,18 @@ MESSAGE_TAGS = {
     messages.ERROR: "error",
 }
 
+# detectar entorno (por ejemplo por variable de entorno)
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")  # "development" o "production"
+
 # --- EMAIL SETUP ---
-ENVIRONMENT = os.environ.get("ENVIRONMENT", "development") # development o production
-DOMAIN      = os.environ.get("DOMAIN", "localhost:8000")
-
-# Remitente por defecto (importante siempre exista)
-EMAIL_HOST_USER    = os.environ.get("EMAIL_HOST_USER", "")
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
-
 if ENVIRONMENT == "development":
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
-    EMAIL_BACKEND       = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST          = "smtp.gmail.com"
-    EMAIL_PORT          = 587
-    EMAIL_USE_TLS       = True
-    EMAIL_HOST_USER     = os.environ.get("EMAIL_HOST_USER")
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp.gmail.com"
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_USE_SSL = False
+    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
     EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
