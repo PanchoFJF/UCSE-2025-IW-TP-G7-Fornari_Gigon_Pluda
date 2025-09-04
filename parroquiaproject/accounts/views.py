@@ -1,6 +1,5 @@
-# accounts/views.py
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import generic
 from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
@@ -15,37 +14,89 @@ from .forms import SignUpForm
 
 User = get_user_model()
 
+
 # --- Registro con confirmación por email ---
 class SignUpView(generic.CreateView):
     form_class = SignUpForm
     template_name = "registration/signup.html"
-    success_url = reverse_lazy("login")  # Vista que muestra mensaje "revisa tu correo"
+    success_url = reverse_lazy("login")
 
     def form_valid(self, form):
+        # 1. Crear usuario inactivo
         user = form.save(commit=False)
-        user.is_active = False  # usuario inactivo hasta confirmar
+        user.is_active = False
         user.save()
 
-        # enviar email de activación
-        current_site = get_current_site(self.request)
-        mail_subject = "Activa tu cuenta"
-        message = render_to_string("registration/activation_email.html", {
-            "user": user,
-            "domain": current_site.domain,
-            "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-            "token": default_token_generator.make_token(user),
-        })
+        # 2. Generar uid y token
+        uid   = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
 
+        # Logs para comparar más tarde
+        print("DEBUG generated uidb64:", uid)
+        print("DEBUG generated token:", token)
+        print(
+            "DEBUG immediate token valid?:",
+            default_token_generator.check_token(user, token),
+        )
+
+        # 3. Construir URL de activación desde la ruta 'activate'
+        path            = reverse("activate", kwargs={"uidb64": uid, "token": token})
+        activation_link = self.request.build_absolute_uri(path)
+        print("DEBUG activation_link:", activation_link)
+
+        # 4. Renderizar plantilla de email con el link completo
+        mail_subject = "Activa tu cuenta"
+        message = render_to_string(
+            "registration/activation_email.html",
+            {
+                "user":            user,
+                "activation_link": activation_link,
+            },
+        )
+
+        # 5. Enviar el email
         email = EmailMessage(mail_subject, message, to=[user.email])
         email.content_subtype = "html"
         email.send()
 
+        # 6. Mensaje de éxito y redirección
         messages.success(self.request, "¡Cuenta creada! Revisa tu correo para activarla.")
-        return super().form_valid(form)
+        return redirect(self.success_url)
 
-# --- Vista de mensaje "email enviado" ---
-class EmailVerificationSentView(generic.TemplateView):
-    template_name = "registration/email_verification_sent.html"
+# --- Activación de usuario ---
+def activate(request, uidb64, token):
+    # 1. Intento de decodificar y cargar usuario
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except Exception:
+        user = None
+        uid = None
+
+    # 2. Compruebo el token y almaceno resultado
+    valid = False
+    if user is not None:
+        valid = default_token_generator.check_token(user, token)
+
+    # 3. Depuración antes del if
+    print(
+        "DEBUG activate:",
+        "uidb64=", uidb64,
+        "-> uid=", uid,
+        "user_exists=", bool(user),
+        "token_recibido=", token,
+        "token_válido?=", valid,
+    )
+
+    # 4. Lógica de activación
+    if user is not None and valid:
+        user.is_active = True
+        user.save()
+        messages.success(request, "Tu cuenta fue activada correctamente. Ya podés iniciar sesión.")
+        return redirect("login")
+    else:
+        messages.error(request, "El enlace de activación no es válido o expiró.")
+        return redirect("signup")
 
 # --- Login y Logout personalizados ---
 class CustomLoginView(LoginView):
@@ -56,26 +107,10 @@ class CustomLoginView(LoginView):
         messages.success(self.request, f"¡Bienvenido de nuevo {username}!")
         return super().get_success_url()
 
+
 class CustomLogoutView(LogoutView):
     next_page = "inicio"
 
     def dispatch(self, request, *args, **kwargs):
         messages.success(request, "Sesión cerrada correctamente.")
         return super().dispatch(request, *args, **kwargs)
-
-# --- Activación de usuario ---
-def activate(request, uidb64, token):
-    try:
-        uid = int(force_str(urlsafe_base64_decode(uidb64)))  # ⚡ corregido: convertir a entero
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    if user is not None and default_token_generator.check_token(user, token):
-        user.is_active = True
-        user.save()
-        messages.success(request, "Tu cuenta fue activada correctamente. Ya podés iniciar sesión.")
-        return redirect("login")
-    else:
-        messages.error(request, "El enlace de activación no es válido o expiró.")
-        return redirect("signup")

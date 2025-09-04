@@ -1,5 +1,5 @@
 Hola {{ user.username }},
 
-Por favor activá tu cuenta ingresando en el siguiente link:
+Por favor activa tu cuenta haciendo click en este enlace:
 
-http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+<a href="{{ activation_link }}">Activar cuenta</a>
