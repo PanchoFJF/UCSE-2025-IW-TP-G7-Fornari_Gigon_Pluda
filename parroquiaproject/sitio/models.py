@@ -34,7 +34,6 @@ class Actividades(models.Model):
 
 class UsuarioIglesias(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name="perfil_iglesias")
-
     iglesias_suscripto = models.ManyToManyField(Iglesia, blank=True, related_name="suscriptores")
     iglesias_admin = models.ManyToManyField(Iglesia, blank=True, related_name="administradores")
 

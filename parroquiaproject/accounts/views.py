@@ -11,6 +11,7 @@ from django.core.mail import EmailMessage
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
 from .forms import SignUpForm
+from django.utils.timezone import now
 
 User = get_user_model()
 
@@ -77,6 +78,11 @@ def activate(request, uidb64, token):
     valid = False
     if user is not None:
         valid = default_token_generator.check_token(user, token)
+        elapsed_seconds = (now() - user.date_joined).total_seconds()
+        if elapsed_seconds > 15 * 60 and not user.is_active:
+            user.delete()
+            messages.error(request, "El enlace de activación expiró. Registrate de nuevo.")
+            return redirect("signup")
 
     # 3. Depuración antes del if
     print(
