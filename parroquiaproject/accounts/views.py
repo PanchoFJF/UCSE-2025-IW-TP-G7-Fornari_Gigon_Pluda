@@ -24,44 +24,36 @@ class SignUpView(generic.CreateView):
     success_url = reverse_lazy("login")
 
     def form_valid(self, form):
-        # 1. Crear usuario inactivo
+        email = form.cleaned_data.get("email")
+
+        # Chequear si ya existe otro usuario (activo o inactivo) con ese correo
+        if User.objects.filter(email=email).exists():
+            form.add_error("email", "Ya existe un usuario registrado con ese correo.")
+            return self.form_invalid(form)  # <-- importante, no redirect
+
+        # Crear usuario inactivo
         user = form.save(commit=False)
         user.is_active = False
         user.save()
 
-        # 2. Generar uid y token
-        uid   = urlsafe_base64_encode(force_bytes(user.pk))
+        # Generar uid y token
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
 
-        # Logs para comparar más tarde
-        print("DEBUG generated uidb64:", uid)
-        print("DEBUG generated token:", token)
-        print(
-            "DEBUG immediate token valid?:",
-            default_token_generator.check_token(user, token),
-        )
-
-        # 3. Construir URL de activación desde la ruta 'activate'
-        path            = reverse("activate", kwargs={"uidb64": uid, "token": token})
+        # Construir link de activación
+        path = reverse("activate", kwargs={"uidb64": uid, "token": token})
         activation_link = self.request.build_absolute_uri(path)
-        print("DEBUG activation_link:", activation_link)
 
-        # 4. Renderizar plantilla de email con el link completo
+        # Enviar email
         mail_subject = "Activa tu cuenta"
         message = render_to_string(
             "registration/activation_email.html",
-            {
-                "user":            user,
-                "activation_link": activation_link,
-            },
+            {"user": user, "activation_link": activation_link},
         )
+        email_message = EmailMessage(mail_subject, message, to=[user.email])
+        email_message.content_subtype = "html"
+        email_message.send()
 
-        # 5. Enviar el email
-        email = EmailMessage(mail_subject, message, to=[user.email])
-        email.content_subtype = "html"
-        email.send()
-
-        # 6. Mensaje de éxito y redirección
         messages.success(self.request, "¡Cuenta creada! Revisa tu correo para activarla.")
         return redirect(self.success_url)
 
