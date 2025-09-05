@@ -1,5 +1,23 @@
-Hola {{ user.username }},
+<p>Hola {{ user.username }},</p>
 
-Por favor activa tu cuenta haciendo click en este enlace:
+<p>Recibiste este correo porque solicitaste activar tu cuenta.</p>
 
-<a href="{{ activation_link }}">Activar cuenta</a>
+<p>Haz clic en el siguiente botón para completar la activación:</p>
+
+<div style="padding-left: 20px; margin: 20px 0;">
+  <a href="{{ activation_link }}" style="
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+  ">
+    Activar cuenta
+  </a>
+</div>
+
+<p>Si no solicitaste esta activación, podés ignorar este correo.</p>
+
