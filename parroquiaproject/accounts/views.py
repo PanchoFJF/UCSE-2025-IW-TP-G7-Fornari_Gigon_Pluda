@@ -105,8 +105,6 @@ def activate(request, uidb64, token):
         messages.error(request, "El enlace de activación no es válido o expiró.")
         return redirect("signup")
 
-User = get_user_model()
-
 # --- Olvidé mi contraseña (pide correo) ---
 def password_reset_custom(request):
     if request.method == "POST":
