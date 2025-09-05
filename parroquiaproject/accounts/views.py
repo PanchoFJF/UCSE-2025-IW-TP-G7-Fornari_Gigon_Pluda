@@ -8,13 +8,14 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
-from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.views import LoginView, LogoutView
-from .forms import SignUpForm
+from .forms import SignUpForm, CustomPasswordResetForm
+from django.contrib.auth.password_validation import validate_password
 from django.utils.timezone import now
 
 User = get_user_model()
-
 
 # --- Registro con confirmación por email ---
 class SignUpView(generic.CreateView):
@@ -103,6 +104,103 @@ def activate(request, uidb64, token):
     else:
         messages.error(request, "El enlace de activación no es válido o expiró.")
         return redirect("signup")
+
+User = get_user_model()
+
+# --- Olvidé mi contraseña (pide correo) ---
+def password_reset_custom(request):
+    if request.method == "POST":
+        form = CustomPasswordResetForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                messages.error(request, "El correo no está asociado a ninguna cuenta.")
+                return redirect("password_reset_custom")
+
+            # Generar uid y token
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+
+            # Guardar timestamp en la sesión
+            request.session[f"password_reset_{user.pk}_sent_at"] = now().timestamp()
+
+            # Construir link absoluto
+            reset_link = request.build_absolute_uri(
+                reverse("password_reset_confirm_custom", kwargs={"uidb64": uid, "token": token})
+            )
+
+            # Enviar email
+            message = render_to_string("registration/password_reset_email_custom.html", {
+                "user": user,
+                "reset_link": reset_link,
+            })
+            email_message = EmailMessage(
+                subject="Restablecer tu contraseña",
+                body=message,
+                to=[user.email],
+            )
+            email_message.content_subtype = "html"
+            email_message.send()
+
+            messages.success(request, "Te enviamos un correo con el enlace para restablecer tu contraseña.")
+            return redirect("password_reset_custom")
+    else:
+        form = CustomPasswordResetForm()
+
+    return render(request, "registration/password_reset_custom.html", {"form": form})
+
+
+# --- Confirmar nueva contraseña ---
+def password_reset_confirm_custom(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except Exception:
+        user = None
+
+    if user is None or not default_token_generator.check_token(user, token):
+        messages.error(request, "El enlace no es válido o expiró.")
+        return redirect("password_reset_custom")
+
+    # --- Validación de timeout: 60 segundos ---
+    sent_at_timestamp = request.session.get(f"password_reset_{user.pk}_sent_at")
+    if not sent_at_timestamp:
+        messages.error(request, "No se puede validar el enlace.")
+        return redirect("password_reset_custom")
+
+    elapsed_seconds = now().timestamp() - sent_at_timestamp
+    if elapsed_seconds > 60:
+        messages.error(request, "El enlace expiró después de 60 segundos.")
+        return redirect("password_reset_custom")
+    # -----------------------------------------
+
+    if request.method == "POST":
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
+
+        if not password1 or not password2:
+            messages.error(request, "Por favor completa ambos campos de contraseña.")
+        elif password1 != password2:
+            messages.error(request, "Las contraseñas no coinciden.")
+        else:
+            # Validaciones de seguridad como en el registro
+            try:
+                validate_password(password1, user=user)
+            except ValidationError:
+                messages.error(request, "La contraseña no cumple con los requisitos de seguridad.")
+                return render(request, "registration/password_reset_confirm_custom.html", {"user": user})
+
+            # Guardar nueva contraseña y limpiar timestamp
+            user.set_password(password1)
+            user.save()
+            update_session_auth_hash(request, user)
+            request.session.pop(f"password_reset_{user.pk}_sent_at", None)
+            messages.success(request, "Contraseña cambiada correctamente.")
+            return redirect("login")
+
+    return render(request, "registration/password_reset_confirm_custom.html", {"user": user})
 
 # --- Login y Logout personalizados ---
 class CustomLoginView(LoginView):
