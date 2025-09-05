@@ -154,6 +154,12 @@ MESSAGE_TAGS = {
     messages.ERROR: "error",
 }
 
+# --- BACKENDS PERSONALIZADOS ---
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.EmailOrUsernameModelBackend',  # nuestro backend
+    'django.contrib.auth.backends.ModelBackend',      # backend default (por seguridad)
+]
+
 import os
 
 # detectar entorno (por ejemplo por variable de entorno)
