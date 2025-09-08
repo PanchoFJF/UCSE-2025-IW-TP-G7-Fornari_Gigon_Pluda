@@ -22,16 +22,10 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
-
     path('admin/', admin.site.urls),
     path('', views.inicio, name='inicio'),
-    path('dashboard/', views.dashboard, name='dashboard'),  
-    path('accounts/', include('accounts.urls')),     # Rutas personalizadas de tu app accounts (ej. registro)
-    path('iglesias/', views.iglesias, name='iglesias'),
-    path('calendario/', views.calendario, name='calendario'),
-    path('horarios/', views.horarios, name='horarios'),
-    path('actividades/', views.actividades, name='actividades'),
-    path('autorizacion/', views.autorizacion_view, name='autorizacion'),
+    path('', include('sitio.urls', namespace='sitio')),
+    path('accounts/', include('accounts.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -2,6 +2,8 @@ from django import forms
 from .models import Iglesia, UsuarioIglesias
 from .models import Noticia
 from .models import Actividades, Iglesia
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class IglesiaForm(forms.ModelForm):
     class Meta:
@@ -47,3 +49,31 @@ class AutorizacionForm(forms.Form):
                 self.fields['iglesia_id'].queryset = usuario_iglesias.iglesias_admin.all()
             except UsuarioIglesias.DoesNotExist:
                 self.fields['iglesia_id'].queryset = Iglesia.objects.none()
+
+
+class EmailChangeForm(forms.Form):
+    email = forms.EmailField(
+        label="Nuevo correo electrónico",
+        widget=forms.EmailInput(attrs={"class": "form-control"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        # Recibimos el usuario actual para validaciones
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean_email(self):
+        nuevo_email = self.cleaned_data.get('email').lower()
+
+        if not self.user:
+            raise ValidationError("No se pudo determinar el usuario actual.")
+
+        # Validación 1: distinto del correo actual
+        if nuevo_email == self.user.email.lower():
+            raise ValidationError("El nuevo correo no puede ser igual al actual.")
+
+        # Validación 2: único en la base de datos
+        if User.objects.filter(email__iexact=nuevo_email).exclude(pk=self.user.pk).exists():
+            raise ValidationError("Este correo ya está en uso por otro usuario.")
+
+        return nuevo_email

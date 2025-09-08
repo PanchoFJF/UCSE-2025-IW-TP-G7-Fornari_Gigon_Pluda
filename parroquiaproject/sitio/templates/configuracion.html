@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Configuración{% endblock %}
+
+{% block content %}
+<div class="card card-body shadow-sm w-100">
+    <h4>Configuración de Cuenta</h4>
+    
+    <!-- Usuario -->
+    <p></p>
+    <p>
+        <strong>Usuario:</strong> {{ user.username }}
+        <a href="" class="btn btn-secondary btn-sm">Editar ✏️</a>
+    </p>
+
+    <!-- Correo -->
+    <p>
+        <strong>Correo electrónico:</strong> {{ user.email }}
+        <!-- Enviar email para cambiar correo -->
+        <a href="{% url 'sitio:configuracion_reset_email' %}" class="btn btn-secondary btn-sm">Editar ✏️</a>
+        <div class="form-text">
+            Se te enviará un enlace para cambiar tu correo. (Válido durante 5 minutos)
+        </div>
+    </p>
+    
+    <hr class="my-4">
+
+    <!-- Eliminar cuenta -->
+    <div class="text-end">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            🗑️ Eliminar cuenta
+        </button>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% autoescape off %}
+<p>Hola {{ user.username }},</p>
+<p>Recibiste este correo porque solicitaste cambiar tu correo asociado a CatholicRafaela.</p>
+<p>Haz clic en el siguiente enlace para cambiar tu correo:</p>
+<div style="padding-left: 20px; margin: 20px 0;">
+  <a href="{{ reset_link }}" style="
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+  ">
+    Cambiar correo
+  </a>
+</div>
+<p>Si no solicitaste este cambio, ignora este correo.</p>
+{% endautoescape %}

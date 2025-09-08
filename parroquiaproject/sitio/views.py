@@ -1,23 +1,30 @@
 from collections import defaultdict
 from django.contrib import messages
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from sitio.models import Actividades, Iglesia
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Iglesia
-from .forms import AutorizacionForm, IglesiaForm
+from .forms import AutorizacionForm, IglesiaForm, EmailChangeForm
 from django.contrib.auth.models import User
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.urls import reverse
+from django.template.loader import render_to_string
+from django.utils.timezone import now
 
 # Create your views here.
 ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
 
+from django.contrib.auth.tokens import default_token_generator
 from collections import defaultdict
 from django.shortcuts import render
 from django.template.defaultfilters import capfirst
 from .models import Actividades, UsuarioIglesias
 from .models import Noticia
+from django.core.mail import EmailMessage
 from .forms import NoticiaForm
 
 def inicio(request):
@@ -57,7 +64,7 @@ def iglesias(request):
             form = IglesiaForm(request.POST, request.FILES)
             if form.is_valid():
                 form.save()
-                return redirect("iglesias")
+                return redirect("sitio:iglesias")
 
         # Editar iglesia
         elif action == "editar":
@@ -69,14 +76,14 @@ def iglesias(request):
             if request.FILES.get("imagen"):
                 iglesia.imagen = request.FILES["imagen"]
             iglesia.save()
-            return redirect("iglesias")
+            return redirect("sitio:iglesias")
 
         # Eliminar iglesia
         elif action == "eliminar":
             iglesia_id = request.POST.get("iglesia_id")
             iglesia = get_object_or_404(Iglesia, id=iglesia_id)
             iglesia.delete()
-            return redirect("iglesias")
+            return redirect("sitio:iglesias")
 
     else:
         form = IglesiaForm()
@@ -160,29 +167,151 @@ def dashboard(request):
     }
     return render(request, "dashboard.html", context)
 
-
 @login_required
-def autorizacion_view(request):
-    if request.method == "POST":
-        form = AutorizacionForm(request.POST, user=request.user)  # <-- pasar user como keyword arg
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            iglesia = form.cleaned_data['iglesia_id']
+def configuracion_view(request):
+    return render(request, "configuracion.html")
 
-            user, created = User.objects.get_or_create(
-                email=email,
-                defaults={'username': email.split('@')[0]}
+
+# --- Enviar enlace al correo actual ---
+@login_required
+def configuracion_reset(request):
+    user = request.user
+
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+
+    reset_link = request.build_absolute_uri(
+        reverse("sitio:config_reset_confirm", kwargs={"uidb64": uid, "token": token})
+    )
+
+    message = render_to_string("configuracion_reset_email.html", {
+        "user": user,
+        "reset_link": reset_link,
+    })
+
+    email_message = EmailMessage(
+        subject="Cambio de correo en CatholicRafaela",
+        body=message,
+        to=[user.email],
+    )
+    email_message.content_subtype = "html"
+    email_message.send()
+
+    messages.success(request, "Te enviamos un enlace a tu correo actual para continuar con el cambio.")
+    return redirect("sitio:configuracion")
+
+
+# --- Enviar enlace de confirmación al nuevo correo ---
+@login_required
+def configuracion_enviar_email(request):
+    user = request.user
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+
+    # Aquí usamos el name correcto: config_reset_confirm
+    reset_link = request.build_absolute_uri(
+        reverse("sitio:config_reset_confirm", kwargs={"uidb64": uid, "token": token})
+    )
+
+    message = render_to_string("configuracion_reset_email.html", {
+        "user": user,
+        "reset_link": reset_link,
+    })
+
+    EmailMessage(
+        subject="Cambio de correo",
+        body=message,
+        to=[user.email],
+    ).send()
+
+    # Guardar timestamp de envío en sesión
+    request.session[f"email_reset_{user.pk}_sent_at"] = now().timestamp()
+
+    messages.success(request, "Te enviamos un enlace a tu correo actual para continuar con el cambio.")
+    return redirect("sitio:configuracion")
+
+
+# --- Página donde se ingresa el nuevo correo ---
+@login_required
+def configuracion_reset_email(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except Exception:
+        user = None
+
+    if user is None or not default_token_generator.check_token(user, token):
+        messages.error(request, "El enlace no es válido o expiró.")
+        return redirect("sitio:configuracion")
+
+    # Validación de timeout
+    sent_at_timestamp = request.session.get(f"email_reset_{user.pk}_sent_at")
+    if not sent_at_timestamp or (now().timestamp() - sent_at_timestamp > 300):
+        messages.error(request, "El enlace expiró después de 5 minutos.")
+        return redirect("sitio:configuracion")
+
+    if request.method == "POST":
+        form = EmailChangeForm(request.POST, user=request.user)
+        if form.is_valid():
+            nuevo_email = form.cleaned_data["email"]
+
+            request.session["nuevo_email"] = nuevo_email
+            request.session["uidb64"] = uidb64
+            request.session["token"] = token
+
+            # Enviar email de confirmación al nuevo correo
+            activation_link = request.build_absolute_uri(
+                reverse("sitio:config_activate", kwargs={"uidb64": uidb64, "token": token})
             )
 
-            usuario_iglesias, _ = UsuarioIglesias.objects.get_or_create(usuario=user)
-            if iglesia not in usuario_iglesias.iglesias_admin.all():
-                usuario_iglesias.iglesias_admin.add(iglesia)
-                messages.success(request, f"{user.email} ahora es admin de {iglesia.nombre}.")
-            else:
-                messages.info(request, f"{user.email} ya era admin de {iglesia.nombre}.")
+            EmailMessage(
+                subject="Confirma tu nuevo correo en CatholicRafaela",
+                body=render_to_string("configuracion_new_email.html", {
+                    "user": user,
+                    "activation_link": activation_link,
+                }),
+                to=[nuevo_email],
+            ).send()
 
-            return redirect("autorizacion")
+            request.session[f"email_new_reset_{user.pk}_sent_at"] = now().timestamp()
+            messages.success(request, "Te enviamos un enlace al nuevo correo para validarlo.")
+            return redirect("sitio:configuracion")
     else:
-        form = AutorizacionForm(user=request.user)  # <-- también aquí
+        form = EmailChangeForm()
 
-    return render(request, "autorizacion.html", {"form": form})
+    return render(request, "configuracion_reset.html", {"form": form})
+
+
+# --- Confirmar el nuevo correo ---
+@login_required
+def configuracion_new_email(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except Exception:
+        user = None
+
+    sent_at_timestamp = request.session.get(f"email_new_reset_{user.pk}_sent_at")
+    if not sent_at_timestamp or (now().timestamp() - sent_at_timestamp > 300):
+        messages.error(request, "El enlace para confirmar tu nuevo correo expiró después de 5 minutos.")
+        return redirect("sitio:configuracion")
+
+    if user is None or not default_token_generator.check_token(user, token):
+        messages.error(request, "El enlace de activación no es válido o expiró.")
+        return redirect("sitio:configuracion")
+
+    nuevo_email = request.session.get("nuevo_email")
+    if not nuevo_email:
+        messages.error(request, "No se pudo recuperar el nuevo correo.")
+        return redirect("sitio:configuracion")
+
+    # Guardar nuevo correo
+    user.email = nuevo_email
+    user.save()
+
+    # Limpiar sesión
+    for key in [f"email_reset_{user.pk}_sent_at", "nuevo_email", "uidb64", "token"]:
+        request.session.pop(key, None)
+
+    messages.success(request, "Se ha cambiado el correo exitosamente.")
+    return redirect("sitio:dashboard")

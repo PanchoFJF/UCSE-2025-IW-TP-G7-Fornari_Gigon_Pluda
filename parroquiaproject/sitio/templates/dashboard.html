@@ -9,8 +9,15 @@
 <div class="container mt-4">
     <h2 
         class="mb-3">Bienvenido, {{ user.username }} 👋 
-        <button class="btn btn-warning mt-2 mt-sm-0 float-end" onclick="window.location.href='/autorizacion/'">
-        👤 Borrar Usuario
+
+        <!-- {% if user.is_superuser %} -->
+        <button class="btn btn-danger mt-2 mt-sm-0 float-end ms-2">
+            Borrar Usuarios
+        </button>
+        <!-- {% endif %} -->
+
+        <button class="btn btn-secondary mt-2 mt-sm-0 float-end" onclick="window.location.href='/configuracion/'">
+            ⚙️
         </button>
     </h2>
     <p>En esta sección puedes ver tus suscripciones:</p>
