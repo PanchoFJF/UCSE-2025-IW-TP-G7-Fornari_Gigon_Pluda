@@ -14,6 +14,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils.timezone import now
+from django.db.models import Q
 
 # Create your views here.
 ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
@@ -169,6 +170,20 @@ def dashboard(request):
 
 @login_required
 def configuracion_view(request):
+    if request.method == "POST" and "cambiar_username" in request.POST:
+        nuevo_username = request.POST.get("username").strip()
+
+        # Validar que no exista otro usuario con ese username
+        if User.objects.filter(Q(username=nuevo_username) & ~Q(pk=request.user.pk)).exists():
+            messages.error(request, "Ese nombre de usuario ya está en uso.")
+        elif not nuevo_username:
+            messages.error(request, "El nombre de usuario no puede estar vacío.")
+        else:
+            request.user.username = nuevo_username
+            request.user.save()
+            messages.success(request, "Tu nombre de usuario se actualizó correctamente.")
+            return redirect("sitio:configuracion")
+
     return render(request, "configuracion.html")
 
 

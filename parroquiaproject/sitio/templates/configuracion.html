@@ -10,10 +10,23 @@
     <!-- Usuario -->
     <p></p>
     <p>
-        <strong>Usuario:</strong> {{ user.username }}
-        <a href="" class="btn btn-secondary btn-sm">Editar ✏️</a>
+        <strong>Usuario:</strong> <span id="username-display">{{ user.username }}</span>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleUsernameForm()">Editar ✏️</button>
     </p>
 
+    <!-- Formulario oculto para cambiar username -->
+    <form method="post" id="username-form" class="mt-2" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="cambiar_username" value="1">
+        <div class="input-group">
+            <input type="text" name="username" value="{{ user.username }}" class="form-control" required>
+            <button type="submit" class="btn btn-success">Guardar ✅</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="toggleUsernameForm()">Cancelar ❌</button>
+        </div>
+        <div class="form-text">El nombre debe ser único, no puede repetirse.</div>
+    <p></p>
+    </form>
+    
     <!-- Correo -->
     <p>
         <strong>Correo electrónico:</strong> {{ user.email }}
@@ -34,4 +47,11 @@
         </button>
     </div>
 </div>
+
+<script>
+function toggleUsernameForm() {
+    const form = document.getElementById("username-form");
+    form.style.display = form.style.display === "none" ? "block" : "none";
+}
+</script>
 {% endblock %}
