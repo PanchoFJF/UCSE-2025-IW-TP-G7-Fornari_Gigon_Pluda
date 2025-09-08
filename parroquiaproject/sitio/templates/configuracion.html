@@ -38,13 +38,10 @@
     </p>
     
     <hr class="my-4">
-
-    <!-- Eliminar cuenta -->
     <div class="text-end">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">
+        <a href="{% url 'sitio:config_delete_send' %}" class="btn btn-danger">
             🗑️ Eliminar cuenta
-        </button>
+        </a>
     </div>
 </div>
 

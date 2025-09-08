@@ -1,0 +1,26 @@
+<p>Hola {{ user.username }},</p>
+
+<p>Recibiste este correo porque solicitaste eliminar tu cuenta en <strong>CatholicRafaela</strong>.</p>
+
+<p>⚠️ Ten en cuenta que si confirmas, tu cuenta será eliminada <strong>permanentemente</strong> y no podrás recuperarla.</p>
+
+<p>Haz clic en el siguiente botón para continuar con la eliminación:</p>
+
+<div style="padding-left: 20px; margin: 20px 0;">
+  <a href="{{ delete_link }}" style="
+    background-color: #dc3545; /* Rojo peligro */
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+  ">
+    Eliminar mi cuenta
+  </a>
+</div>
+
+<p><em>Este enlace será válido únicamente durante los próximos <strong>5 minutos</strong>.</em></p>
+
+<p>Si no solicitaste eliminar tu cuenta, simplemente ignora este correo.</p>

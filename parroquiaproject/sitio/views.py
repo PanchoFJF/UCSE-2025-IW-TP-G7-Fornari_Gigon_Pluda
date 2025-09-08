@@ -15,6 +15,7 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils.timezone import now
 from django.db.models import Q
+from django.contrib.auth import logout
 
 # Create your views here.
 ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
@@ -186,7 +187,7 @@ def configuracion_view(request):
 
     return render(request, "configuracion.html")
 
-
+# CAMBIAR CORREO
 # --- Enviar enlace al correo actual ---
 @login_required
 def configuracion_reset(request):
@@ -330,3 +331,60 @@ def configuracion_new_email(request, uidb64, token):
 
     messages.success(request, "Se ha cambiado el correo exitosamente.")
     return redirect("sitio:dashboard")
+
+# ELIMINAR CUENTA
+@login_required
+def config_delete_send(request):
+    user = request.user
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+
+    delete_link = request.build_absolute_uri(
+        reverse("sitio:config_delete_confirm", kwargs={"uidb64": uid, "token": token})
+    )
+
+    message = render_to_string("configuracion_delete_email.html", {
+        "user": user,
+        "delete_link": delete_link,
+    })
+
+    EmailMessage(
+        subject="Confirmación de eliminación de cuenta",
+        body=message,
+        to=[user.email],
+    ).send()
+
+    request.session[f"delete_request_{user.pk}_sent_at"] = now().timestamp()
+
+    messages.success(request, "Te enviamos un enlace a tu correo (válido por 5 minutos).")
+    return redirect("sitio:configuracion")
+
+
+@login_required
+@login_required
+def config_delete_confirm(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except Exception:
+        user = None
+
+    if user is None or not default_token_generator.check_token(user, token):
+        messages.error(request, "El enlace no es válido o expiró.")
+        return redirect("sitio:configuracion")
+
+    sent_at = request.session.get(f"delete_request_{user.pk}_sent_at")
+    if not sent_at or (now().timestamp() - sent_at > 300):  # 5 minutos
+        messages.error(request, "El enlace expiró después de 5 minutos.")
+        return redirect("sitio:configuracion")
+
+    # Ahora Django encontrará: sitio/templates/configuracion_delete_confirm.html
+    return render(request, "configuracion_delete_confirm.html", {"user": user})
+
+
+@login_required
+def config_delete_final(request):
+    user = request.user
+    user.delete()
+    messages.success(request, "Tu cuenta fue eliminada permanentemente.")
+    return redirect("inicio")

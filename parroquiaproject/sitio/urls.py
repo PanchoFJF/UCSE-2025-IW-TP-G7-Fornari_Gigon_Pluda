@@ -19,4 +19,7 @@ urlpatterns = [
     path('configuracion/enviar/', views.configuracion_enviar_email, name='configuracion_reset_email'),
     path('configuracion/nuevo/<uidb64>/<token>/', views.configuracion_reset_email, name='config_reset_confirm'),
     path('configuracion/activar/<uidb64>/<token>/', views.configuracion_new_email, name='config_activate'),
+    path("configuracion/delete/send/", views.config_delete_send, name="config_delete_send"),
+    path("configuracion/delete/confirm/<uidb64>/<token>/", views.config_delete_confirm, name="config_delete_confirm"),
+    path("configuracion/delete/final/", views.config_delete_final, name="config_delete_final"),
 ]
