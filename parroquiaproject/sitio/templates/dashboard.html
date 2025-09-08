@@ -10,11 +10,14 @@
     <h2 
         class="mb-3">Bienvenido, {{ user.username }} 👋 
 
-        <!-- {% if user.is_superuser %} -->
-        <button class="btn btn-danger mt-2 mt-sm-0 float-end ms-2">
-            Borrar Usuarios
-        </button>
-        <!-- {% endif %} -->
+        {% if user.is_superuser %}
+        <form method="post" action="{% url 'sitio:delete_users' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger mt-2 mt-sm-0 float-end ms-2">
+                Borrar Usuarios
+            </button>
+        </form>
+        {% endif %}
 
         <button class="btn btn-secondary mt-2 mt-sm-0 float-end" onclick="window.location.href='/configuracion/'">
             ⚙️

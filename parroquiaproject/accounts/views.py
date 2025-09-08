@@ -14,8 +14,18 @@ from django.contrib.auth.views import LoginView, LogoutView
 from .forms import SignUpForm, CustomPasswordResetForm
 from django.contrib.auth.password_validation import validate_password
 from django.utils.timezone import now
+from datetime import timedelta
+from django.contrib.auth.decorators import user_passes_test
+from accounts.management.commands.delete_invalid_users import delete_invalid_users
 
 User = get_user_model()
+
+# --- Eliminar usuarios inválidos ---
+@user_passes_test(lambda u: u.is_superuser)  # solo superusuarios
+def delete_users_view(request):
+    count = delete_invalid_users()
+    messages.success(request, f"Se eliminaron {count} usuarios no verificados.")
+    return redirect("sitio:dashboard")
 
 # --- Registro con confirmación por email ---
 class SignUpView(generic.CreateView):

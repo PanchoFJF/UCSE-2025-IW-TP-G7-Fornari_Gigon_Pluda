@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from accounts.views import delete_users_view
 
 app_name = 'sitio'  # namespace para usar en reverse()
 
@@ -22,4 +23,7 @@ urlpatterns = [
     path("configuracion/delete/send/", views.config_delete_send, name="config_delete_send"),
     path("configuracion/delete/confirm/<uidb64>/<token>/", views.config_delete_confirm, name="config_delete_confirm"),
     path("configuracion/delete/final/", views.config_delete_final, name="config_delete_final"),
+
+    # Elimnar usuarios no verificados
+    path("delete_users/", delete_users_view, name="delete_users"),
 ]
