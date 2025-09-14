@@ -77,3 +77,26 @@ class EmailChangeForm(forms.Form):
             raise ValidationError("Este correo ya está en uso por otro usuario.")
 
         return nuevo_email
+    
+class AutorizacionForm(forms.Form):
+    email = forms.EmailField(
+        label="Correo electrónico",
+        required=True,
+        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "ejemplo@correo.com"})
+    )
+    iglesia_id = forms.ModelChoiceField(
+        label="Iglesia",
+        queryset=Iglesia.objects.none(),  # se setea en __init__
+        widget=forms.Select(attrs={"class": "form-control"}),
+        empty_label="Seleccionar iglesia"
+    )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # recibimos opcionalmente el user
+        super().__init__(*args, **kwargs)
+        if user:
+            try:
+                usuario_iglesias = UsuarioIglesias.objects.get(usuario=user)
+                self.fields['iglesia_id'].queryset = usuario_iglesias.iglesias_admin.all()
+            except UsuarioIglesias.DoesNotExist:
+                self.fields['iglesia_id'].queryset = Iglesia.objects.none()

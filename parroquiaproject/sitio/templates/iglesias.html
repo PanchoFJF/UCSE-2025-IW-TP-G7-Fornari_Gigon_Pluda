@@ -64,7 +64,9 @@
           </div>
 
           <div class="d-flex justify-content-center align-items-center gap-2 flex-nowrap">
-            <a href="#" class="btn btn-primary">Suscribirse</a>
+            <a href="{% url 'suscribirse_iglesia' iglesia.id %}" class="btn btn-primary">
+              Suscribirse
+            </a>
 
             <button class="btn btn-warning"
               data-bs-toggle="modal"

@@ -26,6 +26,8 @@ urlpatterns = [
     path('', views.inicio, name='inicio'),
     path('', include('sitio.urls', namespace='sitio')),
     path('accounts/', include('accounts.urls')),
+    path("autorizacion/", views.autorizacion_view, name="autorizacion"),
+    path("suscribirse/<int:iglesia_id>/", views.suscribirse_iglesia, name="suscribirse_iglesia"),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

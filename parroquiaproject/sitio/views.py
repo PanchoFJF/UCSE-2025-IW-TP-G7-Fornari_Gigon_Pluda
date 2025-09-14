@@ -388,3 +388,47 @@ def config_delete_final(request):
     user.delete()
     messages.success(request, "Tu cuenta fue eliminada permanentemente.")
     return redirect("inicio")
+
+@login_required
+def autorizacion_view(request):
+    if request.method == "POST":
+        form = AutorizacionForm(request.POST, user=request.user)  # <-- pasar user como keyword arg
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            iglesia = form.cleaned_data['iglesia_id']
+
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={'username': email.split('@')[0]}
+            )
+
+            usuario_iglesias, _ = UsuarioIglesias.objects.get_or_create(usuario=user)
+            if iglesia not in usuario_iglesias.iglesias_admin.all():
+                usuario_iglesias.iglesias_admin.add(iglesia)
+                messages.success(request, f"{user.email} ahora es admin de {iglesia.nombre}.")
+            else:
+                messages.info(request, f"{user.email} ya era admin de {iglesia.nombre}.")
+
+            return redirect("autorizacion")
+    else:
+        form = AutorizacionForm(user=request.user)  # <-- también aquí
+
+    return render(request, "autorizacion.html", {"form": form})
+
+@login_required
+def suscribirse_iglesia(request, iglesia_id):
+    iglesia = get_object_or_404(Iglesia, id=iglesia_id)
+    user = request.user
+
+    # Buscamos o creamos el registro de UsuarioIglesias para este user
+    usuario_iglesias, _ = UsuarioIglesias.objects.get_or_create(usuario=user)
+
+    # Agregamos la iglesia si no estaba ya suscripto
+    if iglesia not in usuario_iglesias.iglesias_suscripto.all():
+        usuario_iglesias.iglesias_suscripto.add(iglesia)
+        messages.success(request, f"Te suscribiste a {iglesia.nombre}.")
+    else:
+        messages.info(request, f"Ya estabas suscripto a {iglesia.nombre}.")
+
+    # Redirige de vuelta (ajustá la URL al nombre de tu vista de lista de iglesias)
+    return redirect("/iglesias/")
