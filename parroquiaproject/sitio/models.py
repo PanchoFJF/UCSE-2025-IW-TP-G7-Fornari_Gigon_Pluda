@@ -8,6 +8,7 @@ class Iglesia(models.Model):
     direccion = models.CharField(max_length=100)
     imagen = models.ImageField(upload_to='iglesias/', blank=True, null=True)
     contacto_secretaria = models.CharField(max_length=20, blank=True, null=True)
+    administrador = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name="iglesias_admin")
     def __str__(self):
         return self.nombre
     

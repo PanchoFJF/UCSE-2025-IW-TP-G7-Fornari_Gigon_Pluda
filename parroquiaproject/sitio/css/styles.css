@@ -25,3 +25,9 @@
         box-shadow: none !important; /* por si también hay sombras */
     }
 }
+.img-fija {
+    width: 50px;
+    height: 40px;
+    object-fit: cover; /* mantiene proporciones sin deformar */
+    border-radius: 8px; /* opcional, similar a "rounded" de Bootstrap */
+  }

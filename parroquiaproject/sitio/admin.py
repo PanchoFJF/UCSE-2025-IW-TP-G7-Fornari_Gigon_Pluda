@@ -5,7 +5,7 @@ from sitio.models import Iglesia, Actividades, UsuarioIglesias
 
 @admin.register(Iglesia)
 class AdminNoticia(admin.ModelAdmin):
-    list_display = ('id', 'nombre', 'direccion')
+    list_display = ('id', 'nombre', 'direccion', 'administrador')
     #list_filter = ('archivada', 'fecha', 'categoria')
     #search_fields = ('texto', )
     #date_hierarchy = 'fecha'

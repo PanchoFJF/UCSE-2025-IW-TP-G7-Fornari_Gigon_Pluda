@@ -80,3 +80,10 @@
       max-width: 900px;
       margin: 40px auto;
 }
+
+.img-fija {
+    width: 50px;
+    height: 40px;
+    object-fit: cover; /* mantiene proporciones sin deformar */
+    border-radius: 8px; /* opcional, similar a "rounded" de Bootstrap */
+  }
