@@ -28,8 +28,9 @@ from .models import Actividades, UsuarioIglesias
 from .models import Noticia
 from django.core.mail import EmailMessage
 from .forms import NoticiaForm
+from django.http import JsonResponse
 
-def inicio(request):
+def inicio(request):    
     noticias = Noticia.objects.order_by("-fecha")  # timeline descendente
     form = NoticiaForm()
 

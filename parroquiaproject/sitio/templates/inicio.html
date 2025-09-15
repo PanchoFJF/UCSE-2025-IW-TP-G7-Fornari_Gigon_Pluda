@@ -12,19 +12,22 @@
     margin-bottom: 1rem;
   }
   .img-fija {
-    width: 400px ;
-    height: 300px ;
+    width: 400px;
+    height: 300px;
     object-fit: cover;
     border-radius: 8px;
   }
-
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-4">
+  
+  <!-- Versículo del día -->
   <div class="container my-4">
-    <iframe id="versiculo-del-dia" src="https://www.bibliatodo.com/es/online/versiculo-del-dia-texto-2" style="width: 100%; height: 20vh;" frameborder="0" scrolling="no"></iframe>
+    <iframe id="versiculo-del-dia" src="https://www.bibliatodo.com/es/online/versiculo-del-dia-texto-2" 
+      style="width: 100%; height: 20vh;" frameborder="0" scrolling="no"></iframe>
+    
     <h3>🎶 Música recomendada</h3>
     <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
       <!-- Spotify -->
@@ -35,7 +38,6 @@
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
         loading="lazy">
       </iframe>
-    
       <!-- YouTube -->
       <iframe style="flex: 1 1 300px; height: 152px;"
         src="https://www.youtube.com/embed/videoseries?list=PLbsXiQOTnFUmPJf_CNV3vtELkeIiF58e4"
@@ -44,7 +46,9 @@
         allowfullscreen>
       </iframe>
     </div>
-   </div>
+  </div>
+
+  <!-- Título Noticias -->
   <h2>
     Noticias & Anuncios
     <button class="btn btn-warning mt-2 mt-sm-0 float-end" data-bs-toggle="collapse" data-bs-target="#formNoticia">
@@ -56,7 +60,7 @@
   <div id="formNoticia" class="collapse mb-4">
     <div class="card card-body">
       <h4>Nueva Publicación</h4>
-      <form method="post" enctype="multipart/form-data">
+      <form method="post" enctype="multipart/form-data" id="formCrearNoticia">
         {% csrf_token %}
         <input type="hidden" name="action" value="crear">
         {{ form.as_p }}
@@ -65,53 +69,19 @@
     </div>
   </div>
 
-  <!-- LISTA DE PUBLICACIONES VIEJA -->
-  <!--
-  {% for noticia in noticias %}
-  <div class="card post-card">
-    <div class="card-body">
-      <div class="d-flex justify-content-between">
-        <h5 class="card-title">{{ noticia.titulo }}</h5>
-        <small class="text-muted">{{ noticia.fecha|date:"d/m/Y H:i" }}</small>
-      </div>
-      <p class="card-text">{{ noticia.descripcion }}</p>
-
-      {% if noticia.imagen %}
-      <img src="{{ noticia.imagen.url }}" alt="Imagen noticia" class="img-fija mb-3">
-      {% endif %}
-
-      Acciones
-      <div class="d-flex gap-2">
-        Editar
-        <button class="btn btn-sm btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#editarNoticia{{ noticia.id }}">
-          ✏️ Editar
-        </button>
-
-        Eliminar
-        <form method="post" class="d-inline">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="eliminar">
-          <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
-          <button type="submit" class="btn btn-sm btn-danger"
-                  onclick="return confirm('¿Seguro que deseas eliminar esta publicación?')">
-            🗑 Eliminar
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-  -->
-    <!-- LISTA DE PUBLICACIONES -->
-    {% for notica in noticias %}
-    <div class="col-md-6 mb-4"> <!-- Cada noticia ocupa media fila -->
+  <!-- LISTA DE PUBLICACIONES -->
+  <div class="row">
+    {% for noticia in noticias %}
+    <div class="col-md-6 mb-4">
       <div class="row g-0 border rounded overflow-hidden flex-md-row shadow-sm h-md-250 position-relative"
-        style="height: 300px;">
+           style="height: 300px;">
+        
+        <!-- Contenido noticia -->
         <div class="col p-4 d-flex flex-column position-static">
           <h3 class="mb-0">{{ noticia.titulo }}</h3>
           <small class="text-muted">{{ noticia.fecha|date:"d/m/Y H:i" }}</small>
           <p class="card-text mb-auto">Descripción: {{ noticia.descripcion }}</p>
+          
           <!-- Acciones -->
           <div class="d-flex gap-2">
             <!-- Editar -->
@@ -120,7 +90,6 @@
                     data-bs-target="#editarNoticia{{ noticia.id }}">
               ✏️ Editar
             </button>
-
             <!-- Eliminar -->
             <form method="post" class="d-inline">
               {% csrf_token %}
@@ -133,71 +102,70 @@
             </form>
           </div>
         </div>
+
+        <!-- Imagen noticia -->
         <div class="col-auto d-none d-lg-block">
           {% if noticia.imagen %}
             <img src="{{ noticia.imagen.url }}" alt="{{ noticia.titulo }}"
-              class="img-fluid mb-3"
-              style="max-height: 300px; width: 200px; height: 100%; object-fit: cover;">
+                 class="img-fluid mb-3"
+                 style="max-height: 300px; width: 200px; height: 100%; object-fit: cover;">
           {% else %}
             <svg aria-label="Placeholder: Thumbnail"
-              class="bd-placeholder-img"
-              width="200" height="250"
-              preserveAspectRatio="xMidYMid slice"
-              role="img" xmlns="http://www.w3.org/2000/svg">
+                 class="bd-placeholder-img"
+                 width="200" height="300"
+                 preserveAspectRatio="xMidYMid slice"
+                 role="img" xmlns="http://www.w3.org/2000/svg">
               <title>Placeholder</title>
               <rect width="100%" height="100%" fill="#55595c"></rect>
-              <text x="50%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
+              <text x="30%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
             </svg>
           {% endif %}
         </div>
       </div>
-    {% empty %}
-    <p class="text-muted text-center">No hay actividades vigentes.</p>
-    {% endfor %}
-    </div>
-      
 
-  <!-- MODAL EDITAR -->
-  <div class="modal fade" id="editarNoticia{{ noticia.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form method="post" enctype="multipart/form-data">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="editar">
-          <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
+      <!-- MODAL EDITAR (dentro del loop para cada noticia) -->
+      <div class="modal fade" id="editarNoticia{{ noticia.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="editar">
+              <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
+              
+              <div class="modal-header">
+                <h5 class="modal-title">Editar Publicación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
 
-          <div class="modal-header">
-            <h5 class="modal-title">Editar Publicación</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label">Título</label>
+                  <input type="text" name="titulo" class="form-control" value="{{ noticia.titulo }}" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Descripción</label>
+                  <textarea name="descripcion" class="form-control" rows="3" required>{{ noticia.descripcion }}</textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Imagen</label>
+                  <input type="file" name="imagen" class="form-control">
+                  <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Guardar cambios</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              </div>
+            </form>
           </div>
-
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Título</label>
-              <input type="text" name="titulo" class="form-control" value="{{ noticia.titulo }}" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Descripción</label>
-              <textarea name="descripcion" class="form-control" rows="3" required>{{ noticia.descripcion }}</textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Imagen</label>
-              <input type="file" name="imagen" class="form-control">
-              <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-success">Guardar cambios</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          </div>
-        </form>
+        </div>
       </div>
-    </div>
-  </div>
 
-  {% empty %}
-    <p class="text-muted">No hay publicaciones todavía.</p>
-  {% endfor %}
+    </div>
+    {% empty %}
+      <p class="text-muted text-center">No hay publicaciones todavía.</p>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}
