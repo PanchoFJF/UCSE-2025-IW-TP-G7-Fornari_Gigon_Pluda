@@ -10,6 +10,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path("autorizacion/", views.autorizacion_view, name="autorizacion"),
     path("suscribirse/<int:iglesia_id>/", views.suscribirse_iglesia, name="suscribirse_iglesia"),
+    path('iglesia/<int:iglesia_id>/desuscribirse/', views.desuscribirse_iglesia, name='desuscribirse_iglesia'),
 
     # Iglesias y calendario, etc
     path('iglesias/', views.iglesias, name='iglesias'),
@@ -28,4 +29,5 @@ urlpatterns = [
 
     # Elimnar usuarios no verificados
     path("delete_users/", delete_users_view, name="delete_users"),
+    
 ]

@@ -449,3 +449,13 @@ def suscribirse_iglesia(request, iglesia_id):
 
     # Redirige de vuelta (ajustá la URL al nombre de tu vista de lista de iglesias)
     return redirect("/iglesias/")
+
+@login_required
+def desuscribirse_iglesia(request, iglesia_id):
+    try:
+        iglesia = Iglesia.objects.get(id=iglesia_id)
+        request.user.perfil_iglesias.iglesias_suscripto.remove(iglesia)
+        messages.success(request, f"Te has desuscripto de {iglesia.nombre}.")
+    except Iglesia.DoesNotExist:
+        messages.error(request, "La iglesia no existe.")
+    return redirect('sitio:dashboard')

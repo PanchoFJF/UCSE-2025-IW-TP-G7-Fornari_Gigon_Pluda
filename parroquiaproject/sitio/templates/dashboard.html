@@ -40,9 +40,19 @@
             {% if iglesias %}
                 <ul class="list-group list-group-flush">
                     {% for iglesia in iglesias %}
-                        <li class="list-group-item">
-                            <strong>{{ iglesia.nombre }}</strong><br>
-                            <small class="text-muted">{{ iglesia.direccion }}</small>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ iglesia.nombre }}</strong><br>
+                                <small class="text-muted">{{ iglesia.direccion }}</small>
+                            </div>
+
+                            <!-- Form para desuscribirse -->
+                            <form method="post" action="{% url 'sitio:desuscribirse_iglesia' iglesia.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    Desuscribirse
+                                </button>
+                            </form>
                         </li>
                     {% endfor %}
                 </ul>

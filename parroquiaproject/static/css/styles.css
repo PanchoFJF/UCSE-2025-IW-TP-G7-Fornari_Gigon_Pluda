@@ -87,3 +87,15 @@
     object-fit: cover; /* mantiene proporciones sin deformar */
     border-radius: 8px; /* opcional, similar a "rounded" de Bootstrap */
   }
+
+.btn-purple {
+    display: inline-block;
+    background-color: #6f42c1;
+    color: white;
+    border: none;
+    text-decoration: none;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    pointer-events: none;  /* desactiva clicks */
+    cursor: not-allowed;
+}

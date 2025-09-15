@@ -64,10 +64,13 @@
           </div>
 
           <div class="d-flex justify-content-center align-items-center gap-2 flex-nowrap">
-            <a href="{% url 'suscribirse_iglesia' iglesia.id %}" class="btn btn-primary">
-              Suscribirse
-            </a>
+          {% if request.user.is_authenticated and iglesia in request.user.perfil_iglesias.iglesias_suscripto.all %}
+              <button class="btn btn-purple">Suscripto</button>
+          {% else %}
+              <a href="{% url 'suscribirse_iglesia' iglesia.id %}" class="btn btn-primary">Suscribirse</a>
+          {% endif %}
 
+          {% if request.user.is_authenticated and iglesia in request.user.perfil_iglesias.iglesias_admin.all %}
             <button class="btn btn-warning"
               data-bs-toggle="modal"
               data-bs-target="#editarIglesia{{ iglesia.id }}">
@@ -81,6 +84,7 @@
               <button type="submit" class="btn btn-danger"
                 onclick="return confirm('¿Seguro que deseas eliminar {{ iglesia.nombre }}?')">🗑</button>
             </form>
+          {% endif %}
           </div>
         </div>
       </div>
