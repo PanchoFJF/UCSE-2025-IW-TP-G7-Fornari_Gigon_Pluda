@@ -65,7 +65,8 @@
     </div>
   </div>
 
-  <!-- LISTA DE PUBLICACIONES -->
+  <!-- LISTA DE PUBLICACIONES VIEJA -->
+  <!--
   {% for noticia in noticias %}
   <div class="card post-card">
     <div class="card-body">
@@ -79,16 +80,16 @@
       <img src="{{ noticia.imagen.url }}" alt="Imagen noticia" class="img-fija mb-3">
       {% endif %}
 
-      <!-- Acciones -->
+      Acciones
       <div class="d-flex gap-2">
-        <!-- Editar -->
+        Editar
         <button class="btn btn-sm btn-primary"
                 data-bs-toggle="modal"
                 data-bs-target="#editarNoticia{{ noticia.id }}">
           ✏️ Editar
         </button>
 
-        <!-- Eliminar -->
+        Eliminar
         <form method="post" class="d-inline">
           {% csrf_token %}
           <input type="hidden" name="action" value="eliminar">
@@ -101,6 +102,60 @@
       </div>
     </div>
   </div>
+  -->
+    <!-- LISTA DE PUBLICACIONES -->
+    {% for notica in noticias %}
+    <div class="col-md-6 mb-4"> <!-- Cada noticia ocupa media fila -->
+      <div class="row g-0 border rounded overflow-hidden flex-md-row shadow-sm h-md-250 position-relative"
+        style="height: 300px;">
+        <div class="col p-4 d-flex flex-column position-static">
+          <h3 class="mb-0">{{ noticia.titulo }}</h3>
+          <small class="text-muted">{{ noticia.fecha|date:"d/m/Y H:i" }}</small>
+          <p class="card-text mb-auto">Descripción: {{ noticia.descripcion }}</p>
+          <!-- Acciones -->
+          <div class="d-flex gap-2">
+            <!-- Editar -->
+            <button class="btn btn-sm btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editarNoticia{{ noticia.id }}">
+              ✏️ Editar
+            </button>
+
+            <!-- Eliminar -->
+            <form method="post" class="d-inline">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="eliminar">
+              <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
+              <button type="submit" class="btn btn-sm btn-danger"
+                      onclick="return confirm('¿Seguro que deseas eliminar esta publicación?')">
+                🗑 Eliminar
+              </button>
+            </form>
+          </div>
+        </div>
+        <div class="col-auto d-none d-lg-block">
+          {% if noticia.imagen %}
+            <img src="{{ noticia.imagen.url }}" alt="{{ noticia.titulo }}"
+              class="img-fluid mb-3"
+              style="max-height: 300px; width: 200px; height: 100%; object-fit: cover;">
+          {% else %}
+            <svg aria-label="Placeholder: Thumbnail"
+              class="bd-placeholder-img"
+              width="200" height="250"
+              preserveAspectRatio="xMidYMid slice"
+              role="img" xmlns="http://www.w3.org/2000/svg">
+              <title>Placeholder</title>
+              <rect width="100%" height="100%" fill="#55595c"></rect>
+              <text x="50%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
+            </svg>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+    <p class="text-muted text-center">No hay actividades vigentes.</p>
+    {% endfor %}
+    </div>
+      
 
   <!-- MODAL EDITAR -->
   <div class="modal fade" id="editarNoticia{{ noticia.id }}" tabindex="-1" aria-hidden="true">
