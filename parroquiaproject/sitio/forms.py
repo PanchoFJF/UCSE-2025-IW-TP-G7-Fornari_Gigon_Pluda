@@ -86,17 +86,17 @@ class AutorizacionForm(forms.Form):
     )
     iglesia_id = forms.ModelChoiceField(
         label="Iglesia",
-        queryset=Iglesia.objects.none(),  # se setea en __init__
+        queryset=Iglesia.objects.none(),
         widget=forms.Select(attrs={"class": "form-control"}),
         empty_label="Seleccionar iglesia"
     )
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # recibimos opcionalmente el user
+        owner = kwargs.pop('owner', None) or kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        if user:
-            try:
-                usuario_iglesias = UsuarioIglesias.objects.get(usuario=user)
-                self.fields['iglesia_id'].queryset = usuario_iglesias.iglesias_admin.all()
-            except UsuarioIglesias.DoesNotExist:
-                self.fields['iglesia_id'].queryset = Iglesia.objects.none()
+        if owner:
+            self.fields['iglesia_id'].queryset = Iglesia.objects.filter(administrador=owner)
+        else:
+            self.fields['iglesia_id'].queryset = Iglesia.objects.none()
+
+

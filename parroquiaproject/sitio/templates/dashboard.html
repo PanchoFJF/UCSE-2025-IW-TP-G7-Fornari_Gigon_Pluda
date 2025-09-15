@@ -19,6 +19,12 @@
         </form>
         {% endif %}
 
+        {% if can_authorize %}
+        <a href="{% url 'sitio:autorizacion' %}" class="btn btn-primary  mt-2 mt-sm-0 float-end ms-2">
+            Permisos
+        </a>
+        {% endif %}
+
         <button class="btn btn-secondary mt-2 mt-sm-0 float-end" onclick="window.location.href='/configuracion/'">
             ⚙️
         </button>

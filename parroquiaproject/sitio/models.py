@@ -38,6 +38,6 @@ class UsuarioIglesias(models.Model):
     iglesias_suscripto = models.ManyToManyField(Iglesia, blank=True, related_name="suscriptores")
     iglesias_admin = models.ManyToManyField(Iglesia, blank=True, related_name="administradores")
 
-    def __str__(self):
+    def __str__(self):  
         return self.usuario.username
     

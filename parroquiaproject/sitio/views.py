@@ -162,10 +162,17 @@ def dashboard(request):
         permisos_iglesias = []
         actividades = []
 
+    # El usuario puede "autorizar" si es administrador PRINCIPAL de al menos una Iglesia
+    can_authorize = False
+    if request.user.is_authenticated:
+        # Usa la FK related_name en Iglesia: administrador -> related_name="iglesias_admin"
+        can_authorize = request.user.iglesias_admin.exists()
+
     context = {
         "iglesias": iglesias,
         "permisos_iglesias": permisos_iglesias,
         "actividades": actividades,
+        "can_authorize": can_authorize,
     }
     return render(request, "dashboard.html", context)
 
@@ -392,28 +399,38 @@ def config_delete_final(request):
 @login_required
 def autorizacion_view(request):
     if request.method == "POST":
-        form = AutorizacionForm(request.POST, user=request.user)  # <-- pasar user como keyword arg
+        form = AutorizacionForm(request.POST, user=request.user)
         if form.is_valid():
-            email = form.cleaned_data['email']
+            email = form.cleaned_data['email'].strip().lower()
             iglesia = form.cleaned_data['iglesia_id']
 
-            user, created = User.objects.get_or_create(
-                email=email,
-                defaults={'username': email.split('@')[0]}
-            )
+            try:
+                target_user = User.objects.get(email__iexact=email)
+            except User.DoesNotExist:
+                messages.error(request, "No existe ningún usuario con ese correo. Pedile que se registre primero.")
+                return redirect("sitio:autorizacion")
 
-            usuario_iglesias, _ = UsuarioIglesias.objects.get_or_create(usuario=user)
-            if iglesia not in usuario_iglesias.iglesias_admin.all():
-                usuario_iglesias.iglesias_admin.add(iglesia)
-                messages.success(request, f"{user.email} ahora es admin de {iglesia.nombre}.")
-            else:
-                messages.info(request, f"{user.email} ya era admin de {iglesia.nombre}.")
+            usuario_iglesias, _ = UsuarioIglesias.objects.get_or_create(usuario=target_user)
 
-            return redirect("autorizacion")
+            if "add" in request.POST:
+                if iglesia in usuario_iglesias.iglesias_admin.all():
+                    messages.info(request, f"{target_user.email} ya tiene permiso de edición en {iglesia.nombre}.")
+                else:
+                    usuario_iglesias.iglesias_admin.add(iglesia)
+                    messages.success(request, f"{target_user.email} ahora tiene permisos para modificar {iglesia.nombre}.")
+            elif "remove" in request.POST:
+                if iglesia in usuario_iglesias.iglesias_admin.all():
+                    usuario_iglesias.iglesias_admin.remove(iglesia)
+                    messages.success(request, f"Se removieron los permisos de edición de {target_user.email} sobre {iglesia.nombre}.")
+                else:
+                    messages.info(request, f"{target_user.email} no tenía permisos de edición sobre {iglesia.nombre}.")
+
+            return redirect("sitio:autorizacion")
     else:
-        form = AutorizacionForm(user=request.user)  # <-- también aquí
+        form = AutorizacionForm(user=request.user)
 
     return render(request, "autorizacion.html", {"form": form})
+
 
 @login_required
 def suscribirse_iglesia(request, iglesia_id):
