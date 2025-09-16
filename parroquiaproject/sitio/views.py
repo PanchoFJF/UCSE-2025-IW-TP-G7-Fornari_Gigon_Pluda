@@ -242,11 +242,13 @@ def configuracion_enviar_email(request):
         "reset_link": reset_link,
     })
 
-    EmailMessage(
+    email_message = EmailMessage(
         subject="Cambio de correo",
         body=message,
         to=[user.email],
-    ).send()
+    )
+    email_message.content_subtype = "html"
+    email_message.send()
 
     # Guardar timestamp de envío en sesión
     request.session[f"email_reset_{user.pk}_sent_at"] = now().timestamp()
@@ -356,11 +358,13 @@ def config_delete_send(request):
         "delete_link": delete_link,
     })
 
-    EmailMessage(
+    email_message = EmailMessage(
         subject="Confirmación de eliminación de cuenta",
         body=message,
         to=[user.email],
-    ).send()
+    )
+    email_message.content_subtype = "html"
+    email_message.send()
 
     request.session[f"delete_request_{user.pk}_sent_at"] = now().timestamp()
 
