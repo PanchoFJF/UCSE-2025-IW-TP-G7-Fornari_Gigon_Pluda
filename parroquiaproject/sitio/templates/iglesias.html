@@ -11,10 +11,10 @@
 <div class="container mt-4">
   <h2>
     Iglesias
-    <button class="btn btn-warning mt-2 mt-sm-0 float-end" data-bs-toggle="collapse" data-bs-target="#formIglesia">
+    <button class="btn btn-success mt-2 mt-sm-0 float-end" data-bs-toggle="collapse" data-bs-target="#formIglesia">
       <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-plus-lg" viewBox="0 1 16 16">
         <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
-      </svg> Añadir
+      </svg> Nuevo
     </button>
   </h2>
 
@@ -69,11 +69,11 @@
           {% if request.user.is_authenticated and iglesia in request.user.perfil_iglesias.iglesias_suscripto.all %}
               <button class="btn btn-purple">Suscripto</button>
           {% else %}
-              <a href="{% url 'suscribirse_iglesia' iglesia.id %}" class="btn btn-warning">Suscribirse</a>
+              <a href="{% url 'suscribirse_iglesia' iglesia.id %}" class="btn btn-primary">Suscribirse</a>
           {% endif %}
 
           {% if request.user.is_authenticated and iglesia in request.user.perfil_iglesias.iglesias_admin.all %}
-            <button class="btn btn-primary"
+            <button class="btn btn-warning" style="color: white;"
               data-bs-toggle="modal"
               data-bs-target="#editarIglesia{{ iglesia.id }}">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 17 17">
