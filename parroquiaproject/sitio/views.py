@@ -290,14 +290,16 @@ def configuracion_reset_email(request, uidb64, token):
                 reverse("sitio:config_activate", kwargs={"uidb64": uidb64, "token": token})
             )
 
-            EmailMessage(
+            email_message = EmailMessage(
                 subject="Confirma tu nuevo correo en CatholicRafaela",
                 body=render_to_string("configuracion_new_email.html", {
                     "user": user,
                     "activation_link": activation_link,
                 }),
                 to=[nuevo_email],
-            ).send()
+            )
+            email_message.content_subtype = "html"
+            email_message.send()
 
             request.session[f"email_new_reset_{user.pk}_sent_at"] = now().timestamp()
             messages.success(request, "Te enviamos un enlace al nuevo correo para validarlo.")
