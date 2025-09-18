@@ -1,8 +1,16 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}
 
 {% block title %}Autorización{% endblock %}
 
 {% block content %}
+    <h2 
+        class="mb-3">Gestión de Permisos
+    </h2>
 <div class="card card-body shadow-sm w-100 mb-4" style="background-color: #E8E3D0;">
     <h4>Formulario de Autorización</h4>
     <form method="post">
