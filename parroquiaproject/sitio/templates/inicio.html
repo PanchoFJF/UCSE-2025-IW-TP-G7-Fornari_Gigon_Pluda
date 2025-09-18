@@ -129,9 +129,7 @@
         <!-- Imagen noticia -->
         <div class="col-auto d-none d-lg-block">
           {% if noticia.imagen %}
-            <a href="{{ noticia.imagen.url }}" 
-              data-lightbox="noticias" 
-              data-title="{{ noticia.titulo }}">
+            <a href="#imgModal{{ noticia.id }}">
               <img src="{{ noticia.imagen.url }}" alt="{{ noticia.titulo }}"
                   class="img-fluid mb-3"
                   style="max-height: 300px; width: 200px; height: 100%; object-fit: cover; cursor:pointer;">
@@ -147,6 +145,13 @@
               <text x="30%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
             </svg>
           {% endif %}
+        </div>
+
+        <!-- Lightbox -->
+        <div id="imgModal{{ noticia.id }}" class="lightbox">
+          <a href="#" class="close">&times;</a>
+          <img src="{{ noticia.imagen.url }}" alt="{{ noticia.titulo }}">
+          <p>{{ noticia.titulo }}</p>
         </div>
       </div>
 

@@ -99,3 +99,50 @@
     pointer-events: none;  /* desactiva clicks */
     cursor: not-allowed;
 }
+
+  /* Fondo oculto por defecto */
+  .lightbox {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    text-align: center;
+    padding-top: 60px;
+  }
+
+  /* Imagen en grande */
+  .lightbox img {
+    max-width: 90%;
+    max-height: 80vh;
+    margin: auto;
+    display: block;
+    border-radius: 10px;
+  }
+
+  /* Mostrar cuando está targeted */
+  .lightbox:target {
+    display: block;
+  }
+
+  /* Botón de cerrar */
+  .lightbox .close {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+  }
+  .lightbox .close:hover {
+    color: #bbb;
+  }
+
+  /* Texto debajo */
+  .lightbox p {
+    color: #ccc;
+    margin-top: 10px;
+  }
