@@ -434,7 +434,7 @@ def autorizacion_view(request):
             try:
                 target_user = User.objects.get(email__iexact=email)
             except User.DoesNotExist:
-                messages.error(request, "No existe ningún usuario con ese correo. Pedile que se registre primero.")
+                messages.error(request, "No existe ningún usuario con ese correo.")
                 return redirect("sitio:autorizacion")
 
             usuario_iglesias, _ = UsuarioIglesias.objects.get_or_create(usuario=target_user)
@@ -456,7 +456,20 @@ def autorizacion_view(request):
     else:
         form = AutorizacionForm(user=request.user)
 
-    return render(request, "autorizacion.html", {"form": form})
+    # Iglesias donde el usuario actual es administrador principal
+    admin_iglesias = Iglesia.objects.filter(administrador=request.user)
+
+    # Usuarios que tienen permisos de edición en esas iglesias
+    usuarios_con_permisos = UsuarioIglesias.objects.filter(
+        iglesias_admin__in=admin_iglesias
+    ).distinct().order_by("usuario__email")
+
+    context = {
+        "form": form,
+        "admin_iglesias": admin_iglesias,
+        "usuarios_con_permisos": usuarios_con_permisos,
+    }
+    return render(request, "autorizacion.html", context)
 
 
 @login_required

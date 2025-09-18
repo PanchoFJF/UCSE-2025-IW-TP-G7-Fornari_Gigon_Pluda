@@ -3,7 +3,7 @@
 {% block title %}Autorización{% endblock %}
 
 {% block content %}
-<div class="card card-body shadow-sm w-100">
+<div class="card card-body shadow-sm w-100 mb-4" style="background-color: #E8E3D0;">
     <h4>Formulario de Autorización</h4>
     <form method="post">
     {% csrf_token %}
@@ -15,16 +15,50 @@
 </form>
 </div>
     <!-- Usuarios con permisos -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-secondary text-white">
-            <h4 class="mb-0">Usuarios con permisos de edición</h4>
-        </div>
-        <div class="card-body">
-            <ul class="list-group list-group-flush">
-                {% for iglesia in admin_iglesias %}
-                    <li class="list-group-item">{{ iglesia.nombre }}</li>
-                {% endfor %}
-            </ul>
-        </div>
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-warning text-dark">
+        <h4 class="mb-0">Usuarios con permisos de edición</h4>
     </div>
+    <div class="card-body">
+        {% if usuarios_con_permisos %}
+            <!-- Cabecera de columnas -->
+            <div class="row fw-bold text-center border-bottom pb-2 mb-2">
+                <div class="col-md-4">Correo</div>
+                <div class="col-md-3">Usuario</div>
+                <div class="col-md-5">Iglesias con permisos</div>
+            </div>
+
+            <!-- Lista de usuarios -->
+            <div class="list-group">
+                {% for perfil in usuarios_con_permisos %}
+                    <div class="list-group-item border-0 px-0 d-flex justify-content-center">
+                        <div class="row w-100 align-items-center text-center py-1">
+                            <div class="col-md-4">
+                                {{ perfil.usuario.email }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ perfil.usuario.username }}
+                            </div>
+                            <div class="col-md-5">
+                                {% with perfil.iglesias_admin.all|dictsort:"nombre" as iglesias_usuario %}
+                                    {% for iglesia in iglesias_usuario %}
+                                        {% if iglesia in admin_iglesias %}
+                                            <span class="badge bg-primary me-1">{{ iglesia.nombre }}</span>
+                                        {% endif %}
+                                    {% empty %}
+                                        <span class="text-muted">Ninguna</span>
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning mb-0 text-center" role="alert">
+                No hay ningún usuario con permisos en las iglesias que administras.
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

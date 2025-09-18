@@ -57,7 +57,7 @@
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
                                 <strong>{{ iglesia.nombre }}</strong><br>
-                                <small class="text-muted">{{ iglesia.direccion }}</small>
+                                <small class="text-muted mb-0">{{ iglesia.direccion }}</small>
                             </div>
 
                             <!-- Form para desuscribirse -->
@@ -74,7 +74,7 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <p class="text-muted">No estás suscripto a ninguna iglesia.</p>
+                <p class="text-muted mb-0">No estás suscripto a ninguna iglesia.</p>
             {% endif %}
         </div>
     </div>
@@ -127,7 +127,7 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <p class="text-muted">No tienes actividades relacionadas.</p>
+                <p class="text-muted mb-0">No tienes actividades relacionadas.</p>
             {% endif %}
         </div>
     </div>

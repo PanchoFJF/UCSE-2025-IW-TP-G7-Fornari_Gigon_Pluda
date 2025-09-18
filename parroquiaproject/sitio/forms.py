@@ -96,7 +96,7 @@ class AutorizacionForm(forms.Form):
         label="Iglesia",
         queryset=Iglesia.objects.none(),
         widget=forms.Select(attrs={"class": "form-control"}),
-        empty_label="Seleccionar iglesia"
+        empty_label="-- Seleccionar Iglesia --"
     )
 
     def __init__(self, *args, **kwargs):

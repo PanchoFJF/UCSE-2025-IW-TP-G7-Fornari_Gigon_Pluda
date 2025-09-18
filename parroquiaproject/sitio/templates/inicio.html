@@ -63,7 +63,7 @@
   <!-- FORM NUEVA NOTICIA -->
   <div class="modal fade" id="formNoticia" tabindex="-1" aria-labelledby="formNoticiaLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
+      <div class="modal-content" style="background-color: #E8E3D0;">
         <div class="modal-header">
           <h5 class="modal-title" id="formNoticiaLabel">Nueva Publicación</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -91,7 +91,7 @@
            style="height: 300px;">
         
         <!-- Contenido noticia -->
-        <div class="col p-4 d-flex flex-column position-static">
+        <div class="col p-4 d-flex flex-column position-static" style="background-color: #E8E3D0;">
           <h3 class="mb-0">{{ noticia.titulo }}</h3>
           <small class="text-muted">{{ noticia.fecha|date:"d/m/Y H:i" }}</small>
           <p class="card-text mb-auto">Descripción: {{ noticia.descripcion }}</p>
@@ -154,12 +154,12 @@
               <input type="hidden" name="action" value="editar">
               <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
               
-              <div class="modal-header">
+              <div class="modal-header" style="background-color: #E8E3D0;">
                 <h5 class="modal-title">Editar Publicación</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
 
-              <div class="modal-body">
+              <div class="modal-body" style="background-color: #E8E3D0;">
                 <div class="mb-3">
                   <label class="form-label">Título</label>
                   <input type="text" name="titulo" class="form-control" value="{{ noticia.titulo }}" required>
@@ -175,7 +175,7 @@
                 </div>
               </div>
 
-              <div class="modal-footer">
+              <div class="modal-footer" style="background-color: #E8E3D0;">
                 <button type="submit" class="btn btn-success">Guardar cambios</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
               </div>
