@@ -17,13 +17,21 @@ class IglesiaForm(forms.ModelForm):
         }
 
 class NoticiaForm(forms.ModelForm):
+    iglesiaAsociada = forms.ModelChoiceField(
+        queryset=Iglesia.objects.all(),
+        required=True,
+        label="Iglesia asociada",
+        empty_label="-- Seleccionar Iglesia --",
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
     class Meta:
         model = Noticia
-        fields = ["titulo", "descripcion", "imagen"]
+        fields = ["titulo", "descripcion", "imagen", "iglesiaAsociada"]
         widgets = {
             "titulo": forms.TextInput(attrs={"class": "form-control", "placeholder": "Título de la publicación"}),
             "descripcion": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Escribí tu noticia o anuncio..."}),
             "imagen": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "iglesiaAsociada": forms.Select(attrs={"class": "form-control"}),
         }
 
 

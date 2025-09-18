@@ -33,6 +33,23 @@ from django.http import JsonResponse
 def inicio(request):    
     noticias = Noticia.objects.order_by("-fecha")  # timeline descendente
     form = NoticiaForm()
+     
+    for noticia in noticias:
+        noticia.puede_editar = False 
+
+        if request.user.is_authenticated:
+            # Creador
+            if noticia.creador == request.user:
+                noticia.puede_editar = True
+            # Admin principal de la iglesia
+            elif noticia.iglesiaAsociada and noticia.iglesiaAsociada.administrador == request.user:
+                noticia.puede_editar = True
+            # Usuarios con permisos de edición
+            else:
+                usuario_iglesias = getattr(request.user, "perfil_iglesias", None)
+                if usuario_iglesias and noticia.iglesiaAsociada:
+                    if usuario_iglesias.iglesias_admin.filter(pk=noticia.iglesiaAsociada.pk).exists():
+                        noticia.puede_editar = True
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -40,7 +57,9 @@ def inicio(request):
         if action == "crear":
             form = NoticiaForm(request.POST, request.FILES)
             if form.is_valid():
-                form.save()
+                noticia = form.save(commit=False)
+                noticia.creador = request.user
+                noticia.save()   
                 return redirect("inicio")
 
         elif action == "editar":

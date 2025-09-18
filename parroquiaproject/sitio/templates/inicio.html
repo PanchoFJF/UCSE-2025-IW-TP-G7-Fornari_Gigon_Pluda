@@ -51,23 +51,35 @@
   <!-- Título Noticias -->
   <h2>
     Noticias & Anuncios
-    <button class="btn btn-success mt-2 mt-sm-0 float-end" data-bs-toggle="collapse" data-bs-target="#formNoticia">
+    {% if user.is_authenticated %}
+    <button class="btn btn-success mt-2 mt-sm-0 float-end" data-bs-toggle="modal" data-bs-target="#formNoticia">
       <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-plus-lg" viewBox="0 1 16 16">
         <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
       </svg> Nuevo
     </button>
+    {% endif %}
   </h2>
 
   <!-- FORM NUEVA NOTICIA -->
-  <div id="formNoticia" class="collapse mb-4">
-    <div class="card card-body">
-      <h4>Nueva Publicación</h4>
-      <form method="post" enctype="multipart/form-data" id="formCrearNoticia">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="crear">
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Publicar</button>
-      </form>
+  <div class="modal fade" id="formNoticia" tabindex="-1" aria-labelledby="formNoticiaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="formNoticiaLabel">Nueva Publicación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <form method="post" enctype="multipart/form-data" id="formCrearNoticia">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="crear">
+            {{ form.as_p }}
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success" form="formCrearNoticia">Publicar</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -83,8 +95,10 @@
           <h3 class="mb-0">{{ noticia.titulo }}</h3>
           <small class="text-muted">{{ noticia.fecha|date:"d/m/Y H:i" }}</small>
           <p class="card-text mb-auto">Descripción: {{ noticia.descripcion }}</p>
+          <p class="card-text mb-auto">Iglesia: {{ noticia.iglesiaAsociada }}</p>
           
           <!-- Acciones -->
+          {% if noticia.puede_editar %}
           <div class="d-flex gap-2">
             <!-- Editar -->
             <button class="btn btn-sm btn-warning" style="color: white;"
@@ -108,6 +122,7 @@
               </button>
             </form>
           </div>
+          {% endif %}
         </div>
 
         <!-- Imagen noticia -->
