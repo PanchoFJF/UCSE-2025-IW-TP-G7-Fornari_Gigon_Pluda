@@ -29,5 +29,7 @@ urlpatterns = [
 
     # Elimnar usuarios no verificados
     path("delete_users/", delete_users_view, name="delete_users"),
-    
+
+    # Revisión de Post
+    path('check_post/', views.check_post_view, name="check_post"),
 ]

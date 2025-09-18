@@ -14,4 +14,17 @@
     </div>
 </form>
 </div>
+    <!-- Usuarios con permisos -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="mb-0">Usuarios con permisos de edición</h4>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                {% for iglesia in admin_iglesias %}
+                    <li class="list-group-item">{{ iglesia.nombre }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
 {% endblock %}

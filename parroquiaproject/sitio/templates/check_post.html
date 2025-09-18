@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}
+
+{% block content %}
+    <h2 
+        class="mb-3">Publicaciones pendientes
+    </h2>
+    <p>Aquí puedes visualizar las publicaciones que se deberían autorizar</p>
+
+    <!-- Post a revisar -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">Publicaciones pendientes</h4>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                {% for iglesia in permisos_iglesias %}
+                    <li class="list-group-item">{{ iglesia.nombre }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+<div class="container mt-4">
+    <h2 
+        class="mb-3">Mis publicaciones
+    </h2>
+    <p>Aquí puedes visualizar el estado de tus publicaciones (aprobado, rechazado o pendiente)</p>
+
+    <!-- Mis Post Estado -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="mb-0">Estado de mis publicaciones</h4>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                {% for iglesia in admin_iglesias %}
+                    <li class="list-group-item">{{ iglesia.nombre }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

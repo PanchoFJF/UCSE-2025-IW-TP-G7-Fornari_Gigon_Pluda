@@ -182,15 +182,16 @@ def dashboard(request):
         permisos_iglesias = []
         actividades = []
 
-    # El usuario puede "autorizar" si es administrador PRINCIPAL de al menos una Iglesia
-    can_authorize = False
-    if request.user.is_authenticated:
-        # Usa la FK related_name en Iglesia: administrador -> related_name="iglesias_admin"
-        can_authorize = request.user.iglesias_admin.exists()
+    # Iglesias donde el usuario es administrador principal (FK en Iglesia)
+    admin_iglesias = Iglesia.objects.filter(administrador=request.user)
+
+    # Solo se puede autorizar si es admin principal de al menos una iglesia
+    can_authorize = admin_iglesias.exists()
 
     context = {
         "iglesias": iglesias,
         "permisos_iglesias": permisos_iglesias,
+        "admin_iglesias": admin_iglesias,
         "actividades": actividades,
         "can_authorize": can_authorize,
     }
@@ -485,3 +486,7 @@ def desuscribirse_iglesia(request, iglesia_id):
     except Iglesia.DoesNotExist:
         messages.error(request, "La iglesia no existe.")
     return redirect('sitio:dashboard')
+
+@login_required
+def check_post_view(request):
+    return render(request, "check_post.html")
