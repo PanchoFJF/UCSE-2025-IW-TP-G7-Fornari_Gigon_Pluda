@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from sitio.models import Iglesia, Actividades, UsuarioIglesias
+from sitio.models import Iglesia, Actividades, Noticia, UsuarioIglesias
 
 @admin.register(Iglesia)
 class AdminNoticia(admin.ModelAdmin):
@@ -22,3 +22,7 @@ class AdminActividades(admin.ModelAdmin):
 class UsuariosIglesiasAdmin(admin.ModelAdmin):
     list_display = ("usuario",)
     filter_horizontal = ("iglesias_suscripto", "iglesias_admin")
+
+@admin.register(Noticia)
+class AdminActividades(admin.ModelAdmin):
+    list_display = ('id', 'titulo', 'descripcion')
