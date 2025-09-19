@@ -1,13 +1,9 @@
 {% autoescape off %}
-<p>Hola {{ user.username }},</p>
-<p>Tu iglesia <strong>{{ iglesia.nombre }}</strong> ha subido una nueva publicación en <b>Catholic Rafaela</b>:</p>
-
-<h3>{{ noticia.titulo }}</h3>
-<p style="text-align: justify;">{{ noticia.descripcion }}</p>
+<p>La iglesia <strong>{{ iglesia.nombre }}</strong> a la que estás suscripto ha subido una nueva publicación en <b>Catholic Rafaela</b></p>
 
 <div style="padding-left: 20px; margin: 20px 0;">
   <a href="{{ inicio_link }}" style="
-    background-color: gray;
+    background-color: #007bff;
     color: white;
     padding: 10px 20px;
     text-decoration: none;
