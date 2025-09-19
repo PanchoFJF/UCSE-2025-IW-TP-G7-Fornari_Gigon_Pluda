@@ -127,14 +127,23 @@
         </div>
 
         <!-- Imagen noticia -->
+        <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+          <div class="lightbox-content">
+            <img id="lightbox-img" src="" alt="Imagen ampliada">
+            <p id="lightbox-title"></p>
+          </div>
+        </div>
+
         <div class="col-auto d-none d-lg-block">
           {% if noticia.imagen %}
-            <a href="#imgModal{{ noticia.id }}">
-              <img src="{{ noticia.imagen.url }}" alt="{{ noticia.titulo }}"
-                  class="img-fluid mb-3"
-                  style="max-height: 300px; width: 200px; height: 100%; object-fit: cover; cursor:pointer;">
-            </a>
+            <!-- Miniatura clickeable que activa el lightbox global -->
+            <img src="{{ noticia.imagen.url }}" 
+                alt="{{ noticia.titulo }}"
+                class="img-fluid mb-3"
+                style="width: 200px; height: 300px; object-fit: cover; cursor: pointer;"
+                onclick="openLightbox('{{ noticia.imagen.url }}')">
           {% else %}
+            <!-- Placeholder si no hay imagen -->
             <svg aria-label="Placeholder: Thumbnail"
                 class="bd-placeholder-img"
                 width="200" height="300"
@@ -193,4 +202,23 @@
     {% endfor %}
   </div>
 </div>
+
+<script>
+function openLightbox(src, title) {
+  document.getElementById("lightbox-img").src = src;
+  document.getElementById("lightbox").style.display = "flex";
+}
+
+function closeLightbox(event) {
+  if (event.target.id === "lightbox") {
+    document.getElementById("lightbox").style.display = "none";
+  }
+}
+
+document.addEventListener("keydown", function(event) {
+  if (event.key === "Escape") {
+    document.getElementById("lightbox").style.display = "none";
+  }
+});
+</script>
 {% endblock %}

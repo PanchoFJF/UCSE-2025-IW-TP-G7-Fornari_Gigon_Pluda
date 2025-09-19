@@ -27,7 +27,7 @@ from django.template.defaultfilters import capfirst
 from .models import Actividades, UsuarioIglesias
 from .models import Noticia
 from django.core.mail import EmailMessage
-from .forms import NoticiaForm
+from .forms import NoticiaForm, NoticiaEditForm
 from django.http import JsonResponse
 
 def inicio(request):    
@@ -64,7 +64,7 @@ def inicio(request):
 
         elif action == "editar":
             noticia = get_object_or_404(Noticia, pk=request.POST.get("noticia_id"))
-            form = NoticiaForm(request.POST, request.FILES, instance=noticia)
+            form = NoticiaEditForm(request.POST, request.FILES, instance=noticia)
             if form.is_valid():
                 form.save()
                 return redirect("inicio")

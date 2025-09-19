@@ -34,6 +34,15 @@ class NoticiaForm(forms.ModelForm):
             "iglesiaAsociada": forms.Select(attrs={"class": "form-control"}),
         }
 
+class NoticiaEditForm(forms.ModelForm):
+    class Meta:
+        model = Noticia
+        fields = ["titulo", "descripcion", "imagen"]
+        widgets = {
+            "titulo": forms.TextInput(attrs={"class": "form-control"}),
+            "descripcion": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "imagen": forms.ClearableFileInput(attrs={"class": "form-control"}),
+        }
 
 class AutorizacionForm(forms.Form):
     email = forms.EmailField(
