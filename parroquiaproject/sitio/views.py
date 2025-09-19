@@ -398,7 +398,6 @@ def config_delete_send(request):
 
 
 @login_required
-@login_required
 def config_delete_confirm(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
