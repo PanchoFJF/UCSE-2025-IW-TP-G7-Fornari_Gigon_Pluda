@@ -138,3 +138,9 @@
 .lightbox:target {
   display: flex;
 }
+
+.descripcion {
+  white-space: normal; /* Permite saltos de línea */
+  word-wrap: break-word; /* Corta palabras largas */
+  overflow-wrap: anywhere; /* Maneja palabras demasiado largas */
+}
