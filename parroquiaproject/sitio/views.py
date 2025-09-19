@@ -26,9 +26,10 @@ from django.shortcuts import render
 from django.template.defaultfilters import capfirst
 from .models import Actividades, UsuarioIglesias
 from .models import Noticia
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from .forms import NoticiaForm, NoticiaEditForm
 from django.http import JsonResponse
+from django.conf import settings
 
 def inicio(request):    
     noticias = Noticia.objects.order_by("-fecha")  # timeline descendente
@@ -60,6 +61,10 @@ def inicio(request):
                 noticia = form.save(commit=False)
                 noticia.creador = request.user
                 noticia.save()   
+
+                # Notificar por correo a los suscriptores
+                nueva_publicacion_email(noticia, request)
+
                 return redirect("inicio")
 
         elif action == "editar":
@@ -501,3 +506,28 @@ def desuscribirse_iglesia(request, iglesia_id):
 @login_required
 def check_post_view(request):
     return render(request, "check_post.html")
+
+def nueva_publicacion_email(noticia, request):
+    iglesia = noticia.iglesiaAsociada
+    if not iglesia:
+        return
+
+    # usuarios suscriptos
+    suscriptores = iglesia.suscriptores.all().prefetch_related("usuario")
+    emails = [perfil.usuario.email for perfil in suscriptores if perfil.usuario.email]
+
+    if not emails:
+        return
+
+    contexto = {
+        "iglesia": iglesia,
+        "noticia": noticia,
+        "inicio_link": request.build_absolute_uri("/")  # link a inicio
+    }
+
+    subject = f"📢 Nueva publicación de {iglesia.nombre}"
+    html_content = render_to_string("publicacion_email.html", contexto)
+
+    msg = EmailMultiAlternatives(subject, "", settings.DEFAULT_FROM_EMAIL, emails)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
