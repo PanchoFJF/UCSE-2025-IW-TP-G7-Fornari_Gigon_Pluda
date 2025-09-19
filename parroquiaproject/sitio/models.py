@@ -17,13 +17,13 @@ class Iglesia(models.Model):
         return self.nombre
     
 class Noticia(models.Model):
-    titulo = models.CharField(max_length=40)
+    titulo = models.CharField(max_length=20)
     descripcion = models.TextField()
     imagen = models.ImageField(upload_to="inicio/", blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
     iglesiaAsociada = models.ForeignKey(Iglesia, blank=True, null=True, on_delete=models.CASCADE)
     creador = models.ForeignKey(User, on_delete=models.CASCADE)
-    estado = models.BooleanField(null=True, default=None)  # True = visible, False = archivada | estado=True/False/None
+    estado = models.BooleanField(null=True, default=None)  # True = visible, False = archivada
     fechaVencimiento = models.DateTimeField(null=True, default=fecha_vencimiento(30))
     fechaAceptacion = models.DateTimeField(null=True, default=fecha_vencimiento(7))
     def __str__(self):
