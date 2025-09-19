@@ -23,7 +23,7 @@ class Noticia(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
     iglesiaAsociada = models.ForeignKey(Iglesia, blank=True, null=True, on_delete=models.CASCADE)
     creador = models.ForeignKey(User, on_delete=models.CASCADE)
-    estado = models.BooleanField(default=False)  # True = visible, False = archivada
+    estado = models.BooleanField(null=True, default=None)  # True = visible, False = archivada
     fechaVencimiento = models.DateTimeField(null=True, default=fecha_vencimiento(30))
     fechaAceptacion = models.DateTimeField(null=True, default=fecha_vencimiento(7))
     def __str__(self):
