@@ -76,7 +76,6 @@ def inicio(request):
 
     return render(request, "inicio.html", {"noticias": noticias, "form": form})
 
-
 def iglesias(request):
     if request.method == "POST":
         action = request.POST.get("action")
@@ -115,7 +114,6 @@ def iglesias(request):
         "iglesias": iglesias,
         "form": form
     })
-
 
 def calendario(request):
     return render(request, "calendario.html", {

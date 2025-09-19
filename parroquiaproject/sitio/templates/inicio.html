@@ -76,8 +76,8 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-success" form="formCrearNoticia">Publicar</button>
+          <button type="submit" class="btn btn-success w-100" form="formCrearNoticia">Publicar</button>
+          <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
         </div>
       </div>
     </div>
@@ -164,7 +164,7 @@
       </div>
 
       <!-- MODAL EDITAR (dentro del loop para cada noticia) -->
-      <div class="modal fade" id="editarNoticia{{ noticia.id }}" tabindex="-1" aria-hidden="true" style="padding-top: 80px;">
+      <div class="modal fade" id="editarNoticia{{ noticia.id }}" tabindex="-1" aria-hidden="true" style="padding-top: 50px;">
         <div class="modal-dialog">
           <div class="modal-content">
             <form method="post" enctype="multipart/form-data">
@@ -176,7 +176,7 @@
                 <h5 class="modal-title">Editar Publicación</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
-
+              
               <div class="modal-body" style="background-color: #E8E3D0;">
                 <div class="mb-3">
                   <label class="form-label">Título</label>
@@ -194,8 +194,8 @@
               </div>
 
               <div class="modal-footer" style="background-color: #E8E3D0;">
-                <button type="submit" class="btn btn-success">Guardar cambios</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-success w-100">Guardar cambios</button>
+              <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
               </div>
             </form>
           </div>
