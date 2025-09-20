@@ -60,10 +60,8 @@ def inicio(request):
             if form.is_valid():
                 noticia = form.save(commit=False)
                 noticia.creador = request.user
+                noticia.estado = "pendiente"
                 noticia.save()   
-
-                # Notificar por correo a los suscriptores
-                nueva_publicacion_email(noticia, request)
 
                 messages.info(request, "Tu publicación ha sido enviada a revisión.")
                 return redirect("inicio")
@@ -519,6 +517,57 @@ def check_post_view(request):
             estado="pendiente"
         ).order_by("-fecha")
 
+    # 👇 cambio: procesamos aprobar/rechazar
+    if request.method == "POST" and es_moderador:
+        action = request.POST.get("action")
+        noticia = get_object_or_404(Noticia, pk=request.POST.get("noticia_id"))
+
+        # aprobar
+        if action == "aprobar":
+            noticia.estado = "aprobada"
+            noticia.motivo_rechazo = ""
+            noticia.save()
+
+            # correo al creador
+            contexto = {"noticia": noticia}
+            html_content = render_to_string("publicacion_aprobada_email.html", contexto)
+            email = EmailMessage(
+                subject=f"✅ Tu publicación '{noticia.titulo}' fue aprobada",
+                body=html_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[noticia.creador.email],
+            )
+            email.content_subtype = "html"  # 👈 cambio: el body es HTML
+            email.send()
+
+            # Notificar por correo a los suscriptores
+            nueva_publicacion_email(noticia, request)
+
+            messages.success(request, "Se ha aprobado la noticia exitosamente.")
+            return redirect("sitio:check_post")
+
+        # rechazar
+        elif action == "rechazar":
+            motivo = request.POST.get("motivo", "").strip()
+            noticia.estado = "rechazada"
+            noticia.motivo_rechazo = motivo
+            noticia.save()
+
+            # correo al creador con motivo
+            contexto = {"noticia": noticia, "motivo": motivo}
+            html_content = render_to_string("publicacion_rechazada_email.html", contexto)
+            email = EmailMessage(
+                subject=f"❌ Tu publicación '{noticia.titulo}' fue rechazada",
+                body=html_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[noticia.creador.email],
+            )
+            email.content_subtype = "html"
+            email.send()
+
+            messages.success(request, "Se ha rechazado la noticia exitosamente.")
+            return redirect("sitio:check_post")
+
     return render(request, "check_post.html", {
         "mis_publicaciones": mis_publicaciones,
         "pendientes": pendientes,
@@ -549,9 +598,3 @@ def nueva_publicacion_email(noticia, request):
     msg = EmailMultiAlternatives(subject, "", settings.DEFAULT_FROM_EMAIL, emails)
     msg.attach_alternative(html_content, "text/html")
     msg.send()
-
-def publicacion_rechazada_email(request):
-        html_content = render_to_string("publicacion_rechazada_email.html")
-
-def publicacion_aprobada_email(request):
-        html_content = render_to_string("publicacion_aprobada_email.html") 

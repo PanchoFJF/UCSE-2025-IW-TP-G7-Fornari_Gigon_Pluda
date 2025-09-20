@@ -163,11 +163,11 @@ AUTHENTICATION_BACKENDS = [
 import os
 
 # detectar entorno (por ejemplo por variable de entorno)
-# ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")  # "development" o "production"
+#ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")  # "development" o "production"
 
-# if ENVIRONMENT == "development":
-    # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-# else:
+#if ENVIRONMENT == "development":
+    #EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+#else:
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
