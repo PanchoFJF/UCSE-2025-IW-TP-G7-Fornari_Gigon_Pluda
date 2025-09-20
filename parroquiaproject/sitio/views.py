@@ -549,3 +549,9 @@ def nueva_publicacion_email(noticia, request):
     msg = EmailMultiAlternatives(subject, "", settings.DEFAULT_FROM_EMAIL, emails)
     msg.attach_alternative(html_content, "text/html")
     msg.send()
+
+def publicacion_rechazada_email(request):
+        html_content = render_to_string("publicacion_rechazada_email.html")
+
+def publicacion_aprobada_email(request):
+        html_content = render_to_string("publicacion_aprobada_email.html") 
