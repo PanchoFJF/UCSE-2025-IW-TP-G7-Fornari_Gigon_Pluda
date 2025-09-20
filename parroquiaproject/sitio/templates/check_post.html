@@ -1,43 +1,177 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block title %}Gestión de publicaciones{% endblock %}
+
 {% block head %}
 <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<style>
+  .post-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.1);
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+  .img-fija {
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  .post-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-    <h2 
-        class="mb-3">Gestión de Publicaciones
-    </h2>
-    <p>Aquí puedes visualizar las publicaciones que se deberían autorizar</p>
+<div class="container mt-4">
 
-    <!-- Post a revisar -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-warning text-dark">
-            <h4 class="mb-0">Publicaciones pendientes</h4>
-        </div>
-        <div class="card-body">
-            <ul class="list-group list-group-flush">
-                {% for iglesia in permisos_iglesias %}
-                    <li class="list-group-item">{{ iglesia.nombre }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-    
-    <p>Aquí puedes visualizar el estado de tus publicaciones (aprobado, rechazado o pendiente)</p>
+  <h2 class="mb-4">Gestión de publicaciones</h2>
 
-    <!-- Mis Post Estado -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Estado de mis publicaciones</h4>
-        </div>
-        <div class="card-body">
-            <ul class="list-group list-group-flush">
-                {% for iglesia in admin_iglesias %}
-                    <li class="list-group-item">{{ iglesia.nombre }}</li>
-                {% endfor %}
-            </ul>
-        </div>  
+  <!-- Publicaciones pendientes (solo moderadores) -->
+  {% if es_moderador %}
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-warning">
+      <h4 class="mb-0">Publicaciones pendientes de revisión</h4>
     </div>
+    <div class="card-body">
+      {% if pendientes %}
+        {% for post in pendientes %}
+        <div class="card post-card mb-3">
+          <div class="row g-0">
+
+            <!-- Texto + Imagen -->
+            <div class="col-md-7 d-flex p-3" style="background-color: #FFF6DA;">
+              <div class="flex-grow-1 pe-3 d-flex flex-column align-items-start">
+                <h3 class="mb-2">{{ post.titulo }}</h3>
+                <p class="mb-1"><strong>Iglesia:</strong> {{ post.iglesiaAsociada }}</p>
+                <p class="mb-1"><strong>Autor:</strong> {{ post.creador.email }} ({{ post.creador.username }})</p>
+                <div class="mb-2" style="max-height: 200px; overflow-y: auto;">
+                  <p class="mb-1 text-break" style="text-align: justify">{{ post.descripcion }}</p>
+                </div>
+              </div>
+              <div class="flex-shrink-0 ms-2">
+                {% if post.imagen %}
+                  <img src="{{ post.imagen.url }}" alt="{{ post.titulo }}" class="img-fija">
+                {% else %}
+                  <svg class="bd-placeholder-img img-fija" xmlns="http://www.w3.org/2000/svg" role="img">
+                    <rect width="100%" height="100%" fill="#55595c"></rect>
+                    <text x="30%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
+                  </svg>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="col-md-5 post-body p-3">
+              <div>
+                <!-- Aprobar -->
+                <form method="post" class="mb-2">
+                  {% csrf_token %}
+                  <input type="hidden" name="noticia_id" value="{{ post.id }}">
+                  <button type="submit" name="action" value="aprobar" class="btn btn-success w-100">Aprobar</button>
+                </form>
+
+                <!-- Rechazar -->
+                <form method="post" class="mb-2">
+                  {% csrf_token %}
+                  <input type="hidden" name="noticia_id" value="{{ post.id }}">
+                  <button type="submit" name="action" value="rechazar" class="btn btn-danger w-100 mb-2 ">Rechazar</button>
+                  <textarea name="motivo" class="form-control" style="height: 175px;" placeholder="Motivo del rechazo" required></textarea>
+                </form>
+              </div>
+
+              <!-- Fecha -->
+              <div class="d-flex justify-content-end mt-auto">
+                <small class="text-muted">Enviado: {{ post.fecha|date:"d/m/Y H:i" }}</small>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No hay publicaciones pendientes.</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Mis publicaciones -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Estado de mis publicaciones</h4>
+    </div>
+    <div class="card-body">
+      {% for post in mis_publicaciones %}
+      <div class="card post-card mb-3">
+        <div class="row g-0">
+
+          <!-- Texto + Imagen -->
+          <div class="col-md-8 d-flex p-3" style="background-color: #E8E3D0;">
+            <div class="flex-grow-1 pe-3 d-flex flex-column align-items-start">
+              <h3 class="mb-2">{{ post.titulo }}</h3>
+              <p class="mb-2"><strong>Iglesia:</strong> {{ post.iglesiaAsociada }}</p>
+              <div class="mb-2" style="max-height: 200px; overflow-y: auto;">
+                <p class="mb-1 text-break" style="text-align: justify">{{ post.descripcion }}</p>
+              </div>
+            </div>
+            <div class="flex-shrink-0 ms-2">
+              {% if post.imagen %}
+                <img src="{{ post.imagen.url }}" alt="{{ post.titulo }}" class="img-fija">
+              {% else %}
+                <svg class="bd-placeholder-img img-fija" xmlns="http://www.w3.org/2000/svg" role="img">
+                  <rect width="100%" height="100%" fill="#55595c"></rect>
+                  <text x="30%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
+                </svg>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Estado -->
+          <div class="col-md-4 post-body p-3 text-center">
+            <div>
+              <p class="mb-2"><strong>Esta publicación está</strong></p>
+              {% if post.estado == "pendiente" %}
+                <span class="badge bg-warning text-dark fs-6 mb-5"> Pendiente
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-stopwatch-fill" viewBox="0 0 16 16">
+                    <path d="M6.5 0a.5.5 0 0 0 0 1H7v1.07A7.001 7.001 0 0 0 8 16a7 7 0 0 0 5.29-11.584l.013-.012.354-.354.353.354a.5.5 0 1 0 .707-.707l-1.414-1.415a.5.5 0 1 0-.707.707l.354.354-.354.354-.012.012A6.97 6.97 0 0 0 9 2.071V1h.5a.5.5 0 0 0 0-1zm2 5.6V9a.5.5 0 0 1-.5.5H4.5a.5.5 0 0 1 0-1h3V5.6a.5.5 0 1 1 1 0"/>
+                    </svg></span>
+              {% elif post.estado == "aprobado" %}
+                <span class="badge bg-success fs-6 mb-5"> Aprobada 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
+                    <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm10.03 4.97a.75.75 0 0 1 .011 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.75.75 0 0 1 1.08-.022z"/>
+                    </svg></span>
+              {% elif post.estado == "rechazado" %}
+                <span class="badge bg-danger fs-6"> Rechazada
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+                    </svg></span>
+                <div class="mt-2 mb-4"><strong>Motivo:</strong> {{ post.motivo_rechazo }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Aviso de 7 días -->
+            <div class="mt-5 text-start" style="font-size: 0.9em;">
+            <small class="text-muted d-block">Si no se aprueba o rechaza en un plazo de 7 días se deberá publicar de nuevo.</small>
+            </div>
+
+            <!-- Fecha alineada a la derecha -->
+            <div class="mt-0 text-end" style="font-size: 0.9em;">
+            <small class="text-muted">Última actualización: {{ post.fecha|date:"d/m/Y H:i" }}</small>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      {% empty %}
+        <p class="text-muted">Todavía no has creado publicaciones.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
 {% endblock %}

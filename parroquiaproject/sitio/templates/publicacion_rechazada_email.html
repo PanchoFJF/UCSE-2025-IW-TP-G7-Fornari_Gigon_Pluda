@@ -1,0 +1,5 @@
+{% autoescape off %}
+<p>Hola {{ user.username }},</p>
+<p>Tu publicación <b>{{ noticia.titulo }}</b> ha sido <span style="color:red;">rechazada</span>.</p>
+<p>Motivo: {{ motivo }}</p>
+{% endautoescape %}

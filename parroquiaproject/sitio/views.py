@@ -32,25 +32,25 @@ from django.http import JsonResponse
 from django.conf import settings
 
 def inicio(request):    
-    noticias = Noticia.objects.order_by("-fecha")  # timeline descendente
+    noticias = Noticia.objects.filter(estado="aprobada").order_by("-fecha")  # timeline descendente
     form = NoticiaForm()
      
-    for noticia in noticias:
-        noticia.puede_editar = False 
+    if request.user.is_authenticated:
+        perfil = getattr(request.user, "perfil_iglesias", None)
 
-        if request.user.is_authenticated:
-            # Creador
+        for noticia in noticias:
+            noticia.puede_editar = False
+
+            # creador
             if noticia.creador == request.user:
                 noticia.puede_editar = True
-            # Admin principal de la iglesia
+            # admin principal de la iglesia
             elif noticia.iglesiaAsociada and noticia.iglesiaAsociada.administrador == request.user:
                 noticia.puede_editar = True
-            # Usuarios con permisos de edición
-            else:
-                usuario_iglesias = getattr(request.user, "perfil_iglesias", None)
-                if usuario_iglesias and noticia.iglesiaAsociada:
-                    if usuario_iglesias.iglesias_admin.filter(pk=noticia.iglesiaAsociada.pk).exists():
-                        noticia.puede_editar = True
+            # admin delegado desde UsuarioIglesias
+            elif perfil and noticia.iglesiaAsociada:
+                if perfil.iglesias_admin.filter(pk=noticia.iglesiaAsociada.pk).exists():
+                    noticia.puede_editar = True
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -65,6 +65,7 @@ def inicio(request):
                 # Notificar por correo a los suscriptores
                 nueva_publicacion_email(noticia, request)
 
+                messages.info(request, "Tu publicación ha sido enviada a revisión.")
                 return redirect("inicio")
 
         elif action == "editar":
@@ -504,7 +505,25 @@ def desuscribirse_iglesia(request, iglesia_id):
 
 @login_required
 def check_post_view(request):
-    return render(request, "check_post.html")
+    perfil = getattr(request.user, "perfil_iglesias", None)
+
+    mis_publicaciones = Noticia.objects.filter(creador=request.user)
+
+    pendientes = []
+    es_moderador = False
+
+    if perfil and perfil.iglesias_admin.exists():
+        es_moderador = True
+        pendientes = Noticia.objects.filter(
+            iglesiaAsociada__in=perfil.iglesias_admin.all(),
+            estado="pendiente"
+        ).order_by("-fecha")
+
+    return render(request, "check_post.html", {
+        "mis_publicaciones": mis_publicaciones,
+        "pendientes": pendientes,
+        "es_moderador": es_moderador,
+    })
 
 def nueva_publicacion_email(noticia, request):
     iglesia = noticia.iglesiaAsociada
