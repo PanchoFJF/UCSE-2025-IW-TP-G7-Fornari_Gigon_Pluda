@@ -584,7 +584,7 @@ def check_post_view(request):
                     noticia.ultima_edicion_aprobada = timezone.now() 
 
                     # correo al editor
-                    contexto = {"noticia": noticia}
+                    contexto = {"noticia": noticia, "user": noticia.editor,}
                     html_content = render_to_string("publicacion_edicion_aprobada_email.html", contexto)
                     email = EmailMessage(
                         subject=f"✅ Tu edición de '{noticia.titulo}' fue aprobada",
@@ -597,7 +597,7 @@ def check_post_view(request):
                     noticia.motivo_rechazo = ""
                 
                     # correo al creador
-                    contexto = {"noticia": noticia}
+                    contexto = {"noticia": noticia, "user": noticia.creador,}
                     html_content = render_to_string("publicacion_aprobada_email.html", contexto)
                     email = EmailMessage(
                         subject=f"✅ Tu publicación '{noticia.titulo}' fue aprobada",
@@ -631,7 +631,7 @@ def check_post_view(request):
                     noticia.fecha_revision_edicion = timezone.now()
 
                     # correo al editor
-                    contexto = {"noticia": noticia, "motivo": motivo}
+                    contexto = {"noticia": noticia, "motivo": motivo, "user": noticia.editor,}
                     html_content = render_to_string("publicacion_edicion_rechazada_email.html", contexto)
                     email = EmailMessage(
                         subject=f"❌ Tu edición de '{noticia.titulo}' fue rechazada",
@@ -644,7 +644,7 @@ def check_post_view(request):
                     noticia.motivo_rechazo = motivo
 
                     # correo al creador
-                    contexto = {"noticia": noticia, "motivo": motivo}
+                    contexto = {"noticia": noticia, "motivo": motivo, "user": noticia.creador,}
                     html_content = render_to_string("publicacion_rechazada_email.html", contexto)
                     email = EmailMessage(
                         subject=f"❌ Tu publicación '{noticia.titulo}' fue rechazada",
@@ -671,28 +671,28 @@ def nueva_publicacion_email(noticia, request):
     if not iglesia:
         return
 
-    # usuarios suscriptos
     suscriptores = iglesia.suscriptores.all().prefetch_related("usuario")
-    emails = [perfil.usuario.email for perfil in suscriptores if perfil.usuario.email]
 
-    if not emails:
-        return
+    for perfil in suscriptores:
+        usuario = perfil.usuario
+        if not usuario.email:
+            continue
 
-    contexto = {
-        "iglesia": iglesia,
-        "noticia": noticia,
-        "inicio_link": request.build_absolute_uri("/")  # link a inicio
-    }
+        contexto = {
+            "iglesia": iglesia,
+            "noticia": noticia,
+            "user": usuario,
+            "inicio_link": request.build_absolute_uri("/")
+        }
 
-    subject = f"📢 Nueva publicación de {iglesia.nombre}"
-    html_content = render_to_string("publicacion_email.html", contexto)
+        subject = f"📢 Nueva publicación de {iglesia.nombre}"
+        html_content = render_to_string("publicacion_email.html", contexto)
 
-    msg = EmailMultiAlternatives(
-        subject,
-        "",
-        settings.DEFAULT_FROM_EMAIL,
-        [settings.DEFAULT_FROM_EMAIL],  # TO (solo para no dejarlo vacío)
-        bcc=emails  # todos los suscriptores ocultos
-    )
-    msg.attach_alternative(html_content, "text/html")
-    msg.send()
+        msg = EmailMultiAlternatives(
+            subject,
+            "",
+            settings.DEFAULT_FROM_EMAIL,
+            [usuario.email],
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
