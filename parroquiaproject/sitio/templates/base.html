@@ -25,6 +25,26 @@
         font-style: italic;
         color:#525049
     }
+    .noticia-container {
+        width: 90%;       /* ancho por defecto en desktop */
+        margin: 0 auto;   /* centrado */
+        padding: 20px;    /* bordes internos */
+        }
+
+    @media (max-width: 768px) {
+        .noticia-container {
+            width: 100%;    /* ocupa todo el ancho en móviles */
+            padding: 1px;   /* menos padding para móviles */
+        }
+    }
+        /* Aumentar tamaño de los links SOLO en móvil */
+    @media (max-width: 992px) { /* breakpoint de Bootstrap para navbar colapsada */
+    .navbar-nav .nav-link {
+        font-size: 1.4rem;  /* prueba con 1.3rem o más si lo querés bien grande */
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+    }
 </style>
     {% block head %}{% endblock %}
 </head>
@@ -37,7 +57,7 @@
         <a class="navbar-brand fw-bold" href="/">CatholicRafaela.com</a>
 
         <!-- Botón colapsable (mobile) -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
+        <button class="navbar-toggler fs-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
                 aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -88,7 +108,7 @@
 </nav>
 
     <!-- Contenido principal -->
-    <main class="container-sm my-4">
+    <main class="noticia-container">
         {% block content %}{% endblock %}
     </main>
 
