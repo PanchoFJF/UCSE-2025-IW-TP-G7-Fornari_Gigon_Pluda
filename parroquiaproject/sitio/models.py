@@ -33,6 +33,25 @@ class Noticia(models.Model):
     motivo_rechazo = models.TextField(blank=True, null=True)  
     fechaVencimiento = models.DateTimeField(null=True, default=fecha_vencimiento(30))
     fechaAceptacion = models.DateTimeField(null=True, default=fecha_vencimiento(7))
+
+    # Campos auxiliares para ediciones
+    titulo_editado = models.CharField(max_length=20, blank=True, null=True)
+    descripcion_editada = models.TextField(blank=True, null=True)
+    imagen_editada = models.ImageField(upload_to="inicio/edits/", blank=True, null=True)
+    en_revision_edicion = models.BooleanField(default=False)  # True si hay una edición pendiente
+
+    estado_edicion = models.CharField(max_length=20, choices=ESTADO_CHOICES, blank=True, null=True)
+    motivo_rechazo_edicion = models.TextField(blank=True, null=True)
+    fecha_revision_edicion = models.DateTimeField(blank=True, null=True)
+
+    editor = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="noticias_editadas"
+    )
+    
     def __str__(self):
         return self.titulo
  

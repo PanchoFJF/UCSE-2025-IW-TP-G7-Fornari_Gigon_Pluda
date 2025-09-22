@@ -12,12 +12,6 @@
     margin-bottom: 1rem;
     overflow: hidden;
   }
-  .img-fija {
-    width: 200px;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
   .post-body {
     display: flex;
     flex-direction: column;
@@ -43,21 +37,56 @@
         <div class="card post-card mb-3">
           <div class="row g-0">
 
+            <!-- Imagen noticia -->
+            <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+              <div class="lightbox-content">
+                <img id="lightbox-img" src="" alt="Imagen ampliada">
+                <p id="lightbox-title"></p>
+              </div>
+            </div>
+
             <!-- Texto + Imagen -->
             <div class="col-md-7 d-flex p-3" style="background-color: #FFF6DA;">
               <div class="flex-grow-1 pe-3 d-flex flex-column align-items-start">
-                <h3 class="mb-2">{{ post.titulo }}</h3>
+                <h3 class="mb-2">
+                  {% if post.titulo_editado %}
+                    {{ post.titulo_editado }}
+                  {% else %}
+                    {{ post.titulo }}
+                  {% endif %}
+                </h3>
                 <p class="mb-1"><strong>Iglesia:</strong> {{ post.iglesiaAsociada }}</p>
                 <p class="mb-1"><strong>Autor:</strong> {{ post.creador.email }} ({{ post.creador.username }})</p>
                 <div class="mb-2" style="max-height: 200px; overflow-y: auto;">
-                  <p class="mb-1 text-break" style="text-align: justify">{{ post.descripcion }}</p>
+                  <p class="mb-1 text-break" style="text-align: justify">
+                    {% if post.descripcion_editada %}
+                      {{ post.descripcion_editada }}
+                    {% else %}
+                      {{ post.descripcion }}
+                    {% endif %}
+                  </p>
                 </div>
               </div>
               <div class="flex-shrink-0 ms-2">
-                {% if post.imagen %}
-                  <img src="{{ post.imagen.url }}" alt="{{ post.titulo }}" class="img-fija">
+                {% if post.imagen_editada %}
+                  <img src="{{ post.imagen_editada.url }}" 
+                  alt="{{ post.titulo }}"
+                  class="img-fluid mb-3"
+                  style="width: 200px; height: 300px; object-fit: cover; cursor: pointer;"
+                  onclick="openLightbox('{{ post.imagen_editada.url }}')">
+                {% elif post.imagen %}
+                  <img src="{{ post.imagen.url }}" 
+                  alt="{{ post.titulo }}"
+                  class="img-fluid mb-3"
+                  style="width: 200px; height: 300px; object-fit: cover; cursor: pointer;"
+                  onclick="openLightbox('{{ post.imagen.url }}')">
                 {% else %}
-                  <svg class="bd-placeholder-img img-fija" xmlns="http://www.w3.org/2000/svg" role="img">
+                  <svg aria-label="Placeholder: Thumbnail"
+                      class="bd-placeholder-img"
+                      width="200" height="300"
+                      preserveAspectRatio="xMidYMid slice"
+                      role="img" xmlns="http://www.w3.org/2000/svg">
+                    <title>Placeholder</title>
                     <rect width="100%" height="100%" fill="#55595c"></rect>
                     <text x="30%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
                   </svg>
@@ -85,7 +114,14 @@
               </div>
 
               <!-- Fecha -->
-              <div class="d-flex justify-content-end mt-auto">
+              <div class="d-flex justify-content-between mt-auto">
+                {% if post.en_revision_edicion %}
+                  <span class="badge bg-warning text-dark">Edición pendiente
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stopwatch-fill" viewBox="0 0 16 16">
+                    <path d="M6.5 0a.5.5 0 0 0 0 1H7v1.07A7.001 7.001 0 0 0 8 16a7 7 0 0 0 5.29-11.584l.013-.012.354-.354.353.354a.5.5 0 1 0 .707-.707l-1.414-1.415a.5.5 0 1 0-.707.707l.354.354-.354.354-.012.012A6.97 6.97 0 0 0 9 2.071V1h.5a.5.5 0 0 0 0-1zm2 5.6V9a.5.5 0 0 1-.5.5H4.5a.5.5 0 0 1 0-1h3V5.6a.5.5 0 1 1 1 0"/>
+                    </svg></span>
+                  </span>
+                {% endif %}
                 <small class="text-muted">Enviado: {{ post.fecha|date:"d/m/Y H:i" }}</small>
               </div>
             </div>
@@ -110,23 +146,58 @@
       <div class="card post-card mb-3">
         <div class="row g-0">
 
+          <!-- Imagen noticia -->
+          <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+            <div class="lightbox-content">
+              <img id="lightbox-img" src="" alt="Imagen ampliada">
+              <p id="lightbox-title"></p>
+            </div>
+          </div>
+
           <!-- Texto + Imagen -->
           <div class="col-md-8 d-flex p-3" style="background-color: #E8E3D0;">
             <div class="flex-grow-1 pe-3 d-flex flex-column align-items-start">
-              <h3 class="mb-2">{{ post.titulo }}</h3>
+              <h3 class="mb-2">
+                  {% if post.titulo_editado %}
+                    {{ post.titulo_editado }}
+                  {% else %}
+                    {{ post.titulo }}
+                  {% endif %}
+              </h3>
               <p class="mb-2"><strong>Iglesia:</strong> {{ post.iglesiaAsociada }}</p>
               <div class="mb-2" style="max-height: 200px; overflow-y: auto;">
-                <p class="mb-1 text-break" style="text-align: justify">{{ post.descripcion }}</p>
+                <p class="mb-1 text-break" style="text-align: justify">
+                  {% if post.descripcion_editada %}
+                    {{ post.descripcion_editada }}
+                  {% else %}
+                    {{ post.descripcion }}
+                  {% endif %}
+                </p>
               </div>
             </div>
             <div class="flex-shrink-0 ms-2">
-              {% if post.imagen %}
-                <img src="{{ post.imagen.url }}" alt="{{ post.titulo }}" class="img-fija">
-              {% else %}
-                <svg class="bd-placeholder-img img-fija" xmlns="http://www.w3.org/2000/svg" role="img">
-                  <rect width="100%" height="100%" fill="#55595c"></rect>
-                  <text x="30%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
-                </svg>
+                {% if post.imagen_editada %}
+                  <img src="{{ post.imagen_editada.url }}" 
+                  alt="{{ post.titulo }}"
+                  class="img-fluid mb-3"
+                  style="width: 200px; height: 300px; object-fit: cover; cursor: pointer;"
+                  onclick="openLightbox('{{ post.imagen_editada.url }}')">
+                {% elif post.imagen %}
+                    <img src="{{ post.imagen.url }}" 
+                    alt="{{ post.titulo }}"
+                    class="img-fluid mb-3"
+                    style="width: 200px; height: 300px; object-fit: cover; cursor: pointer;"
+                    onclick="openLightbox('{{ post.imagen.url }}')">
+                {% else %}
+                  <svg aria-label="Placeholder: Thumbnail"
+                      class="bd-placeholder-img"
+                      width="200" height="300"
+                      preserveAspectRatio="xMidYMid slice"
+                      role="img" xmlns="http://www.w3.org/2000/svg">
+                    <title>Placeholder</title>
+                    <rect width="100%" height="100%" fill="#55595c"></rect>
+                    <text x="30%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
+                  </svg>
               {% endif %}
             </div>
           </div>
@@ -140,22 +211,53 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-stopwatch-fill" viewBox="0 0 16 16">
                     <path d="M6.5 0a.5.5 0 0 0 0 1H7v1.07A7.001 7.001 0 0 0 8 16a7 7 0 0 0 5.29-11.584l.013-.012.354-.354.353.354a.5.5 0 1 0 .707-.707l-1.414-1.415a.5.5 0 1 0-.707.707l.354.354-.354.354-.012.012A6.97 6.97 0 0 0 9 2.071V1h.5a.5.5 0 0 0 0-1zm2 5.6V9a.5.5 0 0 1-.5.5H4.5a.5.5 0 0 1 0-1h3V5.6a.5.5 0 1 1 1 0"/>
                     </svg></span>
-              {% elif post.estado == "aprobada" %}
+              {% elif post.estado == "aprobado" %}
                 <span class="badge bg-success fs-6 mb-5"> Aprobada 
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
                     <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm10.03 4.97a.75.75 0 0 1 .011 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.75.75 0 0 1 1.08-.022z"/>
                     </svg></span>
-              {% elif post.estado == "rechazada" %}
+              {% elif post.estado == "rechazado" %}
                 <span class="badge bg-danger fs-6"> Rechazada
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
                     <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
                     </svg></span>
-                <div class="mt-2 mb-4"><strong>Motivo:</strong> {{ post.motivo_rechazo }}</div>
+                <div class="mt-2 mb-4">
+                  <small>
+                    <strong>Motivo:</strong> {{ post.motivo_rechazo }}
+                  </small>
+                </div>
               {% endif %}
             </div>
 
+            <div>
+              {% if post.en_revision_edicion or post.estado_edicion %}
+              <p class="mb-2"><strong>La edición está</strong></p>
+              {% if post.en_revision_edicion %}
+                <span class="badge bg-warning text-dark fs-6 mb-5"> Pendiente
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-stopwatch-fill" viewBox="0 0 16 16">
+                    <path d="M6.5 0a.5.5 0 0 0 0 1H7v1.07A7.001 7.001 0 0 0 8 16a7 7 0 0 0 5.29-11.584l.013-.012.354-.354.353.354a.5.5 0 1 0 .707-.707l-1.414-1.415a.5.5 0 1 0-.707.707l.354.354-.354.354-.012.012A6.97 6.97 0 0 0 9 2.071V1h.5a.5.5 0 0 0 0-1zm2 5.6V9a.5.5 0 0 1-.5.5H4.5a.5.5 0 0 1 0-1h3V5.6a.5.5 0 1 1 1 0"/>
+                    </svg></span>
+              {% elif post.estado_edicion == "aprobado" %}
+                <span class="badge bg-success fs-6 mb-5"> Aprobada 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
+                    <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm10.03 4.97a.75.75 0 0 1 .011 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.75.75 0 0 1 1.08-.022z"/>
+                    </svg></span>
+              {% elif post.estado_edicion == "rechazado" %}
+                <span class="badge bg-danger fs-6"> Rechazada
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+                    </svg></span>
+                <div class="mt-2 mb-4">
+                  <small>
+                      <strong>Motivo:</strong> {{ post.motivo_rechazo_edicion }}
+                  </small>
+                </div>
+              {% endif %}
+            {% endif %}
+            </div>
+
             <!-- Aviso de 7 días -->
-            <div class="mt-5 text-start" style="font-size: 0.9em;">
+            <div class="mt-3 text-start" style="font-size: 0.9em;">
             <small class="text-muted d-block">Si no se aprueba o rechaza en un plazo de 7 días se deberá publicar de nuevo.</small>
             </div>
 
@@ -171,7 +273,25 @@
         <p class="text-muted">Todavía no has creado publicaciones.</p>
       {% endfor %}
     </div>
-  </div>
-
+  </div>  
 </div>
+
+<script>
+function openLightbox(src, title) {
+  document.getElementById("lightbox-img").src = src;
+  document.getElementById("lightbox").style.display = "flex";
+}
+
+function closeLightbox(event) {
+  if (event.target.id === "lightbox") {
+    document.getElementById("lightbox").style.display = "none";
+  }
+}
+
+document.addEventListener("keydown", function(event) {
+  if (event.key === "Escape") {
+    document.getElementById("lightbox").style.display = "none";
+  }
+});
+</script>
 {% endblock %}

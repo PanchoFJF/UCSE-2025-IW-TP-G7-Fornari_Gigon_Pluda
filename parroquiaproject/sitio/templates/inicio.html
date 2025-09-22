@@ -11,12 +11,6 @@
     box-shadow: 0 2px 5px rgba(0,0,0,.1);
     margin-bottom: 1rem;
   }
-  .img-fija {
-    width: 400px;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
 </style>
 {% endblock %}
 
@@ -92,7 +86,9 @@
         
         <!-- Contenido noticia -->
         <div class="col p-4 d-flex flex-column position-static" style="background-color: #E8E3D0;">
-          <h3 class="mb-3">{{ noticia.titulo }}</h3>
+          <h3 class="mb-3">
+            {{ noticia.titulo }}
+          </h3>
             <p class="mb-2"><strong>Iglesia:</strong> {{ noticia.iglesiaAsociada }}</p>
             <div class="mb-3" style="max-height: 135px; overflow-y: auto; overflow-x: hidden;">
               <p class="mb-1 text-break" style="text-align: justify">
@@ -119,7 +115,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="action" value="eliminar">
                 <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
-                <button type="submit" class="btn btn-sm btn-danger" title="Eliminar"
+                <button type="submit" class="btn btn-sm btn-danger me-4" title="Eliminar"
                         onclick="return confirm('¿Seguro que deseas eliminar esta publicación?')">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 17 17">
                     <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
@@ -127,6 +123,12 @@
                 </button>
               </form>
             </div>
+            {% endif %}
+            {% if noticia.en_revision_edicion %}
+              <span class="badge bg-warning text-dark">Edición pendiente
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stopwatch-fill" viewBox="0 0 16 16">
+                <path d="M6.5 0a.5.5 0 0 0 0 1H7v1.07A7.001 7.001 0 0 0 8 16a7 7 0 0 0 5.29-11.584l.013-.012.354-.354.353.354a.5.5 0 1 0 .707-.707l-1.414-1.415a.5.5 0 1 0-.707.707l.354.354-.354.354-.012.012A6.97 6.97 0 0 0 9 2.071V1h.5a.5.5 0 0 0 0-1zm2 5.6V9a.5.5 0 0 1-.5.5H4.5a.5.5 0 0 1 0-1h3V5.6a.5.5 0 1 1 1 0"/>
+                </svg></span>
             {% endif %}
           <small class="text-muted ms-auto">{{ noticia.fecha|date:"d/m/Y H:i" }}</small>
           </div>
@@ -163,7 +165,7 @@
         </div>
       </div>
 
-      <!-- MODAL EDITAR (dentro del loop para cada noticia) -->
+      <!-- MODAL EDITAR -->
       <div class="modal fade" id="editarNoticia{{ noticia.id }}" tabindex="-1" aria-hidden="true" style="padding-top: 50px;">
         <div class="modal-dialog">
           <div class="modal-content">
@@ -172,31 +174,38 @@
               <input type="hidden" name="action" value="editar">
               <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
               
-              <div class="modal-header" style="background-color: #E8E3D0;">
-                <h5 class="modal-title">Editar Publicación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-              </div>
-              
-              <div class="modal-body" style="background-color: #E8E3D0;">
-                <div class="mb-3">
-                  <label class="form-label">Título</label>
-                  <input type="text" name="titulo" class="form-control" value="{{ noticia.titulo }}" required>
+              {% if noticia.en_revision_edicion %}
+                <div class="modal-body" style="background-color: #E8E3D0;">
+                  <p class="text-muted">
+                    Ya se ha enviado una solicitud de <strong>edición</strong> de esta publicación que está <strong>pendiente de aprobación</strong>.  
+                    <br>
+                    Espera a que sea revisada antes de hacer nuevos cambios.
+                  </p>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Descripción</label>
-                  <textarea name="descripcion" class="form-control" rows="4" required>{{ noticia.descripcion }}</textarea>
+                <div class="modal-footer" style="background-color: #E8E3D0;">
+                  <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Imagen</label>
-                  <input type="file" name="imagen" class="form-control">
-                  <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
+              {% else %}
+                <div class="modal-body" style="background-color: #E8E3D0;">
+                  <div class="mb-3">
+                    <label class="form-label">Título</label>
+                    <input type="text" name="titulo" class="form-control" value="{{ noticia.titulo }}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Descripción</label>
+                    <textarea name="descripcion" class="form-control" rows="4" required>{{ noticia.descripcion }}</textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Imagen</label>
+                    <input type="file" name="imagen" class="form-control">
+                    <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
+                  </div>
                 </div>
-              </div>
-
-              <div class="modal-footer" style="background-color: #E8E3D0;">
-              <button type="submit" class="btn btn-success w-100">Guardar cambios</button>
-              <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
-              </div>
+                <div class="modal-footer" style="background-color: #E8E3D0;">
+                  <button type="submit" class="btn btn-success w-100">Guardar cambios</button>
+                  <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+              {% endif %}
             </form>
           </div>
         </div>
