@@ -57,6 +57,9 @@
                 </h3>
                 <p class="mb-1"><strong>Iglesia:</strong> {{ post.iglesiaAsociada }}</p>
                 <p class="mb-1"><strong>Autor:</strong> {{ post.creador.email }} ({{ post.creador.username }})</p>
+                {% if post.editor %}
+                  <p class="mb-1"><strong>Editor:</strong> {{ post.editor.email }} ({{ post.editor.username }})</p>
+                {% endif %}
                 <div class="mb-2" style="max-height: 200px; overflow-y: auto;">
                   <p class="mb-1 text-break" style="text-align: justify">
                     {% if post.descripcion_editada %}
@@ -164,7 +167,10 @@
                     {{ post.titulo }}
                   {% endif %}
               </h3>
-              <p class="mb-2"><strong>Iglesia:</strong> {{ post.iglesiaAsociada }}</p>
+              <p class="mb-1"><strong>Iglesia:</strong> {{ post.iglesiaAsociada }}</p>
+              {% if post.editor %}
+                <p class="mb-1"><strong>Editor:</strong> {{ post.editor.email }} ({{ post.editor.username }})</p>
+              {% endif %}
               <div class="mb-2" style="max-height: 200px; overflow-y: auto;">
                 <p class="mb-1 text-break" style="text-align: justify">
                   {% if post.descripcion_editada %}
