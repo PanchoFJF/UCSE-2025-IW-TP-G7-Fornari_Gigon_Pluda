@@ -530,105 +530,135 @@ def check_post_view(request):
         ).order_by("-fecha")
 
     # Procesar aprobar/rechazar
-    if request.method == "POST" and es_moderador:
+    if request.method == "POST":
         action = request.POST.get("action")
-        noticia = get_object_or_404(Noticia, pk=request.POST.get("noticia_id"))
 
-        if action == "aprobar":
-            es_edicion = noticia.en_revision_edicion
+        # ---- REINTENTAR (solo creador) ----
+        if action == "reintentar":
+            noticia = get_object_or_404(Noticia, pk=request.POST.get("noticia_id"), creador=request.user)
 
-            if es_edicion:
-                noticia.titulo = noticia.titulo_editado or noticia.titulo
-                noticia.descripcion = noticia.descripcion_editada or noticia.descripcion
-                if noticia.imagen_editada:
-                    noticia.imagen = noticia.imagen_editada
+            if noticia.estado == "rechazado" and not noticia.en_revision_edicion:
+                # El usuario vuelve a intentar la publicación
+                noticia.titulo = request.POST.get("titulo", noticia.titulo)
+                noticia.descripcion = request.POST.get("descripcion", noticia.descripcion)
 
-                # limpiar auxiliares
-                noticia.titulo_editado = None
-                noticia.descripcion_editada = None
-                noticia.imagen_editada = None
-                noticia.en_revision_edicion = False
+                # Manejo de la imagen: si no envía nada, se mantiene la anterior
+                if "imagen" in request.FILES:
+                    noticia.imagen = request.FILES["imagen"]
+                else:
+                    # Si no sube nueva imagen → borrar la anterior
+                    noticia.imagen.delete(save=False)
+                    noticia.imagen = None
 
-                noticia.estado_edicion = "aprobado"
-                noticia.fecha_revision_edicion = timezone.now()
-                noticia.ultima_edicion_aprobada = timezone.now() 
-
-                # correo al editor
-                contexto = {"noticia": noticia}
-                html_content = render_to_string("publicacion_edicion_aprobada_email.html", contexto)
-                email = EmailMessage(
-                    subject=f"✅ Tu edición de '{noticia.titulo}' fue aprobada",
-                    body=html_content,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[noticia.editor.email] if noticia.editor else [],  # seguridad 
-                )
-            else:
-                noticia.estado = "aprobado"
+                noticia.estado = "pendiente"
                 noticia.motivo_rechazo = ""
-            
-                # correo al creador
-                contexto = {"noticia": noticia}
-                html_content = render_to_string("publicacion_aprobada_email.html", contexto)
-                email = EmailMessage(
-                    subject=f"✅ Tu publicación '{noticia.titulo}' fue aprobada",
-                    body=html_content,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[noticia.creador.email],
-                )
-            noticia.save()
-            email.content_subtype = "html"
-            if email.to: # solo si hay destinatario
-                email.send(fail_silently=True)
+                noticia.fecha = timezone.now()  # actualizar fecha de creación
+                noticia.save()
 
-            # notificar suscriptores SOLO si es nueva publicación
-            if not es_edicion:
-                nueva_publicacion_email(noticia, request)
-
-            messages.success(request, "Se ha aprobado la noticia exitosamente.")
-            return redirect("sitio:check_post")
-
-        elif action == "rechazar":
-            motivo = request.POST.get("motivo", "").strip()
-
-            if noticia.en_revision_edicion:
-                noticia.titulo_editado = None
-                noticia.descripcion_editada = None
-                noticia.imagen_editada = None
-                noticia.en_revision_edicion = False
-
-                noticia.estado_edicion = "rechazado"
-                noticia.motivo_rechazo_edicion = motivo
-                noticia.fecha_revision_edicion = timezone.now()
-
-                # correo al editor
-                contexto = {"noticia": noticia, "motivo": motivo}
-                html_content = render_to_string("publicacion_edicion_rechazada_email.html", contexto)
-                email = EmailMessage(
-                    subject=f"❌ Tu edición de '{noticia.titulo}' fue rechazada",
-                    body=html_content,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[noticia.editor.email] if noticia.editor else [],  # seguridad
-                )
+                messages.info(request, "Has reenviado tu publicación para revisión.")
             else:
-                noticia.estado = "rechazado"
-                noticia.motivo_rechazo = motivo
+                messages.error(request, "Solo puedes reintentar publicaciones rechazadas en creación.")
 
-                # correo al creador
-                contexto = {"noticia": noticia, "motivo": motivo}
-                html_content = render_to_string("publicacion_rechazada_email.html", contexto)
-                email = EmailMessage(
-                    subject=f"❌ Tu publicación '{noticia.titulo}' fue rechazada",
-                    body=html_content,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[noticia.creador.email],
-                )
-            noticia.save()
-            email.content_subtype = "html"
-            if email.to: # solo si hay destinatario
-                email.send(fail_silently=True)
-
-            messages.success(request, "Se ha rechazado la noticia exitosamente.")
             return redirect("sitio:check_post")
+        
+        if es_moderador:
+            noticia = get_object_or_404(Noticia, pk=request.POST.get("noticia_id"))
+
+            if action == "aprobar":
+                es_edicion = noticia.en_revision_edicion
+
+                if es_edicion:
+                    noticia.titulo = noticia.titulo_editado or noticia.titulo
+                    noticia.descripcion = noticia.descripcion_editada or noticia.descripcion
+                    if noticia.imagen_editada:
+                        noticia.imagen = noticia.imagen_editada
+
+                    # limpiar auxiliares
+                    noticia.titulo_editado = None
+                    noticia.descripcion_editada = None
+                    noticia.imagen_editada = None
+                    noticia.en_revision_edicion = False
+
+                    noticia.estado_edicion = "aprobado"
+                    noticia.fecha_revision_edicion = timezone.now()
+                    noticia.ultima_edicion_aprobada = timezone.now() 
+
+                    # correo al editor
+                    contexto = {"noticia": noticia}
+                    html_content = render_to_string("publicacion_edicion_aprobada_email.html", contexto)
+                    email = EmailMessage(
+                        subject=f"✅ Tu edición de '{noticia.titulo}' fue aprobada",
+                        body=html_content,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=[noticia.editor.email] if noticia.editor else [],  # seguridad 
+                    )
+                else:
+                    noticia.estado = "aprobado"
+                    noticia.motivo_rechazo = ""
+                
+                    # correo al creador
+                    contexto = {"noticia": noticia}
+                    html_content = render_to_string("publicacion_aprobada_email.html", contexto)
+                    email = EmailMessage(
+                        subject=f"✅ Tu publicación '{noticia.titulo}' fue aprobada",
+                        body=html_content,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=[noticia.creador.email],
+                    )
+                noticia.save()
+                email.content_subtype = "html"
+                if email.to: # solo si hay destinatario
+                    email.send(fail_silently=True)
+
+                # notificar suscriptores SOLO si es nueva publicación
+                if not es_edicion:
+                    nueva_publicacion_email(noticia, request)
+
+                messages.success(request, "Se ha aprobado la noticia exitosamente.")
+                return redirect("sitio:check_post")
+
+            elif action == "rechazar":
+                motivo = request.POST.get("motivo", "").strip()
+
+                if noticia.en_revision_edicion:
+                    noticia.titulo_editado = None
+                    noticia.descripcion_editada = None
+                    noticia.imagen_editada = None
+                    noticia.en_revision_edicion = False
+
+                    noticia.estado_edicion = "rechazado"
+                    noticia.motivo_rechazo_edicion = motivo
+                    noticia.fecha_revision_edicion = timezone.now()
+
+                    # correo al editor
+                    contexto = {"noticia": noticia, "motivo": motivo}
+                    html_content = render_to_string("publicacion_edicion_rechazada_email.html", contexto)
+                    email = EmailMessage(
+                        subject=f"❌ Tu edición de '{noticia.titulo}' fue rechazada",
+                        body=html_content,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=[noticia.editor.email] if noticia.editor else [],  # seguridad
+                    )
+                else:
+                    noticia.estado = "rechazado"
+                    noticia.motivo_rechazo = motivo
+
+                    # correo al creador
+                    contexto = {"noticia": noticia, "motivo": motivo}
+                    html_content = render_to_string("publicacion_rechazada_email.html", contexto)
+                    email = EmailMessage(
+                        subject=f"❌ Tu publicación '{noticia.titulo}' fue rechazada",
+                        body=html_content,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=[noticia.creador.email],
+                    )
+                noticia.save()
+                email.content_subtype = "html"
+                if email.to: # solo si hay destinatario
+                    email.send(fail_silently=True)
+
+                messages.success(request, "Se ha rechazado la noticia exitosamente.")
+                return redirect("sitio:check_post")
 
     return render(request, "check_post.html", {
         "mis_publicaciones": mis_publicaciones,

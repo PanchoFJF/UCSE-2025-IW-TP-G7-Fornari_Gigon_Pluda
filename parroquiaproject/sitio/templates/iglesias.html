@@ -9,29 +9,16 @@
 
 {% block content %}
 <div >
-  <h2>
+  <h2 class="mt-sm-2">
     Iglesias
     {% if request.user.is_superuser %}
-    <button class="btn btn-success mt-2 mt-sm-0 float-end" title="Nueva Iglesia" data-bs-toggle="modal" data-bs-target="#formIglesiaModal">
+    <button class="btn btn-success mt-2 float-end" title="Nueva Iglesia" data-bs-toggle="modal" data-bs-target="#formIglesiaModal">
       <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-plus-lg" viewBox="0 1 16 16">
         <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
       </svg>
     </button>
     {% endif %}
   </h2>
-
-  <!-- FORMULARIO AÑADIR IGLESIA -->
-  <div id="formIglesia" class="collapse mb-4">
-    <div class="card card-body w-100">
-      <h4>Añadir Nueva Iglesia</h4>
-      <form method="post" enctype="multipart/form-data" class="needs-validation">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="crear">
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success w-100">Guardar</button>
-      </form>
-    </div>
-  </div>
 
   <!-- LISTA DE IGLESIAS -->
   <div class="row g-3">
@@ -106,21 +93,57 @@
     <div class="modal fade" id="formIglesiaModal" tabindex="-1" aria-labelledby="formIglesiaLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content" style="background-color: #E8E3D0;">
-          <div class="modal-header">
+          
+          <div class="modal-header" style="background-color: #d0ccbb;">
             <h5 class="modal-title" id="formIglesiaLabel">Nueva Iglesia</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
+          
           <div class="modal-body">
             <form method="post" enctype="multipart/form-data" id="formCrearIglesia">
               {% csrf_token %}
               <input type="hidden" name="action" value="crear">
-              {{ form.as_p }}
+
+              <!-- Nombre -->
+              <div class="mb-3">
+                {{ form.nombre.label_tag }}
+                {{ form.nombre }}
+              </div>
+
+              <!-- Direccion -->
+              <div class="mb-3">
+                {{ form.direccion.label_tag }}
+                {{ form.direccion }}
+              </div>
+              
+              <!-- Secretaria -->
+              <div class="mb-3">
+                <div class="d-flex align-items-center gap-2">
+                  {{ form.contacto_secretaria.label_tag }}
+                  <small class="text-muted">{{ form.contacto_secretaria.help_text }}</small>
+                </div>
+                {{ form.contacto_secretaria }}
+              </div>
+
+              <!-- Imagen -->
+              <div class="mb-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2">
+                    {{ form.imagen.label_tag }}
+                    <small class="text-muted mb-0">{{ form.imagen.help_text }}</small>
+                  </div>
+                  {{ form.imagen }}
+                </div>
+              </div>
+
             </form>
           </div>
+          
           <div class="modal-footer">
             <button type="submit" class="btn btn-success w-100" form="formCrearIglesia">Añadir</button>
             <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
           </div>
+
         </div>
       </div>
     </div>
@@ -134,7 +157,7 @@
             <input type="hidden" name="action" value="editar">
             <input type="hidden" name="iglesia_id" value="{{ iglesia.id }}">
 
-            <div class="modal-header" style="background-color: #E8E3D0;">
+            <div class="modal-header"  style="background-color: #d0ccbb;">
               <h5 class="modal-title">Editar Iglesia</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
@@ -150,17 +173,19 @@
               </div>
               <div class="mb-3">
                 <label class="form-label">Contacto Secretaría</label>
+                <label class="form-text text-start"><small>(opcional)</small></label>
                 <input type="text" name="contacto_secretaria" class="form-control" value="{{ iglesia.contacto_secretaria }}">
               </div>
               <div class="mb-3">
                 <label class="form-label">Imagen</label>
+                <label class="form-text text-start"><small>(opcional)</small></label>
                 <input type="file" name="imagen" class="form-control">
                 <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
               </div>
             </div>
 
             <div class="modal-footer flex-column gap-2" style="background-color: #E8E3D0;">
-              <button type="submit" class="btn btn-success w-100">Guardar cambios</button>
+              <button type="submit" class="btn btn-success w-100">Aplicar cambios</button>
               <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
             </div>
           </form>

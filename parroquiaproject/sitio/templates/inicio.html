@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load my_filters %}
 
 {% block title %}Inicio{% endblock %}
 
@@ -43,10 +44,10 @@
   </div>
 
   <!-- Título Noticias -->
-  <h2>
+  <h2 class="mt-sm-2">
     Noticias & Anuncios
     {% if user.is_authenticated %}
-    <button class="btn btn-success mt-2 mt-sm-0 float-end" title="Nueva Publicacion" data-bs-toggle="modal" data-bs-target="#formNoticia">
+    <button class="btn btn-success mt-2 float-end" title="Nueva Publicacion" data-bs-toggle="modal" data-bs-target="#formNoticia">
       <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-plus-lg" viewBox="0 1 16 16">
         <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
       </svg>
@@ -58,7 +59,7 @@
   <div class="modal fade" id="formNoticia" tabindex="-1" aria-labelledby="formNoticiaLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content" style="background-color: #E8E3D0;">
-        <div class="modal-header">
+        <div class="modal-header" style="background-color: #d0ccbb;">
           <h5 class="modal-title" id="formNoticiaLabel">Nueva Publicación</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
@@ -66,7 +67,33 @@
           <form method="post" enctype="multipart/form-data" id="formCrearNoticia">
             {% csrf_token %}
             <input type="hidden" name="action" value="crear">
-            {{ form.as_p }}
+
+            <!-- Título -->
+            <div class="mb-3">
+              {{ form.titulo.label_tag }}
+              {{ form.titulo }}
+            </div>
+
+            <!-- Descripción -->
+            <div class="mb-3">
+              {{ form.descripcion.label_tag }}
+              {{ form.descripcion }}
+            </div>
+
+            <!-- Imagen -->
+            <div class="mb-3">
+              <div class="d-flex align-items-center gap-2">
+                {{ form.imagen.label_tag }}
+                <small class="text-muted mb-0">(opcional)</small>
+              </div>
+              {{ form.imagen }}
+            </div>
+
+            <!-- Iglesia asociada -->
+            <div class="mb-3">
+              {{ form.iglesiaAsociada.label_tag }}
+              {{ form.iglesiaAsociada }}
+            </div>
           </form>
         </div>
         <div class="modal-footer">
@@ -89,7 +116,7 @@
           <h3 class="mb-3">
             {{ noticia.titulo }}
           </h3>
-            <p class="mb-2"><strong>Iglesia:</strong> {{ noticia.iglesiaAsociada }}</p>
+            <p class="mb-2"><strong>Iglesia</strong> {{ noticia.iglesiaAsociada }}</p>
             <div class="mb-3" style="max-height: 135px; overflow-y: auto; overflow-x: hidden;">
               <p class="mb-1 text-break" style="text-align: justify">
                 {{ noticia.descripcion }}
@@ -130,10 +157,12 @@
                 <path d="M6.5 0a.5.5 0 0 0 0 1H7v1.07A7.001 7.001 0 0 0 8 16a7 7 0 0 0 5.29-11.584l.013-.012.354-.354.353.354a.5.5 0 1 0 .707-.707l-1.414-1.415a.5.5 0 1 0-.707.707l.354.354-.354.354-.012.012A6.97 6.97 0 0 0 9 2.071V1h.5a.5.5 0 0 0 0-1zm2 5.6V9a.5.5 0 0 1-.5.5H4.5a.5.5 0 0 1 0-1h3V5.6a.5.5 0 1 1 1 0"/>
                 </svg></span>
             {% elif noticia.ultima_edicion_aprobada %}
-              <span class="badge bg-secondary text-light">Editado hace {{ noticia.ultima_edicion_aprobada|timesince }}
+              <span class="badge bg-secondary text-light">
+                Editado hace {{ noticia.ultima_edicion_aprobada|timesince_one }}
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                   <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
-                </svg></span>
+                </svg>
+              </span>
             {% endif %}
           <small class="text-muted ms-auto">{{ noticia.fecha|date:"d/m/Y H:i" }}</small>
           </div>
@@ -152,13 +181,13 @@
             <!-- Miniatura clickeable que activa el lightbox global -->
             <img src="{{ noticia.imagen.url }}" 
                 alt="{{ noticia.titulo }}"
-                class="img-fluid mb-3"
+                class="img-fluid mb-2"
                 style="width: 200px; height: 300px; object-fit: cover; cursor: pointer;"
                 onclick="openLightbox('{{ noticia.imagen.url }}')">
           {% else %}
             <!-- Placeholder si no hay imagen -->
             <svg aria-label="Placeholder: Thumbnail"
-                class="bd-placeholder-img"
+                class="bd-placeholder-img mb-2"
                 width="200" height="300"
                 preserveAspectRatio="xMidYMid slice"
                 role="img" xmlns="http://www.w3.org/2000/svg">
@@ -178,6 +207,11 @@
               {% csrf_token %}
               <input type="hidden" name="action" value="editar">
               <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
+
+              <div class="modal-header" style="background-color: #d0ccbb;">
+                <h5 class="modal-title">Editar publicación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+              </div>
               
               {% if noticia.en_revision_edicion %}
                 <div class="modal-body" style="background-color: #E8E3D0;">
@@ -193,21 +227,22 @@
               {% else %}
                 <div class="modal-body" style="background-color: #E8E3D0;">
                   <div class="mb-3">
-                    <label class="form-label">Título</label>
+                    <label class="form-label">Nuevo título</label>
                     <input type="text" name="titulo" class="form-control" value="{{ noticia.titulo }}" required>
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">Descripción</label>
+                    <label class="form-label">Nueva descripción</label>
                     <textarea name="descripcion" class="form-control" rows="4" required>{{ noticia.descripcion }}</textarea>
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">Imagen</label>
+                    <label class="form-label">Nueva imagen</label>
+                    <label class="form-text text-start"><small>(opcional)</small></label>
                     <input type="file" name="imagen" class="form-control">
                     <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
                   </div>
                 </div>
                 <div class="modal-footer" style="background-color: #E8E3D0;">
-                  <button type="submit" class="btn btn-success w-100">Guardar cambios</button>
+                  <button type="submit" class="btn btn-success w-100">Aplicar cambios</button>
                   <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
                 </div>
               {% endif %}

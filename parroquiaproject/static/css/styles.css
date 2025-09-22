@@ -137,3 +137,9 @@
   word-wrap: break-word; /* Corta palabras largas */
   overflow-wrap: anywhere; /* Maneja palabras demasiado largas */
 }
+
+.helptext {
+  font-size: 0.85em;
+  color: #575c60; /* gris Bootstrap */
+  margin-left: 4px;
+}

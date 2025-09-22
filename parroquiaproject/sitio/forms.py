@@ -15,6 +15,10 @@ class IglesiaForm(forms.ModelForm):
             'contacto_secretaria': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+54...'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
         }
+        help_texts = {
+            "contacto_secretaria": "(opcional)",
+            "imagen": "(opcional)",
+        }  
 
 class NoticiaForm(forms.ModelForm):
     iglesiaAsociada = forms.ModelChoiceField(
@@ -33,6 +37,9 @@ class NoticiaForm(forms.ModelForm):
             "imagen": forms.ClearableFileInput(attrs={"class": "form-control"}),
             "iglesiaAsociada": forms.Select(attrs={"class": "form-control"}),
         }
+        help_texts = {
+            "imagen": "(opcional)",
+        }  
 
 class NoticiaEditForm(forms.ModelForm):
     class Meta:

@@ -16,15 +16,15 @@ from django.contrib.auth.password_validation import validate_password
 from django.utils.timezone import now
 from datetime import timedelta
 from django.contrib.auth.decorators import user_passes_test
-from accounts.management.commands.delete_invalid_users import delete_invalid_users
+from accounts.management.commands.delete_invalid_users import delete_invalid_users_and_rejected_posts
 
 User = get_user_model()
 
 # --- Eliminar usuarios inválidos ---
 @user_passes_test(lambda u: u.is_superuser)  # solo superusuarios
 def delete_users_view(request):
-    count = delete_invalid_users()
-    messages.success(request, f"Se eliminaron {count} usuarios no verificados.")
+    user_count, post_count = delete_invalid_users_and_rejected_posts()
+    messages.success(request, f"Se eliminaron {user_count} usuarios no verificados y {post_count} publicaciones rechazadas.")
     return redirect("sitio:dashboard")
 
 # --- Registro con confirmación por email ---
