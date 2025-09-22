@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from django.utils.timezone import now
+from functools import partial
 
 # Create your models here.
 def fecha_vencimiento(dias):
@@ -31,8 +32,8 @@ class Noticia(models.Model):
     creador = models.ForeignKey(User, on_delete=models.CASCADE)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default="pendiente")
     motivo_rechazo = models.TextField(blank=True, null=True)  
-    fechaVencimiento = models.DateTimeField(null=True, default=fecha_vencimiento(30))
-    fechaAceptacion = models.DateTimeField(null=True, default=fecha_vencimiento(7))
+    fechaVencimiento = models.DateTimeField(null=True, default=partial(fecha_vencimiento, 30))
+    fechaAceptacion = models.DateTimeField(null=True, default=partial(fecha_vencimiento, 7))
 
     # Campos auxiliares para ediciones
     titulo_editado = models.CharField(max_length=20, blank=True, null=True)
@@ -43,6 +44,7 @@ class Noticia(models.Model):
     estado_edicion = models.CharField(max_length=20, choices=ESTADO_CHOICES, blank=True, null=True)
     motivo_rechazo_edicion = models.TextField(blank=True, null=True)
     fecha_revision_edicion = models.DateTimeField(blank=True, null=True)
+    ultima_edicion_aprobada = models.DateTimeField(null=True, blank=True)
 
     editor = models.ForeignKey(
         User,

@@ -125,7 +125,7 @@
                     </svg></span>
                   </span>
                 {% endif %}
-                <small class="text-muted">Enviado: {{ post.fecha|date:"d/m/Y H:i" }}</small>
+                <small class="text-muted">{{ post.fecha|date:"d/m/Y H:i" }}</small>
               </div>
             </div>
 
@@ -269,7 +269,7 @@
 
             <!-- Fecha alineada a la derecha -->
             <div class="mt-0 text-end" style="font-size: 0.9em;">
-            <small class="text-muted">Última actualización: {{ post.fecha|date:"d/m/Y H:i" }}</small>
+            <small class="text-muted">{{ post.fecha|date:"d/m/Y H:i" }}</small>
             </div>
           </div>
 

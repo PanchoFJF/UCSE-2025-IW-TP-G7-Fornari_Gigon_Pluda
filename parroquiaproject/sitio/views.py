@@ -551,6 +551,7 @@ def check_post_view(request):
 
                 noticia.estado_edicion = "aprobado"
                 noticia.fecha_revision_edicion = timezone.now()
+                noticia.ultima_edicion_aprobada = timezone.now() 
 
                 # correo al editor
                 contexto = {"noticia": noticia}
@@ -577,7 +578,7 @@ def check_post_view(request):
             noticia.save()
             email.content_subtype = "html"
             if email.to: # solo si hay destinatario
-                email.send()
+                email.send(fail_silently=True)
 
             # notificar suscriptores SOLO si es nueva publicación
             if not es_edicion:
@@ -624,7 +625,7 @@ def check_post_view(request):
             noticia.save()
             email.content_subtype = "html"
             if email.to: # solo si hay destinatario
-                email.send()
+                email.send(fail_silently=True)
 
             messages.success(request, "Se ha rechazado la noticia exitosamente.")
             return redirect("sitio:check_post")
