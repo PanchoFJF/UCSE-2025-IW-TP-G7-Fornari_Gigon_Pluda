@@ -251,7 +251,8 @@
                       <div class="modal-body" style="background-color: #E8E3D0;">
                         <form method="post" enctype="multipart/form-data">
                           {% csrf_token %}
-                          <input type="hidden" name="noticia_id" value="{{ post.id }}">
+                            <input type="hidden" name="noticia_id" value="{{ post.id }}">
+                            <input type="hidden" name="action" value="reintentar">
                           
                           <div class="mb-3">
                             <label for="titulo-{{ post.id }}" class="form-label d-block text-start" style="display:block; text-align:left;">
@@ -277,7 +278,7 @@
                           </div>
 
                           <div class="modal-footer">
-                            <button type="submit" class="btn btn-success w-100" form="formCrearNoticia">Aplicar cambios</button>
+                            <button type="submit" class="btn btn-success w-100">Aplicar cambios</button>
                             <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
                           </div>
                         </form>
