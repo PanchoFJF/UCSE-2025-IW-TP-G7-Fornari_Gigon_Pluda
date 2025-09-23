@@ -143,3 +143,34 @@
   color: #575c60; /* gris Bootstrap */
   margin-left: 4px;
 }
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #d4cfbc;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #8c7e5d;
+  border-radius: 6px;
+  border: 2px solid #d4cfbc;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #6b5e3e;
+}
+
+/* Ocultar flechas */
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Firefox */
+* {
+  scrollbar-width:thin;
+  scrollbar-color: #8c7e5d #d4cfbc;
+}

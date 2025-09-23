@@ -113,12 +113,12 @@
         
         <!-- Contenido noticia -->
         <div class="col p-4 d-flex flex-column position-static" style="background-color: #E8E3D0;">
-          <h3 class="mb-3">
+          <h3 class="mb-2">
             {{ noticia.titulo }}
           </h3>
             <p class="mb-2"><strong>Iglesia</strong> {{ noticia.iglesiaAsociada }}</p>
-            <div class="mb-3" style="max-height: 135px; overflow-y: auto; overflow-x: hidden;">
-              <p class="mb-1 text-break" style="text-align: justify">
+            <div class="mt-0 mb-2" style="height: 135px; overflow-y: auto; padding: 6px; border-radius: 6px; background: #d4cfbc;">
+              <p class="text-break" style="text-align: justify">
                 {{ noticia.descripcion }}
               </p>
             </div>
