@@ -76,9 +76,31 @@
     border-bottom: 1px solid #dee2e6; /* border-bottom de Bootstrap */
 }
 
+/* Ajuste solo para móviles (pantallas menores a 768px) */
+@media (max-width: 767.98px) {
+  h2 {
+    font-size: 2.25rem; /* más chico en móvil */
+  }
+}
+
 #calendar {
       max-width: 900px;
       margin: 40px auto;
+}
+
+/* Botones pequeños con icono centrado */
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon i {
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .btn-purple {
@@ -133,9 +155,21 @@
 }
 
 .descripcion {
-  white-space: normal; /* Permite saltos de línea */
-  word-wrap: break-word; /* Corta palabras largas */
-  overflow-wrap: anywhere; /* Maneja palabras demasiado largas */
+  min-height: 135px;
+  max-height: 135px;
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: 6px;
+  background: #d4cfbc;
+}
+
+/* En móviles (<768px) la descripción se hace flexible */
+@media (max-width: 767.98px) {
+  .descripcion {
+    min-height: auto;   /* sin altura mínima */
+    max-height: 135px;  /* límite máximo */
+    overflow-y: auto;   /* aparece scroll solo si se pasa */
+  }
 }
 
 .helptext {

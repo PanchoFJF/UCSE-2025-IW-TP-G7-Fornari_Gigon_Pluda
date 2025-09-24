@@ -9,3 +9,7 @@ def timesince_one(value):
         return ""
     delta = timesince(value)
     return delta.split(",")[0]
+
+@register.filter(name='add_class')
+def add_class(field, css):
+    return field.as_widget(attrs={"class": css})

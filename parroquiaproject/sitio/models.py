@@ -24,7 +24,7 @@ class Noticia(models.Model):
         ("rechazado", "Rechazado"),
     ]
 
-    titulo = models.CharField(max_length=20)
+    titulo = models.CharField(max_length=35)
     descripcion = models.TextField()
     imagen = models.ImageField(upload_to="inicio/", blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
@@ -36,7 +36,7 @@ class Noticia(models.Model):
     fechaAceptacion = models.DateTimeField(null=True, default=partial(fecha_vencimiento, 7))
 
     # Campos auxiliares para ediciones
-    titulo_editado = models.CharField(max_length=20, blank=True, null=True)
+    titulo_editado = models.CharField(max_length=35, blank=True, null=True)
     descripcion_editada = models.TextField(blank=True, null=True)
     imagen_editada = models.ImageField(upload_to="inicio/edits/", blank=True, null=True)
     en_revision_edicion = models.BooleanField(default=False)  # True si hay una edición pendiente

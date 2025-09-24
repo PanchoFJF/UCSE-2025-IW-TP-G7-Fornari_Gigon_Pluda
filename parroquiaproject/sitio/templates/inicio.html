@@ -12,13 +12,32 @@
     box-shadow: 0 2px 5px rgba(0,0,0,.1);
     margin-bottom: 1rem;
   }
+  /* Lightbox global */
+  .lightbox {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,.8);
+    justify-content: center;
+    align-items: center;
+  }
+  .lightbox-content {
+    text-align: center;
+  }
+  .lightbox-content img {
+    max-width: 95%;
+    max-height: 85vh;
+    border-radius: 8px;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="full-width">
   
-  <!-- Versículo del día -->
+  <!-- ====================== VERSÍCULO DEL DÍA ====================== -->
   <div>
     <iframe id="versiculo-del-dia" src="https://www.bibliatodo.com/es/online/versiculo-del-dia-texto-2" 
       style="width: 100%; height: 20vh;" frameborder="0" scrolling="no"></iframe>
@@ -29,7 +48,6 @@
       <iframe style="border-radius:12px; flex: 1 1 300px;"
         src="https://open.spotify.com/embed/playlist/6sc0V02fkbMDw8X5deDuN2?utm_source=generator&theme=0"
         width="100%" height="152" frameborder="0"
-        allowfullscreen=""
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
         loading="lazy">
       </iframe>
@@ -43,19 +61,180 @@
     </div>
   </div>
 
-  <!-- Título Noticias -->
-  <h2 class="mt-sm-2">
+  <!-- ====================== TÍTULO NOTICIAS ====================== -->
+  <h2 class="mt-sm-2 mt-4">
     Noticias & Anuncios
     {% if user.is_authenticated %}
     <button class="btn btn-success mt-2 float-end" title="Nueva Publicacion" data-bs-toggle="modal" data-bs-target="#formNoticia">
-      <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-plus-lg" viewBox="0 1 16 16">
-        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
-      </svg>
+      <i class="bi bi-plus-lg"></i>
     </button>
     {% endif %}
   </h2>
 
-  <!-- FORM NUEVA NOTICIA -->
+  <!-- ====================== LISTA DE PUBLICACIONES ====================== -->
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for noticia in noticias %}
+    <div class="col d-flex">
+      <article class="row g-0 border rounded shadow-sm post-card overflow-hidden h-100 w-100">
+
+        <!-- Columna texto -->
+        <div class="col-12 col-md-8 p-4 d-flex flex-column" style="background-color: #E8E3D0;">
+          <h3 class="mb-2">{{ noticia.titulo }}</h3>
+          <p class="mb-2"><strong>Iglesia</strong> {{ noticia.iglesiaAsociada }}</p>
+
+          <!-- Descripción con altura fija -->
+          <div class="mt-0 mb-2 descripcion">
+            <p class="text-break mb-0" style="text-align: justify;">
+              {{ noticia.descripcion }}
+            </p>
+          </div>
+
+          <!-- Acciones y fecha -->
+          <div class="d-flex align-items-center gap-2 mt-auto flex-wrap">
+            {% if noticia.puede_editar %}
+              <!-- Botón Editar -->
+              <button class="btn btn-warning btn-sm btn-icon text-light"
+                      data-bs-toggle="modal"
+                      data-bs-target="#editarNoticia{{ noticia.id }}"
+                      title="Editar">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+
+              <!-- Botón Eliminar -->
+              <form method="post" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="eliminar">
+                <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
+                <button type="submit"
+                        class="btn btn-danger btn-sm btn-icon"
+                        title="Eliminar"
+                        onclick="return confirm('¿Seguro que deseas eliminar esta publicación?')">
+                  <i class="bi bi-trash3-fill"></i>
+                </button>
+              </form>
+            {% endif %}
+
+            <!-- Estado -->
+            {% if noticia.en_revision_edicion %}
+              <span class="badge bg-warning text-dark">Edición pendiente 
+                <i class="bi bi-stopwatch-fill"></i>
+              </span>
+            {% elif noticia.ultima_edicion_aprobada %}
+              <span class="badge bg-secondary text-light">
+                Editado hace {{ noticia.ultima_edicion_aprobada|timesince_one }}
+                <i class="bi bi-pencil-fill"></i>
+              </span>
+            {% endif %}
+
+            <!-- Fecha -->
+            <small class="text-muted ms-auto">
+              {{ noticia.fecha|date:"d/m/Y H:i" }}
+            </small>
+          </div>
+        </div>
+
+        <!-- Columna imagen -->
+        <div class="col-12 col-md-4 d-flex align-items-stretch">
+          {% if noticia.imagen %}
+            <img src="{{ noticia.imagen.url }}"
+                alt="{{ noticia.titulo }}"
+                class="img-fluid w-100"
+                style="object-fit: cover; cursor: pointer;"
+                onclick="openLightbox('{{ noticia.imagen.url }}', '{{ noticia.titulo|escapejs }}')">
+          {% else %}
+            <!-- Placeholder -->
+            <svg aria-label="Placeholder: Thumbnail"
+                class="bd-placeholder-img"
+                width="100%" height="100%"
+                preserveAspectRatio="xMidYMid slice"
+                role="img" xmlns="http://www.w3.org/2000/svg">
+              <title>Sin Imagen</title>
+              <rect width="100%" height="100%" fill="#d4cfbc"></rect>
+              <text x="50%" y="50%" fill="#55595c" dy=".3em" text-anchor="middle">Sin Imagen</text>
+            </svg>
+          {% endif %}
+        </div>
+      </article>
+      <!-- ====================== MODAL EDITAR NOTICIA ====================== -->
+      <div class="modal fade" id="editarNoticia{{ noticia.id }}" tabindex="-1" aria-hidden="true" style="padding-top: 50px;">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content" style="background-color: #E8E3D0;">
+            <form method="post" enctype="multipart/form-data" id="formEditarNoticia{{ noticia.id }}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="editar">
+              <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
+
+              <div class="modal-header" style="background-color: #d0ccbb;">
+                <h5 class="modal-title">Editar publicación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+              </div>
+
+              {% if noticia.en_revision_edicion %}
+                <div class="modal-body">
+                  <p class="text-muted">
+                    Ya se ha enviado una solicitud de <strong>edición</strong> que está
+                    <strong>pendiente de aprobación</strong>.  
+                    <br>
+                    Espera a que sea revisada antes de hacer nuevos cambios.
+                  </p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+              {% else %}
+                <div class="modal-body">
+                  <!-- Título -->
+                  <div class="mb-3">
+                    <label class="form-label">Nuevo título</label>
+                    <input type="text" name="titulo" class="form-control" value="{{ noticia.titulo }}" required>
+                  </div>
+
+                  <!-- Descripción -->
+                  <div class="mb-3">
+                    <label class="form-label">Nueva descripción</label>
+                    <textarea name="descripcion" class="form-control" rows="4" required>{{ noticia.descripcion }}</textarea>
+                  </div>
+
+                  <!-- Imagen -->
+                  <div class="mb-3">
+                    <label class="form-label">Nueva imagen <small class="text-muted">(opcional)</small></label>
+                    <input type="file" name="imagen" class="form-control">
+                    <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
+                  </div>
+
+                  <!-- Iglesia asociada -->
+                  <div class="mb-3">
+                    <label class="form-label">Iglesia asociada</label>
+                    <input type="text" name="iglesiaAsociada" class="form-control" value="{{ noticia.iglesiaAsociada }}">
+                  </div>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-success w-100">Aplicar cambios</button>
+                  <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+              {% endif %}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+      <p class="text-muted text-center">No hay publicaciones todavía.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ====================== LIGHTBOX GLOBAL ====================== -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <div class="lightbox-content">
+    <img id="lightbox-img" src="" alt="Imagen ampliada">
+    <p id="lightbox-title" class="text-white mt-2"></p>
+  </div>
+</div>
+
+
+  <!-- ====================== MODAL NUEVA NOTICIA ====================== -->
   <div class="modal fade" id="formNoticia" tabindex="-1" aria-labelledby="formNoticiaLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content" style="background-color: #E8E3D0;">
@@ -71,13 +250,13 @@
             <!-- Título -->
             <div class="mb-3">
               {{ form.titulo.label_tag }}
-              {{ form.titulo }}
+              {{ form.titulo|add_class:"form-control" }}
             </div>
 
             <!-- Descripción -->
             <div class="mb-3">
               {{ form.descripcion.label_tag }}
-              {{ form.descripcion }}
+              {{ form.descripcion|add_class:"form-control" }}
             </div>
 
             <!-- Imagen -->
@@ -86,13 +265,13 @@
                 {{ form.imagen.label_tag }}
                 <small class="text-muted mb-0">(opcional)</small>
               </div>
-              {{ form.imagen }}
+              {{ form.imagen|add_class:"form-control" }}
             </div>
 
             <!-- Iglesia asociada -->
             <div class="mb-3">
               {{ form.iglesiaAsociada.label_tag }}
-              {{ form.iglesiaAsociada }}
+              {{ form.iglesiaAsociada|add_class:"form-control" }}
             </div>
           </form>
         </div>
@@ -104,175 +283,25 @@
     </div>
   </div>
 
-  <!-- LISTA DE PUBLICACIONES -->
-  <div class="row">
-    {% for noticia in noticias %}
-    <div class="col-md-6 mb-4">
-      <div class="row g-0 border rounded overflow-hidden flex-md-row shadow-sm position-relative"
-           style="height: 300px;">
-        
-        <!-- Contenido noticia -->
-        <div class="col p-4 d-flex flex-column position-static" style="background-color: #E8E3D0;">
-          <h3 class="mb-2">
-            {{ noticia.titulo }}
-          </h3>
-            <p class="mb-2"><strong>Iglesia</strong> {{ noticia.iglesiaAsociada }}</p>
-            <div class="mt-0 mb-2" style="height: 135px; overflow-y: auto; padding: 6px; border-radius: 6px; background: #d4cfbc;">
-              <p class="text-break" style="text-align: justify">
-                {{ noticia.descripcion }}
-              </p>
-            </div>
-            
-          <!-- Acciones -->
-          <div class="d-flex justify-content-between align-items-center mt-auto">
-            {% if noticia.puede_editar %}
-            <div class="d-flex gap-2">
-              <!-- Editar -->
-              <button class="btn btn-sm btn-warning" style="color: white;"
-                      data-bs-toggle="modal"
-                      data-bs-target="#editarNoticia{{ noticia.id }}"
-                      title="Editar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 17 17">
-                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                  <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
-                </svg>
-              </button>
-              <!-- Eliminar -->
-              <form method="post" class="d-inline">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="eliminar">
-                <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
-                <button type="submit" class="btn btn-sm btn-danger me-4" title="Eliminar"
-                        onclick="return confirm('¿Seguro que deseas eliminar esta publicación?')">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 17 17">
-                    <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                  </svg>
-                </button>
-              </form>
-            </div>
-            {% endif %}
-            {% if noticia.en_revision_edicion %}
-              <span class="badge bg-warning text-dark">Edición pendiente
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stopwatch-fill" viewBox="0 0 16 16">
-                <path d="M6.5 0a.5.5 0 0 0 0 1H7v1.07A7.001 7.001 0 0 0 8 16a7 7 0 0 0 5.29-11.584l.013-.012.354-.354.353.354a.5.5 0 1 0 .707-.707l-1.414-1.415a.5.5 0 1 0-.707.707l.354.354-.354.354-.012.012A6.97 6.97 0 0 0 9 2.071V1h.5a.5.5 0 0 0 0-1zm2 5.6V9a.5.5 0 0 1-.5.5H4.5a.5.5 0 0 1 0-1h3V5.6a.5.5 0 1 1 1 0"/>
-                </svg></span>
-            {% elif noticia.ultima_edicion_aprobada %}
-              <span class="badge bg-secondary text-light">
-                Editado hace {{ noticia.ultima_edicion_aprobada|timesince_one }}
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                  <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
-                </svg>
-              </span>
-            {% endif %}
-          <small class="text-muted ms-auto">{{ noticia.fecha|date:"d/m/Y H:i" }}</small>
-          </div>
-        </div>
-
-        <!-- Imagen noticia -->
-        <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
-          <div class="lightbox-content">
-            <img id="lightbox-img" src="" alt="Imagen ampliada">
-            <p id="lightbox-title"></p>
-          </div>
-        </div>
-
-        <div class="col-auto d-none d-lg-block">
-          {% if noticia.imagen %}
-            <!-- Miniatura clickeable que activa el lightbox global -->
-            <img src="{{ noticia.imagen.url }}" 
-                alt="{{ noticia.titulo }}"
-                class="img-fluid mb-2"
-                style="width: 200px; height: 300px; object-fit: cover; cursor: pointer;"
-                onclick="openLightbox('{{ noticia.imagen.url }}')">
-          {% else %}
-            <!-- Placeholder si no hay imagen -->
-            <svg aria-label="Placeholder: Thumbnail"
-                class="bd-placeholder-img mb-2"
-                width="200" height="300"
-                preserveAspectRatio="xMidYMid slice"
-                role="img" xmlns="http://www.w3.org/2000/svg">
-              <title>Placeholder</title>
-              <rect width="100%" height="100%" fill="#55595c"></rect>
-              <text x="30%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
-            </svg>
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- MODAL EDITAR -->
-      <div class="modal fade" id="editarNoticia{{ noticia.id }}" tabindex="-1" aria-hidden="true" style="padding-top: 50px;">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <form method="post" enctype="multipart/form-data">
-              {% csrf_token %}
-              <input type="hidden" name="action" value="editar">
-              <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
-
-              <div class="modal-header" style="background-color: #d0ccbb;">
-                <h5 class="modal-title">Editar publicación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-              </div>
-              
-              {% if noticia.en_revision_edicion %}
-                <div class="modal-body" style="background-color: #E8E3D0;">
-                  <p class="text-muted">
-                    Ya se ha enviado una solicitud de <strong>edición</strong> de esta publicación que está <strong>pendiente de aprobación</strong>.  
-                    <br>
-                    Espera a que sea revisada antes de hacer nuevos cambios.
-                  </p>
-                </div>
-                <div class="modal-footer" style="background-color: #E8E3D0;">
-                  <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-              {% else %}
-                <div class="modal-body" style="background-color: #E8E3D0;">
-                  <div class="mb-3">
-                    <label class="form-label">Nuevo título</label>
-                    <input type="text" name="titulo" class="form-control" value="{{ noticia.titulo }}" required>
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">Nueva descripción</label>
-                    <textarea name="descripcion" class="form-control" rows="4" required>{{ noticia.descripcion }}</textarea>
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">Nueva imagen</label>
-                    <label class="form-text text-start"><small>(opcional)</small></label>
-                    <input type="file" name="imagen" class="form-control">
-                    <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
-                  </div>
-                </div>
-                <div class="modal-footer" style="background-color: #E8E3D0;">
-                  <button type="submit" class="btn btn-success w-100">Aplicar cambios</button>
-                  <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
-                </div>
-              {% endif %}
-            </form>
-          </div>
-        </div>
-      </div>
-
-    </div>
-    {% empty %}
-      <p class="text-muted text-center">No hay publicaciones todavía.</p>
-    {% endfor %}
-  </div>
-</div>
 
 <script>
 function openLightbox(src, title) {
   document.getElementById("lightbox-img").src = src;
+  document.getElementById("lightbox-title").textContent = title || "";
   document.getElementById("lightbox").style.display = "flex";
 }
 
 function closeLightbox(event) {
   if (event.target.id === "lightbox") {
     document.getElementById("lightbox").style.display = "none";
+    document.getElementById("lightbox-img").src = "";
   }
 }
 
 document.addEventListener("keydown", function(event) {
   if (event.key === "Escape") {
     document.getElementById("lightbox").style.display = "none";
+    document.getElementById("lightbox-img").src = "";
   }
 });
 </script>
