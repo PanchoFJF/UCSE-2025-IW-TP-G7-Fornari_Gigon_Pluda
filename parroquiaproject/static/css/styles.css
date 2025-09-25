@@ -123,6 +123,22 @@
   justify-content: center;
 }
 
+.dashboard-buttons {
+  display: flex;
+  justify-content: center; 
+  gap: 12px;              
+  margin-top: 8px;
+}
+
+.btn-icon-dashboard {
+  width: 48px;
+  height: 48px;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .btn-icon i {
   font-size: 1rem;
   line-height: 1;

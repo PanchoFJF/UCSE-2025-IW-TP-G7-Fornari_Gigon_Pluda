@@ -6,32 +6,35 @@
 {% endblock %}
 
 {% block content %}
-<div>
-    <h2 
-        class="mb-3">Bienvenido, {{ user.username }} 👋 
-
-        {% if user.is_superuser %}
-        <form method="post" action="{% url 'sitio:delete_users' %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger mt-2 mt-sm-0 float-end ms-2" title="Eliminar no verificados y posts rechazados">
-                <i class="bi bi-person-dash-fill"></i>
+<div class="mb-4">
+    <h2 class="mb-3">
+    Bienvenido, {{ user.username }}👋
+    <br>
+        <!-- Contenedor de botones -->
+        <div class="dashboard-buttons mt-2">
+            <button class="btn btn-secondary btn-icon-dashboard" title="Configuración de cuenta" onclick="window.location.href='/configuracion/'">
+                <i class="bi bi-gear-fill"></i>
             </button>
-        </form>
-        {% endif %}
 
-        {% if can_authorize %}
-        <a href="{% url 'sitio:autorizacion' %}" class="btn btn-primary  mt-2 mt-sm-0 float-end ms-2" title="Gestion de permisos">
-            <i class="bi bi-person-fill-lock"></i>
-        </a>
-        {% endif %}
+            <button class="btn btn-success btn-icon-dashboard" title="Dashboard" onclick="window.location.href='/check_post/'">
+                <i class="bi bi-clipboard2-fill"></i>
+            </button>
 
-        <button class="btn btn-success mt-2 mt-sm-0 float-end ms-2" title="Dashboard" onclick="window.location.href='/check_post/'">
-            <i class="bi bi-clipboard2-fill"></i>
-        </button>
+            {% if can_authorize %}
+            <a href="{% url 'sitio:autorizacion' %}" class="btn btn-primary btn-icon-dashboard" title="Gestión de permisos">
+                <i class="bi bi-person-fill-lock"></i>
+            </a>
+            {% endif %}
 
-        <button class="btn btn-secondary mt-2 mt-sm-0 float-end" title="Configuracion de cuenta" onclick="window.location.href='/configuracion/'">
-            <i class="bi bi-gear-fill"></i>
-        </button>
+            {% if user.is_superuser %}
+            <form method="post" action="{% url 'sitio:delete_users' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-icon-dashboard" title="Eliminar no verificados y posts rechazados">
+                    <i class="bi bi-person-dash-fill"></i>
+                </button>
+            </form>
+            {% endif %}
+        </div>
     </h2>
     <p>Aquí puedes visualizar tu información personal y realizar ajustes en tus credenciales de usuario</p>
 
