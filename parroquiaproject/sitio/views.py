@@ -84,6 +84,7 @@ def inicio(request):
         elif action == "eliminar":
             noticia = get_object_or_404(Noticia, pk=request.POST.get("noticia_id"))
             noticia.delete()
+            messages.success(request, "La publicación se eliminó correctamente.")
             return redirect("inicio")
 
     return render(request, "inicio.html", {"noticias": noticias, "form": form})

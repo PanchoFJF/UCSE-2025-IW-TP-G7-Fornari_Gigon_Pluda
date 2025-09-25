@@ -17,7 +17,6 @@ class AdminActividades(admin.ModelAdmin):
     #search_fields = ('texto', )
     #date_hierarchy = 'fecha'
 
-
 @admin.register(UsuarioIglesias)
 class UsuariosIglesiasAdmin(admin.ModelAdmin):
     list_display = ("usuario",)

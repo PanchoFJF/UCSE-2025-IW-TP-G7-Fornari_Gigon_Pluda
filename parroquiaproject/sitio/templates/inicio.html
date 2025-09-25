@@ -101,14 +101,13 @@
               </button>
 
               <!-- Botón Eliminar -->
-              <form method="post" class="d-inline">
+              <form method="post" class="d-inline eliminar-form">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="eliminar">
                 <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
-                <button type="submit"
-                        class="btn btn-danger btn-sm btn-icon"
-                        title="Eliminar"
-                        onclick="return confirm('¿Seguro que deseas eliminar esta publicación?')">
+                <button type="button"
+                        class="btn btn-danger btn-sm btn-icon btn-eliminar"
+                        title="Eliminar">
                   <i class="bi bi-trash3-fill"></i>
                 </button>
               </form>
@@ -303,6 +302,26 @@ document.addEventListener("keydown", function(event) {
     document.getElementById("lightbox").style.display = "none";
     document.getElementById("lightbox-img").src = "";
   }
+});
+
+document.querySelectorAll('.btn-eliminar').forEach(button => {
+    button.addEventListener('click', function(e) {
+        const form = this.closest('form');
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¡No podrás revertir esta acción!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit(); // Envía el formulario solo si confirma
+            }
+        });
+    });
 });
 </script>
 {% endblock %}

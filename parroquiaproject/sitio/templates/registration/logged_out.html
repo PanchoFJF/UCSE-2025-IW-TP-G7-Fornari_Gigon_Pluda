@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}
+
 {% block content %}
 <h1>Sesión cerrada</h1>
 <p>Volver al <a href="{% url 'inicio' %}">inicio</a> o <a href="{% url 'login' %}">iniciar sesión</a>.</p>

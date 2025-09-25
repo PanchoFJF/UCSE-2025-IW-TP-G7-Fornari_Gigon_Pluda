@@ -63,9 +63,16 @@
     }
   }
 
+  h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 2.5rem;
+    text-align: center;           /* text-center */
+    padding-bottom: 1rem;         /* pb-3 → 16px */
+    margin-bottom: 1.5rem;        /* mb-4 → 24px *//
+}
 
 /* Titulo */
-  h2 {
+  main h2 {
     font-family: "Playfair Display", serif;
     font-style: italic;
     font-size: 2.5rem;
@@ -78,9 +85,27 @@
 
 /* Ajuste solo para móviles (pantallas menores a 768px) */
 @media (max-width: 767.98px) {
-  h2 {
+  main h2 {
     font-size: 2.25rem; /* más chico en móvil */
   }
+}
+
+/* Tamaño de fuente normal en desktop */
+.fs-lg {
+    font-size: 0.8rem; /* tamaño base para escritorio */
+}
+.fs-icon {
+    font-size: 1.1rem; /* iconos base */
+}
+
+/* Aumentar tamaño de fuente en móvil */
+@media (max-width: 992px) {
+    .fs-lg {
+        font-size: 1.2rem; /* texto más grande en móvil */
+    }
+    .fs-icon {
+        font-size: 1.5rem; /* icono más grande en móvil */
+    }
 }
 
 #calendar {
