@@ -17,7 +17,9 @@ from django.utils.timezone import now
 from datetime import timedelta
 from django.contrib.auth.decorators import user_passes_test
 from accounts.management.commands.delete_invalid_users import delete_invalid_users_and_rejected_posts
-
+import smtplib
+from django.conf import settings
+from socket import timeout
 User = get_user_model()
 
 # --- Eliminar usuarios inválidos ---
@@ -62,6 +64,18 @@ class SignUpView(generic.CreateView):
         )
         email_message = EmailMessage(mail_subject, message, to=[user.email])
         email_message.content_subtype = "html"
+
+        # --- CÓDIGO DE PRUEBA TEMPORAL ---
+        try:
+            with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=10) as server:
+                server.starttls()
+                server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+            print("¡La conexión al servidor SMTP se ha establecido correctamente!")
+        except timeout:
+            print("¡Error! La conexión ha fallado por tiempo de espera. La red está bloqueada.")
+        except Exception as e:
+            print(f"¡Error! No se pudo conectar al servidor SMTP. Error: {e}")
+        # --- FIN DEL CÓDIGO DE PRUEBA ---
         email_message.send()
 
         messages.success(self.request, "¡Cuenta creada! Revisa tu correo para activarla.")
