@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}  {# <-- aquí tiene que coincidir con tu base.html #}
+<h2>Buscar actividades:</h2>
+
+<form method="get" action="{% url 'haystack_search' %}">
+    {{ form.as_p }}
+    <input type="submit" value="Buscar" class="btn btn-primary">
+</form>
+
+{% if query %}
+    <h3>Resultados:</h3>
+    {% for result in page.object_list %}
+        <p>{{ result.object.titulo }} - {{ result.object.fechaVencimiento }}</p>
+    {% empty %}
+        <p>No se encontraron actividades.</p>
+    {% endfor %}
+
+    {% if page.has_previous or page.has_next %}
+        <div class="mt-3">
+            {% if page.has_previous %}
+                <a href="?q={{ query }}&page={{ page.previous_page_number }}">&laquo; Previous</a>
+            {% endif %}
+            |
+            {% if page.has_next %}
+                <a href="?q={{ query }}&page={{ page.next_page_number }}">Next &raquo;</a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

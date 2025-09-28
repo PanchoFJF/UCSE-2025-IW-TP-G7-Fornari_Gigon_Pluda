@@ -1,0 +1,5 @@
+{{ object.titulo }}
+{{ object.iglesia.nombre }}
+{{ object.titulo }}
+{% if object.categoria %}{{ object.categoria }}{% endif %}
+{% if object.texto %}{{ object.texto }}{% endif %}

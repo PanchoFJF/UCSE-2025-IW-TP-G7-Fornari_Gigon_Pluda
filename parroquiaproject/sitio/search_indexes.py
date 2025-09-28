@@ -1,15 +1,18 @@
 from haystack import indexes
-from sitio.models import Noticia
+from sitio.models import Actividades
+from django.utils import timezone
 
 
-class NoticiaIndex(indexes.SearchIndex, indexes.Indexable):
-    text = indexes.CharField(document=True, use_template=True)
+class ActividadIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.CharField(document=True, use_template=True)  
     titulo = indexes.CharField(model_attr='titulo')
-    fecha = indexes.DateTimeField(model_attr='fecha')
+    texto = indexes.CharField(model_attr='texto')
+    categoria = indexes.CharField(model_attr='categoria', null=True)
+    fechaVencimiento = indexes.DateTimeField(model_attr='fechaVencimiento', null=True)
+
 
     def get_model(self):
-        return Noticia
+        return Actividades
 
     def index_queryset(self, using=None):
-        """Queremos que se indexen todas las noticias que tengan archivada=False"""
-        return self.get_model().objects.filter(archivada=False)
+        return self.get_model().objects.filter(fechaVencimiento__gte=timezone.now())

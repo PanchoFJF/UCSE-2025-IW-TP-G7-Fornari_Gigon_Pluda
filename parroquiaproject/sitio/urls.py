@@ -32,4 +32,6 @@ urlpatterns = [
 
     # Revisión de Post
     path('check_post/', views.check_post_view, name="check_post"),
+
+    path('rebuild_index/', views.rebuild_index),
 ]
