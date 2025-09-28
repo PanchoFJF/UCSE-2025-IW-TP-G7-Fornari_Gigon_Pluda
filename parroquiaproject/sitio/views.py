@@ -180,6 +180,30 @@ def actividades(request):
         "parroquias": parroquias,
     })
 
+# sitio/views.py
+from django.http import JsonResponse, Http404
+from .models import Actividades
+
+def actividad_detalle_ajax(request, pk):
+    try:
+        actividad = Actividades.objects.get(pk=pk)
+        data = {
+            'titulo': actividad.titulo,
+            'categoria': actividad.categoria,
+            'dia': actividad.dia,
+            'hora': actividad.hora.strftime('%H:%M') if actividad.hora else '',
+            'texto': actividad.texto,
+            'iglesia': actividad.iglesia.nombre if actividad.iglesia else '',
+            'fechaVencimiento': actividad.fechaVencimiento.strftime('%Y-%m-%d %H:%M') if actividad.fechaVencimiento else '',
+        }
+    except Actividades.DoesNotExist:
+        data = {'error': 'Actividad no encontrada'}
+    return JsonResponse(data)
+
+#def actividad_detalle(request, actividad_id):
+    actividad = get_object_or_404(Actividades, id=actividad_id)
+    return render(request, 'sitio/actividad_detalle.html', {'actividad': actividad})
+
 def rebuild_index(request):
     from django.core.management import call_command
     from django.http import JsonResponse

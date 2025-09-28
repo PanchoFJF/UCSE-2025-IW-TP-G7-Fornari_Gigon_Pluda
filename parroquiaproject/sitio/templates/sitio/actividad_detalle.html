@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{ actividad.titulo }}</h2>
+<p><strong>Categoría:</strong> {{ actividad.categoria }}</p>
+<p><strong>Texto:</strong> {{ actividad.texto }}</p>
+<p><strong>Día:</strong> {{ actividad.dia }}</p>
+<p><strong>Hora:</strong> {{ actividad.hora }}</p>
+<p><strong>Vencimiento:</strong> {{ actividad.fechaVencimiento }}</p>
+<a href="{% url 'haystack_search' %}">Volver a resultados</a>
+{% endblock %}

@@ -29,6 +29,7 @@ urlpatterns = [
     path("autorizacion/", views.autorizacion_view, name="autorizacion"),
     path("suscribirse/<int:iglesia_id>/", views.suscribirse_iglesia, name="suscribirse_iglesia"),
     path('search/', include('haystack.urls')),
+    path('actividad/ajax/<int:pk>/', views.actividad_detalle_ajax, name='actividad_detalle_ajax'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

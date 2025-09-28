@@ -34,4 +34,5 @@ urlpatterns = [
     path('check_post/', views.check_post_view, name="check_post"),
 
     path('rebuild_index/', views.rebuild_index),
+    path('actividad/ajax/<int:pk>/', views.actividad_detalle_ajax, name='actividad_ajax'),
 ]
