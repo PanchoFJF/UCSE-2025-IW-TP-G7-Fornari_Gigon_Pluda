@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'haystack',
     'cloudinary_storage',
     'cloudinary',
 
@@ -32,6 +33,13 @@ INSTALLED_APPS = [
     'accounts',
     'widget_tweaks',
 ]
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': BASE_DIR / 'whoosh_index',
+    },
+}
 
 # --- MIDDLEWARE ---
 MIDDLEWARE = [
