@@ -177,10 +177,21 @@ import os
     #EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     #DEFAULT_FROM_EMAIL = "test@example.com"
 #else:
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.sendgrid.net"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "apikey"
-EMAIL_HOST_PASSWORD = os.environ.get("SENDGRID_API_KEY")  # la API Key que creaste en SendGrid
-DEFAULT_FROM_EMAIL = "yisuschristmesias@gmail.com"
+
+EMAIL_BACKEND_MODE = os.environ.get("EMAIL_BACKEND_MODE", "smtp")  # "smtp" o "api"
+
+if EMAIL_BACKEND_MODE == "smtp":
+    # Configuración SMTP clásica
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp.sendgrid.net"
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = "apikey"  # literal
+    EMAIL_HOST_PASSWORD = os.environ.get("SENDGRID_API_KEY")
+    DEFAULT_FROM_EMAIL = "yisuschristmesias@gmail.com"
+
+else:
+    # Configuración API de SendGrid (recomendada en Render)
+    EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+    SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+    DEFAULT_FROM_EMAIL = "yisuschristmesias@gmail.com"
