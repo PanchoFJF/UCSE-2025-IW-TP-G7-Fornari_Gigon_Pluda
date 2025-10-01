@@ -123,4 +123,38 @@ class AutorizacionForm(forms.Form):
         else:
             self.fields['iglesia_id'].queryset = Iglesia.objects.none()
 
+class ActividadesForm(forms.ModelForm):
+    class Meta:
+        model = Actividades
+        fields = ["categoria", "dia", "hora", "iglesia", "titulo", "texto", "fechaVencimiento"]
+
+    categoria = forms.ChoiceField(choices=[
+        ("Misa", "Misa"),
+        ("Adoración", "Adoración"),
+        ("Bingo", "Bingo"),
+        ("Retiro", "Retiro"),
+        ("Grupo Juvenil", "Grupo Juvenil"),
+        ("Otro", "Otro"),
+    ], required=True)
+
+    dia = forms.ChoiceField(choices=[
+        ("Lunes", "Lunes"),
+        ("Martes", "Martes"),
+        ("Miércoles", "Miércoles"),
+        ("Jueves", "Jueves"),
+        ("Viernes", "Viernes"),
+        ("Sábado", "Sábado"),
+        ("Domingo", "Domingo"),
+    ], required=True)
+
+    hora = forms.TimeField(
+        widget=forms.TimeInput(format='%H:%M', attrs={'placeholder': 'Ej: 17:30'}),
+        input_formats=['%H:%M']
+    )
+
+    fechaVencimiento = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        required=False
+    )
+
 

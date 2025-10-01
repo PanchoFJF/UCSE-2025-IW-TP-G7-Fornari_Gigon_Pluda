@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Iglesia
-from .forms import AutorizacionForm, IglesiaForm, EmailChangeForm
+from .forms import AutorizacionForm, IglesiaForm, EmailChangeForm, ActividadesForm
 from django.contrib.auth.models import User
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -132,10 +132,22 @@ def calendario(request):
     return render(request, "calendario.html", {
     })
 
-def horarios(request):
+def actividades(request):
+    dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+    # Crear actividad (desde modal)
+    if request.method == "POST":
+        form = ActividadesForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("sitio:actividades")  # recargar lista
+    else:
+        form = ActividadesForm()
+
+    # Filtros dinámicos
     dia = request.GET.get("dia")
     categoria = request.GET.get("categoria")
     parroquia_nombre = request.GET.get("parroquia")
+    vencimiento = request.GET.get("vencimiento")
 
     actividades = Actividades.objects.select_related("iglesia").all()
 
@@ -145,9 +157,14 @@ def horarios(request):
         actividades = actividades.filter(categoria__iexact=categoria)
     if parroquia_nombre:
         actividades = actividades.filter(iglesia__nombre__iexact=parroquia_nombre)
+    if vencimiento == "con":
+        actividades = actividades.exclude(fechaVencimiento__isnull=True)
+    elif vencimiento == "sin":
+        actividades = actividades.filter(fechaVencimiento__isnull=True)
 
     actividades = actividades.order_by("hora")
 
+    # Agrupar por día
     actividades_por_dia = defaultdict(list)
     for act in actividades:
         dia_normalizado = capfirst(act.dia.strip().lower())
@@ -156,28 +173,17 @@ def horarios(request):
     orden_dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
     actividades_por_dia_ordenadas = {dia: actividades_por_dia[dia] for dia in orden_dias if dia in actividades_por_dia}
 
-    # Obtener todas las categorías y parroquias para llenar los selects
-    categorias = Actividades.objects.values_list("categoria", flat=True).distinct()
-    parroquias = Iglesia.objects.all()
-
-    return render(request, "horarios.html", {
-        "actividades_por_dia": actividades_por_dia_ordenadas,
-        "filtros": {"dia": dia, "categoria": categoria, "parroquia": parroquia_nombre},
-        "categorias": categorias,
-        "parroquias": parroquias,
-    })
-
-def actividades(request):
-    actividades = Actividades.objects.all()
-
-    # Filtros dinámicos
+    # Para selects
     categorias = Actividades.objects.values_list("categoria", flat=True).distinct()
     parroquias = Iglesia.objects.all()
 
     return render(request, "actividades.html", {
-        "actividades": actividades,
+        "form": form,
+        "actividades": actividades,   
+        "dias": dias,                
         "categorias": categorias,
         "parroquias": parroquias,
+        "filtros": {"dia": dia, "categoria": categoria, "parroquia": parroquia_nombre, "vencimiento": vencimiento}
     })
 
 # sitio/views.py

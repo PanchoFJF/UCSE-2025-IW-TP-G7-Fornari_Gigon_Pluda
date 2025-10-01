@@ -15,7 +15,6 @@ urlpatterns = [
     # Iglesias y calendario, etc
     path('iglesias/', views.iglesias, name='iglesias'),
     path('calendario/', views.calendario, name='calendario'),
-    path('horarios/', views.horarios, name='horarios'),
     path('actividades/', views.actividades, name='actividades'),
 
     # URLs de configuración de usuario

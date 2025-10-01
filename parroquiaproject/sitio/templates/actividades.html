@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block title %}Actividades{% endblock %}
 
@@ -8,75 +9,143 @@
 {% endblock %}
 
 {% block content %}
-<div >
-    <h2>
-        Actividades Vigentes
-        <button class="btn btn-success mt-2 mt-sm-0 float-end" title="Nueva Actividad" data-bs-toggle="collapse">
-            <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-plus-lg" viewBox="0 1 16 16">
-        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
-            </svg>    
-        </button>
-    </h2>
+<div>
+  <h2>
+    Actividades Vigentes
+    <button class="btn btn-success mt-2 mt-sm-0 float-end" title="Nueva Actividad"
+            data-bs-toggle="modal" data-bs-target="#formActividad">
+      ➕
+    </button>
+  </h2>
+
+  <!-- FILTROS -->
+  <form method="get" class="mb-4 text-center">
+    <select name="dia">
+      <option value="">-- Día --</option>
+      {% for d in dias %}
+        <option value="{{ d }}">{{ d }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="categoria">
+      <option value="">-- Categoría --</option>
+      {% for c in categorias %}
+        <option value="{{ c }}" {% if filtros.categoria == c %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="parroquia">
+      <option value="">-- Parroquia --</option>
+      {% for p in parroquias %}
+        <option value="{{ p.nombre }}" {% if filtros.parroquia == p.nombre %}selected{% endif %}>
+          {{ p.nombre }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <select name="vencimiento">
+      <option value="">-- Vencimiento --</option>
+      <option value="con" {% if filtros.vencimiento == "con" %}selected{% endif %}>Con fecha</option>
+      <option value="sin" {% if filtros.vencimiento == "sin" %}selected{% endif %}>Sin fecha</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary btn-sm">🔍 Filtrar</button>
+    {% if filtros.dia or filtros.categoria or filtros.parroquia or filtros.vencimiento %}
+      <a href="." class="btn btn-danger btn-sm">🗑️ Borrar</a>
+    {% endif %}
+  </form>
+
+    <!-- LISTADO DE ACTIVIDADES EN TARJETAS -->
     <div class="row mb-2">
-  {% for actividad in actividades %}
-    <div class="col-md-6 mb-4"> <!-- Cada actividad ocupa media fila -->
-      <div class="row g-0 border rounded overflow-hidden flex-md-row shadow-sm h-md-250 position-relative">
-        <div class="col p-4 d-flex flex-column position-static">
-          <h3 class="mb-0">{{ actividad.titulo }}</h3>
-          <div class="mb-1 text-body-secondary">Fecha: {{ actividad.dia }}</div>
-          <div class="mb-1 text-body-secondary">Hora: {{ actividad.hora }}</div>
-          <p class="card-text mb-auto">Descripción: {{ actividad.texto }}</p>
+      {% for actividad in actividades %}
+        <div class="col-md-6 mb-4">
+          <!-- Cada actividad ocupa media fila -->
+          <div class="row g-0 border rounded overflow-hidden flex-md-row shadow-sm h-md-250 position-relative">
+            <div class="col p-4 d-flex flex-column position-static">
+              <h3 class="mb-0">{{ actividad.titulo }}</h3>
+              <div class="mb-1 text-body-secondary">Fecha: {{ actividad.dia }}</div>
+              <div class="mb-1 text-body-secondary">Hora: {{ actividad.hora }}</div>
+              <p class="card-text mb-auto">Descripción: {{ actividad.texto }}</p>
+            </div>
+            <div class="col-auto d-none d-lg-block">
+              {% if actividad.imagen %}
+                <img src="{{ actividad.imagen.url }}" alt="{{ actividad.titulo }}"
+                    class="img-fluid mb-3"
+                    style="max-height: 300px; width: 200px; height: 250px; object-fit: cover;">
+              {% else %}
+                <svg aria-label="Placeholder: Thumbnail" class="bd-placeholder-img"
+                    width="200" height="250" preserveAspectRatio="xMidYMid slice"
+                    role="img" xmlns="http://www.w3.org/2000/svg">
+                  <title>Placeholder</title>
+                  <rect width="100%" height="100%" fill="#55595c"></rect>
+                  <text x="50%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
+                </svg>
+              {% endif %}
+            </div>
+          </div>
         </div>
-        <div class="col-auto d-none d-lg-block">
-          {% if actividad.imagen %}
-            <img src="{{ actividad.imagen.url }}" alt="{{ actividad.titulo }}"
-              class="img-fluid mb-3"
-              style="max-height: 300px; width: 200px; height: 250px; object-fit: cover;">
-          {% else %}
-            <svg aria-label="Placeholder: Thumbnail"
-              class="bd-placeholder-img"
-              width="200" height="250"
-              preserveAspectRatio="xMidYMid slice"
-              role="img" xmlns="http://www.w3.org/2000/svg">
-              <title>Placeholder</title>
-              <rect width="100%" height="100%" fill="#55595c"></rect>
-              <text x="50%" y="50%" fill="#eceeef" dy=".3em">Sin Imagen</text>
-            </svg>
-          {% endif %}
-        </div>
-      </div>
+      {% empty %}
+        <p class="text-muted text-center">No hay actividades vigentes.</p>
+      {% endfor %}
     </div>
-  {% empty %}
-    <p class="text-muted text-center">No hay actividades vigentes.</p>
-  {% endfor %}
+  </div>
 </div>
 
-    <!-- LISTA DE ACTVIDADES DISEÑO VIEJO -->
-    <div class="accordion" id="accordionActividades">
-        {% for actividad in actividades %}
-        <div class="accordion-item">
-            <h3 class="accordion-header" id="heading{{ forloop.counter }}">
-                <button class="accordion-button collapsed" type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapse{{ forloop.counter }}">
-                    {{ actividad.categoria }} - {{ actividad.titulo }}
-                </button>
-            </h3>
-            <div id="collapse{{ forloop.counter }}"
-                 class="accordion-collapse collapse"
-                 data-bs-parent="#accordionActividades">
-                <div class="accordion-body text-center">
-                    {% if actividad.imagen %}
-                        <img src="{{ actividad.imagen.url }}" alt="{{ actividad.titulo }}"
-                             class="img-fluid mb-3" style="max-height: 300px;">
-                    {% endif %}
-                    <p><strong>Descripción:</strong> {{ actividad.texto }}</p>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <p class="text-muted text-center">No hay actividades vigentes.</p>
-        {% endfor %}
+<!-- Modal Detalle -->
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title">Detalle de la Actividad</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Título:</strong> <span id="detalleTitulo"></span></p>
+        <p><strong>Categoría:</strong> <span id="detalleCategoria"></span></p>
+        <p><strong>Día:</strong> <span id="detalleDia"></span></p>
+        <p><strong>Hora:</strong> <span id="detalleHora"></span></p>
+        <p><strong>Iglesia:</strong> <span id="detalleIglesia"></span></p>
+        <p><strong>Descripción:</strong> <span id="detalleTexto"></span></p>
+        <p><strong>Vencimiento:</strong> <span id="detalleVencimiento"></span></p>
+      </div>
     </div>
+  </div>
 </div>
+
+<!-- Modal Crear Actividad -->
+<div class="modal fade" id="formActividad" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="background-color: #E8E3D0;">
+      <div class="modal-header" style="background-color: #d0ccbb;">
+        <h5 class="modal-title">Nueva Actividad</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" id="formCrearActividad">
+          {% csrf_token %}
+          {{ form.as_p }}
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success w-100" form="formCrearActividad">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var detalleModal = document.getElementById('detalleModal')
+    detalleModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget
+        document.getElementById('detalleTitulo').textContent = button.getAttribute('data-titulo')
+        document.getElementById('detalleCategoria').textContent = button.getAttribute('data-categoria')
+        document.getElementById('detalleDia').textContent = button.getAttribute('data-dia')
+        document.getElementById('detalleHora').textContent = button.getAttribute('data-hora')
+        document.getElementById('detalleIglesia').textContent = button.getAttribute('data-iglesia')
+        document.getElementById('detalleTexto').textContent = button.getAttribute('data-texto')
+        document.getElementById('detalleVencimiento').textContent = button.getAttribute('data-fechavencimiento')
+    })
+})
+</script>
 {% endblock %}
