@@ -65,7 +65,21 @@
               <h3 class="mb-0">{{ actividad.titulo }}</h3>
               <div class="mb-1 text-body-secondary">Fecha: {{ actividad.dia }}</div>
               <div class="mb-1 text-body-secondary">Hora: {{ actividad.hora }}</div>
-              <p class="card-text mb-auto">Descripción: {{ actividad.texto }}</p>
+              <p class="card-text mb-auto">Descripción: {{ actividad.texto|truncatechars:100 }}</p>
+              
+              <!-- Botón más info -->
+              <button class="btn btn-info btn-sm mt-2"
+                      data-bs-toggle="modal"
+                      data-bs-target="#detalleModal"
+                      data-titulo="{{ actividad.titulo }}"
+                      data-categoria="{{ actividad.categoria }}"
+                      data-dia="{{ actividad.dia }}"
+                      data-hora="{{ actividad.hora }}"
+                      data-iglesia="{{ actividad.parroquia }}"
+                      data-texto="{{ actividad.texto }}"
+                      data-fechavencimiento="{{ actividad.fecha_vencimiento }}">
+                ℹ️ Más info
+              </button>
             </div>
             <div class="col-auto d-none d-lg-block">
               {% if actividad.imagen %}
