@@ -73,8 +73,8 @@
 
   <!-- ====================== LISTA DE PUBLICACIONES ====================== -->
   <div class="row row-cols-1 row-cols-md-2 g-4">
-    {% for noticia in noticias %}
-    <div class="col d-flex">
+  {% for noticia in noticias %}
+  <div class="col d-flex">
       <article class="row g-0 border rounded shadow-sm post-card overflow-hidden h-100 w-100">
 
         <!-- Columna texto -->
@@ -139,7 +139,7 @@
                 alt="{{ noticia.titulo }}"
                 class="img-fluid w-100"
                 style="object-fit: cover; cursor: pointer;"
-                onclick="openLightbox('{{ noticia.imagen.url }}', '{{ noticia.titulo|escapejs }}')">
+                onclick="openLightbox('{{ noticia.imagen.url }}')">
           {% else %}
             <!-- Placeholder -->
             <svg aria-label="Placeholder: Thumbnail"
@@ -219,8 +219,11 @@
       </div>
     </div>
     {% empty %}
-      <div class="col-12">
-        <p class="text-muted text-center">No hay publicaciones todavía.</p>
+      </div>
+      <div class="row">
+        <div class="col-12 d-flex align-items-center justify-content-center" style="min-height:80px;">
+          <p class="text-muted mb-0">No hay publicaciones todavía.</p>
+        </div>
       </div>
     {% endfor %}
   </div>
