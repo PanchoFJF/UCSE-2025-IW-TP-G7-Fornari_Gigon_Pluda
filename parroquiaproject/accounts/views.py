@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.views import generic
 from django.contrib import messages
-from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -14,7 +13,6 @@ from django.contrib.auth.views import LoginView, LogoutView
 from .forms import SignUpForm, CustomPasswordResetForm
 from django.contrib.auth.password_validation import validate_password
 from django.utils.timezone import now
-from datetime import timedelta
 from django.contrib.auth.decorators import user_passes_test
 from accounts.management.commands.delete_invalid_users import delete_invalid_users_and_rejected_posts
 import smtplib
@@ -23,11 +21,11 @@ from socket import timeout
 User = get_user_model()
 
 # --- Eliminar usuarios inválidos ---
-@user_passes_test(lambda u: u.is_superuser)  # solo superusuarios
-def delete_users_view(request):
-    user_count, post_count = delete_invalid_users_and_rejected_posts()
-    messages.success(request, f"Se eliminaron {user_count} usuarios no verificados y {post_count} publicaciones rechazadas.")
-    return redirect("sitio:dashboard")
+#@user_passes_test(lambda u: u.is_superuser)  # solo superusuarios
+#def delete_users_view(request):
+#    user_count, post_count = delete_invalid_users_and_rejected_posts()
+#    messages.success(request, f"Se eliminaron {user_count} usuarios no verificados y {post_count} publicaciones rechazadas.")
+#    return redirect("sitio:dashboard")
 
 # --- Registro con confirmación por email ---
 class SignUpView(generic.CreateView):
@@ -45,40 +43,40 @@ class SignUpView(generic.CreateView):
 
         # Crear usuario inactivo
         user = form.save(commit=False)
-        user.is_active = False
+        user.is_active = True
         user.save()
 
         # Generar uid y token
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
+        #uid = urlsafe_base64_encode(force_bytes(user.pk))
+        #token = default_token_generator.make_token(user)
 
         # Construir link de activación
-        path = reverse("activate", kwargs={"uidb64": uid, "token": token})
-        activation_link = self.request.build_absolute_uri(path)
+       #path = reverse("activate", kwargs={"uidb64": uid, "token": token})
+       # activation_link = self.request.build_absolute_uri(path)
 
         # Enviar email
-        mail_subject = "Activa tu cuenta"
-        message = render_to_string(
-            "registration/activation_email.html",
-            {"user": user, "activation_link": activation_link},
-        )
-        email_message = EmailMessage(mail_subject, message, to=[user.email])
-        email_message.content_subtype = "html"
+        #mail_subject = "Activa tu cuenta"
+        #message = render_to_string(
+        #    "registration/activation_email.html",
+        #    {"user": user, "activation_link": activation_link},
+        #)
+        #email_message = EmailMessage(mail_subject, message, to=[user.email])
+        #email_message.content_subtype = "html"
 
         # --- CÓDIGO DE PRUEBA TEMPORAL ---
-        try:
-            with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=10) as server:
-                server.starttls()
-                server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-            print("¡La conexión al servidor SMTP se ha establecido correctamente!")
-        except timeout:
-            print("¡Error! La conexión ha fallado por tiempo de espera. La red está bloqueada.")
-        except Exception as e:
-            print(f"¡Error! No se pudo conectar al servidor SMTP. Error: {e}")
+        #try:
+        #    with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=10) as server:
+        #        server.starttls()
+        #        server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+        #    print("¡La conexión al servidor SMTP se ha establecido correctamente!")
+        #except timeout:
+        #    print("¡Error! La conexión ha fallado por tiempo de espera. La red está bloqueada.")
+        #except Exception as e:
+        #    print(f"¡Error! No se pudo conectar al servidor SMTP. Error: {e}")
         # --- FIN DEL CÓDIGO DE PRUEBA ---
-        email_message.send()
+        #email_message.send()
 
-        messages.success(self.request, "¡Cuenta creada! Revisa tu correo para activarla.")
+        messages.success(self.request, "¡Cuenta creada! ")
         return redirect(self.success_url)
 
 # --- Activación de usuario ---

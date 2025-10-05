@@ -1,13 +1,11 @@
 from collections import defaultdict
 from django.utils import timezone
 from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
 from sitio.models import Actividades, Iglesia
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Iglesia
+from .models import Iglesia, Noticia, Actividades, UsuarioIglesias
 from .forms import AutorizacionForm, IglesiaForm, EmailChangeForm, ActividadesForm
 from django.contrib.auth.models import User
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -17,20 +15,17 @@ from django.template.loader import render_to_string
 from django.utils.timezone import now
 from django.db.models import Q
 from django.contrib.auth import logout
-
-# Create your views here.
-ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
-
 from django.contrib.auth.tokens import default_token_generator
 from collections import defaultdict
-from django.shortcuts import render
 from django.template.defaultfilters import capfirst
-from .models import Actividades, UsuarioIglesias
-from .models import Noticia
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from .forms import NoticiaForm, NoticiaEditForm
 from django.http import JsonResponse
 from django.conf import settings
+from django.http import JsonResponse, Http404
+from .models import Actividades
+# Create your views here.
+ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
 
 def inicio(request):
     # Solo aprobadas
@@ -186,10 +181,6 @@ def actividades(request):
         "filtros": {"dia": dia, "categoria": categoria, "parroquia": parroquia_nombre, "vencimiento": vencimiento}
     })
 
-# sitio/views.py
-from django.http import JsonResponse, Http404
-from .models import Actividades
-
 def actividad_detalle_ajax(request, pk):
     try:
         actividad = Actividades.objects.get(pk=pk)
@@ -291,7 +282,7 @@ def configuracion_reset(request):
         to=[user.email],
     )
     email_message.content_subtype = "html"
-    email_message.send()
+    #email_message.send()
 
     messages.success(request, "Te enviamos un enlace a tu correo actual para continuar con el cambio.")
     return redirect("sitio:configuracion")
@@ -320,7 +311,7 @@ def configuracion_enviar_email(request):
         to=[user.email],
     )
     email_message.content_subtype = "html"
-    email_message.send()
+    #email_message.send()
 
     # Guardar timestamp de envío en sesión
     request.session[f"email_reset_{user.pk}_sent_at"] = now().timestamp()
@@ -371,7 +362,7 @@ def configuracion_reset_email(request, uidb64, token):
                 to=[nuevo_email],
             )
             email_message.content_subtype = "html"
-            email_message.send()
+            #email_message.send()
 
             request.session[f"email_new_reset_{user.pk}_sent_at"] = now().timestamp()
             messages.success(request, "Te enviamos un enlace al nuevo correo para validarlo.")
@@ -383,8 +374,8 @@ def configuracion_reset_email(request, uidb64, token):
 
 
 # --- Confirmar el nuevo correo ---
-@login_required
-def configuracion_new_email(request, uidb64, token):
+#@login_required
+#def configuracion_new_email(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
@@ -438,7 +429,7 @@ def config_delete_send(request):
         to=[user.email],
     )
     email_message.content_subtype = "html"
-    email_message.send()
+    #email_message.send()
 
     request.session[f"delete_request_{user.pk}_sent_at"] = now().timestamp()
 
@@ -737,4 +728,4 @@ def nueva_publicacion_email(noticia, request):
             [usuario.email],
         )
         msg.attach_alternative(html_content, "text/html")
-        msg.send()
+        #msg.send()
