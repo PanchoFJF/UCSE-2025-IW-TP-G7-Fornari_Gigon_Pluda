@@ -21,11 +21,11 @@ from socket import timeout
 User = get_user_model()
 
 # --- Eliminar usuarios inválidos ---
-#@user_passes_test(lambda u: u.is_superuser)  # solo superusuarios
-#def delete_users_view(request):
-#    user_count, post_count = delete_invalid_users_and_rejected_posts()
-#    messages.success(request, f"Se eliminaron {user_count} usuarios no verificados y {post_count} publicaciones rechazadas.")
-#    return redirect("sitio:dashboard")
+@user_passes_test(lambda u: u.is_superuser)  # solo superusuarios
+def delete_users_view(request):
+    user_count, post_count = delete_invalid_users_and_rejected_posts()
+    messages.success(request, f"Se eliminaron {user_count} usuarios no verificados y {post_count} publicaciones rechazadas.")
+    return redirect("sitio:dashboard")
 
 # --- Registro con confirmación por email ---
 class SignUpView(generic.CreateView):
