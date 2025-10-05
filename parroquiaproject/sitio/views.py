@@ -642,7 +642,7 @@ def check_post_view(request):
                 email.content_subtype = "html"
                 if email.to: # solo si hay destinatario
                     #email.send(fail_silently=True)
-                    1 = 1 
+                    1 == 1 
 
                 # notificar suscriptores SOLO si es nueva publicación
                 if not es_edicion:
@@ -690,7 +690,7 @@ def check_post_view(request):
                 email.content_subtype = "html"
                 if email.to: # solo si hay destinatario
                     #email.send(fail_silently=True)
-                    1 =1
+                    1 == 1
 
                 messages.success(request, "Se ha rechazado la noticia exitosamente.")
                 return redirect("sitio:check_post")
