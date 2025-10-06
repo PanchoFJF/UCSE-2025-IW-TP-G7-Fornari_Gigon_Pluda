@@ -17,7 +17,7 @@
         <i class="bi bi-search"></i>
     </button>
   
-    {% if request.user.is_superuser %}
+    {% if puede_crear_actividad %}
     <button class="btn btn-success mt-2 float-end" title="Nueva Actividad"
             data-bs-toggle="modal" data-bs-target="#formActividad">
         <i class="bi bi-plus-lg"></i>

@@ -1,6 +1,7 @@
 from collections import defaultdict
 from django.utils import timezone
 from django.contrib import messages
+from flask import request
 from sitio.models import Actividades, Iglesia
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
@@ -20,7 +21,7 @@ from collections import defaultdict
 from django.template.defaultfilters import capfirst
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from .forms import NoticiaForm, NoticiaEditForm
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.conf import settings
 from django.http import JsonResponse, Http404
 from .models import Actividades
@@ -131,8 +132,13 @@ def calendario(request):
 
 def actividades(request):
     dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-    # Crear actividad (desde modal)
+
+    perfil = getattr(request.user, "perfil_iglesias", None)
+
     if request.method == "POST":
+        puede_crear = request.user.is_superuser or (perfil and perfil.iglesias_admin.exists())
+        if not puede_crear:
+            return HttpResponseForbidden("No tenés permisos para crear actividades.")
         form = ActividadesForm(request.POST)
         if form.is_valid():
             form.save()
@@ -147,6 +153,16 @@ def actividades(request):
             return redirect("sitio:actividades")
     else:
         form = ActividadesForm()
+        if perfil and not request.user.is_superuser:
+            form.fields["iglesia"].queryset = perfil.iglesias_admin.all()
+        else:
+            form.fields["iglesia"].queryset = Iglesia.objects.all()
+
+    puede_crear_actividad = False
+    if request.user.is_superuser:
+        puede_crear_actividad = True
+    elif perfil and perfil.iglesias_admin.exists():
+        puede_crear_actividad = True
 
     # Filtros dinámicos
     dia = request.GET.get("dia")
@@ -188,6 +204,7 @@ def actividades(request):
         "dias": dias,                
         "categorias": categorias,
         "parroquias": parroquias,
+        "puede_crear_actividad": puede_crear_actividad,
         "filtros": {"dia": dia, "categoria": categoria, "parroquia": parroquia_nombre, "vencimiento": vencimiento}
     })
 
