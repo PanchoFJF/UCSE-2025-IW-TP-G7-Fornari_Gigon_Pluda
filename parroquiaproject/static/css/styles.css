@@ -32,15 +32,6 @@
     }
 }
 
-.accordion-button {
-        background-color: #E8E3D0 ;
-    }
-.accordion-button:not(.collapsed) {
-    background-color: #E8E3D0 !important;
-    color: #000 !important;
-    box-shadow: none !important; /* quita el sombreado azul */
-    }
-
   .card-iglesia {
     background-color: #E8E3D0;
   }
@@ -86,7 +77,7 @@
 /* Ajuste solo para móviles (pantallas menores a 768px) */
 @media (max-width: 767.98px) {
   main h2 {
-    font-size: 2.25rem; /* más chico en móvil */
+    font-size: 2.15rem; /* más chico en móvil */
   }
 }
 
