@@ -26,7 +26,7 @@ urlpatterns = [
     #path("configuracion/delete/confirm/<uidb64>/<token>/", views.config_delete_confirm, name="config_delete_confirm"),
     path("configuracion/delete/final/", views.config_delete_final, name="config_delete_final"),
 
-    # Elimnar usuarios no verificados
+    # Eliminar usuarios no verificados
     path("delete_users/", delete_users_view, name="delete_users"),
 
     # Revisión de Post
@@ -34,4 +34,5 @@ urlpatterns = [
 
     path('rebuild_index/', views.rebuild_index),
     path('actividad/ajax/<int:pk>/', views.actividad_detalle_ajax, name='actividad_ajax'),
+    path("robots.txt", views.robots_txt, name="robots_txt"),
 ]

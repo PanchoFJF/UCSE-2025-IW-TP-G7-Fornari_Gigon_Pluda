@@ -20,7 +20,7 @@ from collections import defaultdict
 from django.template.defaultfilters import capfirst
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from .forms import NoticiaForm, NoticiaEditForm
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.http import JsonResponse, Http404
 from .models import Actividades
@@ -731,3 +731,24 @@ def nueva_publicacion_email(noticia, request):
         )
         msg.attach_alternative(html_content, "text/html")
         #msg.send()
+
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Disallow: /admin/",
+        "Disallow: /accounts/",
+        "Disallow: /dashboard/",
+        "Disallow: /configuracion/",
+        "Disallow: /signup/",
+        "Disallow: /login/",
+        "Disallow: /logout/",
+        "Disallow: /password_reset_custom/",
+        "Disallow: /reset/",
+        "Disallow: /autorizacion/",
+        "Disallow: /suscribirse/",
+        "Disallow: /delete_users/",
+        "Disallow: /check_post/",
+        "Allow: /",
+        "Sitemap: https://parroquia-ingweb.onrender.com/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
