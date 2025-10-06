@@ -24,6 +24,8 @@ from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.http import JsonResponse, Http404
 from .models import Actividades
+from django.http import JsonResponse
+from haystack.query import SearchQuerySet
 # Create your views here.
 ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
 
@@ -134,7 +136,15 @@ def actividades(request):
         form = ActividadesForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("sitio:actividades")  # recargar lista
+
+            # reconstruir índice automáticamente
+            from django.core.management import call_command
+            try:
+                call_command("update_index", verbosity=0)
+            except Exception as e:
+                print("Error actualizando índice:", e)
+
+            return redirect("sitio:actividades")
     else:
         form = ActividadesForm()
 
@@ -196,6 +206,24 @@ def actividad_detalle_ajax(request, pk):
     except Actividades.DoesNotExist:
         data = {'error': 'Actividad no encontrada'}
     return JsonResponse(data)
+
+def buscar_actividades_ajax(request):
+    query = request.GET.get("q", "").strip()
+    resultados = []
+    if query:
+        sqs = SearchQuerySet().filter(content=query)
+        for r in sqs:
+            obj = r.object
+            resultados.append({
+                "id": obj.id,
+                "titulo": obj.titulo,
+                "texto": obj.texto,
+                "categoria": obj.categoria,
+                "dia": obj.dia,
+                "hora": obj.hora.strftime('%H:%M') if obj.hora else '',
+                "fechaVencimiento": obj.fechaVencimiento.strftime('%Y-%m-%d') if obj.fechaVencimiento else ''
+            })
+    return JsonResponse({"resultados": resultados})
 
 #def actividad_detalle(request, actividad_id):
     actividad = get_object_or_404(Actividades, id=actividad_id)

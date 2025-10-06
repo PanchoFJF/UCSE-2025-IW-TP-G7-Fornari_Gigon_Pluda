@@ -139,6 +139,27 @@
   </div>
 </div>
 
+<!-- Modal Buscar Actividad -->
+<div class="modal fade" id="buscarModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="background-color: #E8E3D0;">
+      <div class="modal-header" style="background-color: #d0ccbb;">
+        <h5 class="modal-title">Buscar Actividades</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formBuscarActividad">
+          <div class="input-group mb-3">
+            <input type="text" id="buscarInput" class="form-control" placeholder="Buscar por título o descripción...">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+          </div>
+        </form>
+        <div id="resultadosBusqueda"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var detalleModal = document.getElementById('detalleModal')
@@ -154,41 +175,51 @@ document.addEventListener('DOMContentLoaded', function () {
     })
 })
 
-// AJAX búsqueda
-$(document).ready(function(){
-    $('#formBusqueda').on('submit', function(e){
-        e.preventDefault();
-        let query = $(this).find('input[name="q"]').val();
-        if(!query.trim()){ return; }
-
-        $('#resultadosBusqueda').html('<p class="text-center text-muted">Buscando...</p>');
-        $.get("{% url 'haystack_search' %}", { q: query }, function(data){
-            // Extraemos los resultados del template renderizado
-            let resultados = $(data).find('.main-content, #content, body').html();
-            $('#resultadosBusqueda').html(resultados || '<p>No se encontraron resultados.</p>');
-        });
+document.addEventListener('DOMContentLoaded', function () {
+    // Modal detalle (ya existente)
+    var detalleModal = document.getElementById('detalleModal');
+    detalleModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        document.getElementById('detalleTitulo').textContent = button.getAttribute('data-titulo');
+        document.getElementById('detalleCategoria').textContent = button.getAttribute('data-categoria');
+        document.getElementById('detalleDia').textContent = button.getAttribute('data-dia');
+        document.getElementById('detalleHora').textContent = button.getAttribute('data-hora');
+        document.getElementById('detalleIglesia').textContent = button.getAttribute('data-iglesia');
+        document.getElementById('detalleTexto').textContent = button.getAttribute('data-texto');
+        document.getElementById('detalleVencimiento').textContent = button.getAttribute('data-fechavencimiento');
     });
 
-    // Detalle AJAX de actividad desde resultado
-    $(document).on('click', '.actividad-link', function(e){
-        e.preventDefault();
-        let actividadId = $(this).data('id');
+    // Nueva funcionalidad: búsqueda AJAX
+    const formBuscar = document.getElementById('formBuscarActividad');
+    const inputBuscar = document.getElementById('buscarInput');
+    const resultadosDiv = document.getElementById('resultadosBusqueda');
 
-        $.get("{% url 'sitio:actividad_ajax' 0 %}".replace('0', actividadId), function(data){
-            if(data.error){
-                alert(data.error);
-            } else {
-                $('#buscarModal').modal('hide');
-                $('#detalleTitulo').text(data.titulo);
-                $('#detalleCategoria').text(data.categoria);
-                $('#detalleDia').text(data.dia);
-                $('#detalleHora').text(data.hora);
-                $('#detalleIglesia').text(data.iglesia);
-                $('#detalleTexto').text(data.texto);
-                $('#detalleVencimiento').text(data.fechaVencimiento);
-                new bootstrap.Modal(document.getElementById('detalleModal')).show();
-            }
-        });
+    formBuscar.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const query = inputBuscar.value.trim();
+        if (!query) return;
+
+        resultadosDiv.innerHTML = "<p>Buscando...</p>";
+
+        fetch(`/actividad/ajax/search/?q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.resultados.length === 0) {
+                    resultadosDiv.innerHTML = "<p>No se encontraron actividades.</p>";
+                } else {
+                    resultadosDiv.innerHTML = data.resultados.map(a => `
+                        <div class="border rounded p-2 mb-2" style="background:#fff;">
+                            <h5>${a.titulo}</h5>
+                            <p><strong>Categoría:</strong> ${a.categoria || ''}</p>
+                            <p><strong>Día:</strong> ${a.dia || ''} - ${a.hora || ''}</p>
+                            <p>${a.texto || ''}</p>
+                        </div>
+                    `).join('');
+                }
+            })
+            .catch(err => {
+                resultadosDiv.innerHTML = "<p>Error al buscar.</p>";
+            });
     });
 });
 </script>
