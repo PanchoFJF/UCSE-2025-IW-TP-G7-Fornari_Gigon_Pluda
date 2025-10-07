@@ -99,46 +99,39 @@
     }
 }
 
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-}
+  /* Grid */
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .week-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom:6px; }
 
-.day-card {
-  background-color: #E8E3D0;
-  border-radius: 10px;
-  padding: 8px;
-  min-height: 90px;
-  position: relative;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
+  /* Cards */
+  .day-card {
+    background-color: #E8E3D0;
+    border-radius: 8px;
+    padding: 6px;
+    min-height: 86px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .day-card.other-month { opacity: 0.45; background-color: #f5f5f5; }
+  .day-card.has-activity { border: 2px solid #6b705c; }
 
-.day-card.has-activity {
-  border: 2px solid #6b705c;
-}
+  .day-number { font-weight: 700; font-size: 0.95rem; margin-bottom:6px; color:#333; }
+  .day-number.muted { color: #777; font-weight: 600; }
 
-.day-number {
-  font-weight: bold;
-  font-size: 14px;
-  color: #333;
-  margin-bottom: 5px;
-}
+  .activity-list { font-size: 0.85rem; }
+  .activity-link {
+    display:block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+    text-decoration: none;
+    color: #2b2b2b;
+  }
+  .activity-link:hover { text-decoration: underline; color: #0b5ed7; }
 
-.activity-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  font-size: 13px;
-}
-
-.activity-list li {
-  background: #c9cba3;
-  border-radius: 5px;
-  padding: 2px 4px;
-  margin-bottom: 2px;
-  text-align: center;
-}
+  .week-header { margin-bottom: 8px; }
 
 /* Botones pequeños con icono centrado */
 .btn-icon {
