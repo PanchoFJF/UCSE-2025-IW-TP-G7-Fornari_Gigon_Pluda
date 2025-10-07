@@ -25,6 +25,7 @@ Los usuarios enfrentan una búsqueda fragmentada y poco eficiente de eventos rel
 - Acceso libre y sin registro
 - Visualización clara por día y horario
 - Filtros por tipo de evento y ubicación
+- Información actualizada desde una hoja de cálculo dinámica
 - Posibilidad de agregar eventos especiales (bingo, grupos juveniles, etc.)
 
 ---
@@ -45,9 +46,11 @@ Un usuario accede a la aplicación desde su celular sin necesidad de registrarse
 
 ### ⚙️ Funcionamiento técnico
 
-La aplicación divide actividades en:
+La aplicación se alimenta de una hoja de cálculo dinámica en Google Sheets, dividida en:
 - **Actividades permanentes:** eventos que se repiten semanalmente.
 - **Eventos especiales:** actividades únicas o mensuales (ej. “Primer domingo del mes”).
+
+La hoja se publica en modo lectura, permitiendo que el sitio web consuma los datos actualizados sin exponer credenciales ni permitir edición pública. Se utilizan macros y filtros para mantener el orden por fecha y horario.
 
 ---
 
