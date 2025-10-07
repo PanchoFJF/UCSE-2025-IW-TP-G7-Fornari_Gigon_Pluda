@@ -27,6 +27,7 @@ from .models import Actividades
 from django.http import JsonResponse
 from haystack.query import SearchQuerySet
 from datetime import datetime
+from django.core.management import call_command
 # Create your views here.
 ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
 
@@ -158,14 +159,9 @@ def actividades(request):
             return HttpResponseForbidden("No tenés permisos para crear actividades.")
         form = ActividadesForm(request.POST)
         if form.is_valid():
-            actividad = form.save(commit=True)  # Guardar y tener la instancia
-            # Actualizar índice solo para esta actividad
-            from haystack.utils import update_index
-            try:
-                update_index('default', model=actividad.__class__, instance=actividad)
-            except Exception as e:
-                print("Error actualizando índice:", e)
+            form.save()  # El índice se actualiza automáticamente
             return redirect("sitio:actividades")
+
     else:
         form = ActividadesForm()
         if perfil and not request.user.is_superuser:

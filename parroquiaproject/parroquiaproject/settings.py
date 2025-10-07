@@ -168,6 +168,9 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',      # backend default (por seguridad)
 ]
 
+# --- HAYSTACK ---
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
 import os
 
 # detectar entorno (por ejemplo por variable de entorno)
