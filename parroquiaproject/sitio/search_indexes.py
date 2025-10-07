@@ -1,7 +1,7 @@
 from haystack import indexes
 from sitio.models import Actividades
 from django.utils import timezone
-
+from django.db.models import Q
 
 class ActividadIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)  
@@ -15,4 +15,6 @@ class ActividadIndex(indexes.SearchIndex, indexes.Indexable):
         return Actividades
 
     def index_queryset(self, using=None):
-        return self.get_model().objects.filter(fechaVencimiento__gte=timezone.now())
+        return self.get_model().objects.filter(
+            Q(fechaVencimiento__gte=timezone.now()) | Q(fechaVencimiento__isnull=True)
+        )

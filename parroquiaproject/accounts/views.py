@@ -15,9 +15,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.utils.timezone import now
 from django.contrib.auth.decorators import user_passes_test
 from accounts.management.commands.delete_invalid_users import delete_invalid_users_and_rejected_posts
-import smtplib
 from django.conf import settings
-from socket import timeout
 User = get_user_model()
 
 # --- Eliminar usuarios inválidos ---
