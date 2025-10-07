@@ -238,6 +238,7 @@ def buscar_actividades_ajax(request):
                 "categoria": obj.categoria,
                 "dia": obj.dia,
                 "hora": obj.hora.strftime('%H:%M') if obj.hora else '',
+                "iglesia": obj.iglesia.nombre if obj.iglesia else "",
                 "fechaVencimiento": obj.fechaVencimiento.strftime('%Y-%m-%d') if obj.fechaVencimiento else ''
             })
     return JsonResponse({"resultados": resultados})

@@ -51,9 +51,9 @@
     </select>
 
     <select name="vencimiento">
-      <option value="">-- Vencimiento --</option>
-      <option value="con" {% if filtros.vencimiento == "con" %}selected{% endif %}>Con fecha</option>
-      <option value="sin" {% if filtros.vencimiento == "sin" %}selected{% endif %}>Sin fecha</option>
+      <option value="">-- Tipo --</option>
+      <option value="con" {% if filtros.vencimiento == "con" %}selected{% endif %}>Especial</option>
+      <option value="sin" {% if filtros.vencimiento == "sin" %}selected{% endif %}>Permanente</option>
     </select>
 
     <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
@@ -82,9 +82,8 @@
                       data-categoria="{{ actividad.categoria }}"
                       data-dia="{{ actividad.dia }}"
                       data-hora="{{ actividad.hora }}"
-                      data-iglesia="{{ actividad.parroquia }}"
-                      data-texto="{{ actividad.texto }}"
-                      data-fechavencimiento="{{ actividad.fecha_vencimiento }}">
+                      data-iglesia="{{ actividad.iglesia.nombre }}"
+                      data-texto="{{ actividad.texto }}">
                 ℹ️ Más info
               </button>
             </div>
@@ -112,7 +111,6 @@
         <p><strong>Hora:</strong> <span id="detalleHora"></span></p>
         <p><strong>Iglesia:</strong> <span id="detalleIglesia"></span></p>
         <p><strong>Descripción:</strong> <span id="detalleTexto"></span></p>
-        <p><strong>Vencimiento:</strong> <span id="detalleVencimiento"></span></p>
       </div>
     </div>
   </div>
@@ -150,7 +148,7 @@
       <div class="modal-body">
         <form id="formBuscarActividad">
           <div class="input-group mb-3">
-            <input type="text" id="buscarInput" class="form-control" placeholder="Buscar por título o descripción...">
+            <input type="text" id="buscarInput" class="form-control" placeholder="Buscar por título, descripción, iglesia..." required>
             <button type="submit" class="btn btn-primary">Buscar</button>
           </div>
         </form>
@@ -204,21 +202,46 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch(`/actividad/ajax/search/?q=${encodeURIComponent(query)}`)
             .then(res => res.json())
             .then(data => {
-                if (data.resultados.length === 0) {
-                    resultadosDiv.innerHTML = "<p>No se encontraron actividades.</p>";
-                } else {
-                    resultadosDiv.innerHTML = data.resultados.map(a => `
-                        <div class="border rounded p-2 mb-2" style="background:#fff;">
-                            <h5>${a.titulo}</h5>
-                            <p><strong>Categoría:</strong> ${a.categoria || ''}</p>
-                            <p><strong>Día:</strong> ${a.dia || ''} - ${a.hora || ''}</p>
-                            <p>${a.texto || ''}</p>
+                if (!data.resultados || data.resultados.length === 0) {
+                                    resultadosDiv.innerHTML = "<p class='text-muted text-center mb-0'>No se encontraron actividades.</p>";
+                                    return;
+                                }
+
+                // Mostrar los resultados de a 2 por fila
+                let html = '<div class="row">';
+                data.resultados.forEach((a, i) => {
+                    html += `
+                        <div class="col-md-6 mb-3">
+                            <div class="card shadow-sm p-3" style="background-color: #E8E3D0;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">${a.titulo}</h5>
+                                    <button class="btn btn-info btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#detalleModal"
+                                            data-titulo="${a.titulo}"
+                                            data-categoria="${a.categoria || ''}"
+                                            data-dia="${a.dia || ''}"
+                                            data-hora="${a.hora || ''}"
+                                            data-texto="${a.texto || ''}"
+                                            data-iglesia="${a.iglesia || ''}"
+                                            data-fechavencimiento="${a.fechaVencimiento || ''}">
+                                        ℹ️ Más información
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    `).join('');
-                }
+                    `;
+                    // Cierra la fila cada 2 tarjetas
+                    if ((i + 1) % 2 === 0 && i !== data.resultados.length - 1) {
+                        html += '</div><div class="row">';
+                    }
+                });
+                html += '</div>';
+                resultadosDiv.innerHTML = html;
             })
             .catch(err => {
-                resultadosDiv.innerHTML = "<p>Error al buscar.</p>";
+                resultadosDiv.innerHTML = "<p class='text-danger text-center'>Error al buscar.</p>";
+                console.error(err);
             });
     });
 });
