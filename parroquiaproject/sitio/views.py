@@ -1,7 +1,6 @@
 from collections import defaultdict
 from django.utils import timezone
 from django.contrib import messages
-from flask import request
 from sitio.models import Actividades, Iglesia
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
