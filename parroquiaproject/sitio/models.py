@@ -58,13 +58,19 @@ class Noticia(models.Model):
         return self.titulo
  
 class Actividades(models.Model):
+    TIPO_CHOICES = [
+        ('permanente', 'Permanente'),
+        ('especial', 'Especial'),
+    ]
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='permanente')
     categoria = models.CharField(max_length=50, blank=True, null=True)
     dia = models.CharField(max_length=20, null=True, blank=True)
     hora = models.TimeField(null=True, blank=True)
     iglesia = models.ForeignKey(Iglesia, blank=True, null=True, on_delete=models.CASCADE)
     titulo = models.CharField(max_length=50)
     texto = models.CharField(max_length=200)
-    fechaVencimiento = models.DateTimeField(null=True)
+    fecha_inicio = models.DateTimeField(null=True, blank=True)
+    fechaVencimiento = models.DateTimeField(null=True, blank=True)
     def __str__(self):
         return self.titulo
 

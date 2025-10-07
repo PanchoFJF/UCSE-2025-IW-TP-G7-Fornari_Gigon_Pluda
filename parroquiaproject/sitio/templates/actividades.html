@@ -70,7 +70,7 @@
           <div class="row g-0 border rounded overflow-hidden flex-md-row shadow-sm h-md-250 position-relative" style="background-color: #E8E3D0;">
             <div class="col p-4 d-flex flex-column position-static">
               <h3 class="mb-0">{{ actividad.titulo }}</h3>
-              <div class="mb-1 text-body-secondary">Fecha: {{ actividad.dia }}</div>
+              <div class="mb-1 text-body-secondary">Día: {{ actividad.dia }}</div>
               <div class="mb-1 text-body-secondary">Hora: {{ actividad.hora }}</div>
               <p class="card-text mb-auto">Descripción: {{ actividad.texto|truncatechars:100 }}</p>
               
@@ -80,10 +80,12 @@
                       data-bs-target="#detalleModal"
                       data-titulo="{{ actividad.titulo }}"
                       data-categoria="{{ actividad.categoria }}"
-                      data-dia="{{ actividad.dia }}"
+                      data-dia="{% if actividad.fecha_inicio %}{{ actividad.fecha_inicio|date:'l d \\d\\e F'|title }}{% else %}{{ actividad.dia }}{% endif %}"
                       data-hora="{{ actividad.hora }}"
                       data-iglesia="{{ actividad.iglesia.nombre }}"
-                      data-texto="{{ actividad.texto }}">
+                      data-texto="{{ actividad.texto }}"
+                      data-fecha_inicio="{{ actividad.fecha_inicio|date:'Y-m-d' }}"
+                      data-fechavencimiento="{{ actividad.fechaVencimiento|date:'Y-m-d' }}">
                 ℹ️ Más info
               </button>
             </div>
@@ -124,12 +126,30 @@
         <h5 class="modal-title">Nueva Actividad</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
+
       <div class="modal-body">
         <form method="post" id="formCrearActividad">
           {% csrf_token %}
-          {{ form.as_p }}
+          <p>{{ form.tipo.label_tag }} {{ form.tipo }}</p>
+          <p>{{ form.categoria.label_tag }} {{ form.categoria }}</p>
+          <p>{{ form.iglesia.label_tag }} {{ form.iglesia }}</p>
+          <p>{{ form.titulo.label_tag }} {{ form.titulo }}</p>
+          <p>{{ form.texto.label_tag }} {{ form.texto }}</p>
+
+          <!-- Campos para actividades PERMANENTES (Día + Hora) -->
+          <div id="permanente-fields">
+            <p>{{ form.dia.label_tag }} {{ form.dia }}</p>
+            <p>{{ form.hora.label_tag }} {{ form.hora }}</p>
+          </div>
+
+          <!-- Campos para actividades ESPECIALES (Fecha inicio + Fecha vencimiento) -->
+          <div id="especial-fields" style="display:none;">
+            <p>{{ form.fecha_inicio.label_tag }} {{ form.fecha_inicio }}</p>
+            <p>{{ form.fechaVencimiento.label_tag }} {{ form.fechaVencimiento }}</p>
+          </div>
         </form>
       </div>
+
       <div class="modal-footer">
         <button type="submit" class="btn btn-success w-100" form="formCrearActividad">Guardar</button>
       </div>
@@ -159,91 +179,156 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    var detalleModal = document.getElementById('detalleModal')
-    detalleModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget
-        document.getElementById('detalleTitulo').textContent = button.getAttribute('data-titulo')
-        document.getElementById('detalleCategoria').textContent = button.getAttribute('data-categoria')
-        document.getElementById('detalleDia').textContent = button.getAttribute('data-dia')
-        document.getElementById('detalleHora').textContent = button.getAttribute('data-hora')
-        document.getElementById('detalleIglesia').textContent = button.getAttribute('data-iglesia')
-        document.getElementById('detalleTexto').textContent = button.getAttribute('data-texto')
-        document.getElementById('detalleVencimiento').textContent = button.getAttribute('data-fechavencimiento')
-    })
-})
+
+function formatearFecha(fechaStr){
+    if(!fechaStr) return "";
+    const meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+    const dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+
+    // Tomar solo la parte de fecha (YYYY-MM-DD)
+    const fechaSolo = fechaStr.split('T')[0]; // Ignorar hora
+    const partes = fechaSolo.split('-'); // ['2025','10','18']
+    if(partes.length < 3) return fechaStr;
+    const año = parseInt(partes[0],10);
+    const mes = parseInt(partes[1],10) - 1; // JS meses 0-11
+    const dia = parseInt(partes[2],10);
+    
+    const fecha = new Date(año, mes, dia); // fecha local sin restar horas
+    const diaSemana = dias[fecha.getDay()];
+    const nombreMes = meses[fecha.getMonth()];
+    return `${diaSemana} ${dia} de ${nombreMes}`;
+}
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Modal detalle (ya existente)
-    var detalleModal = document.getElementById('detalleModal');
-    detalleModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget;
-        document.getElementById('detalleTitulo').textContent = button.getAttribute('data-titulo');
-        document.getElementById('detalleCategoria').textContent = button.getAttribute('data-categoria');
-        document.getElementById('detalleDia').textContent = button.getAttribute('data-dia');
-        document.getElementById('detalleHora').textContent = button.getAttribute('data-hora');
-        document.getElementById('detalleIglesia').textContent = button.getAttribute('data-iglesia');
-        document.getElementById('detalleTexto').textContent = button.getAttribute('data-texto');
-        document.getElementById('detalleVencimiento').textContent = button.getAttribute('data-fechavencimiento');
+  // helper
+  const $ = id => document.getElementById(id);
+
+  const tipoSelect = $('id_tipo');              // select tipo (valores: 'permanente' o 'especial')
+  const permanenteFields = $('permanente-fields');
+  const especialFields = $('especial-fields');
+  const fechaInicioInput = $('id_fecha_inicio');        // datetime-local
+  const fechaVencInput = $('id_fechaVencimiento');     // datetime-local
+  const diaSelect = $('id_dia');                       // select Día
+  const horaInput = $('id_hora');                      // input time
+
+  // defensive checks
+  function exists(el){ return typeof el !== 'undefined' && el !== null; }
+
+  // Toggle UI según tipo (usa minúsculas y mayúsculas por si el value viene diferente)
+  function toggleByTipo(value){
+    if(!exists(permanenteFields) || !exists(especialFields)) return;
+    const v = (value || '').toString().toLowerCase();
+    if(v === 'especial'){
+      especialFields.style.display = 'block';
+      permanenteFields.style.display = 'none';
+    } else {
+      especialFields.style.display = 'none';
+      permanenteFields.style.display = 'block';
+    }
+  }
+
+  // Inicializar y escuchar cambios en tipo
+  if(exists(tipoSelect)){
+    toggleByTipo(tipoSelect.value);
+    tipoSelect.addEventListener('change', function(){ toggleByTipo(this.value); });
+  }
+
+  // Si el modal se abre, recalcular (por si el formulario se reseteó)
+  const formModal = $('formActividad');
+  if(exists(formModal)){
+    // show.bs.modal se dispara por bootstrap cuando se muestra el modal
+    formModal.addEventListener('show.bs.modal', function () {
+      toggleByTipo(tipoSelect ? tipoSelect.value : null);
     });
+    // al ocultar, opcionalmente resetear el form para limpiar errores/valores previos
+    formModal.addEventListener('hidden.bs.modal', function () {
+      const f = $('formCrearActividad');
+      if(f) f.reset();
+      toggleByTipo(tipoSelect ? tipoSelect.value : null);
+    });
+  }
 
-    // Nueva funcionalidad: búsqueda AJAX
-    const formBuscar = document.getElementById('formBuscarActividad');
-    const inputBuscar = document.getElementById('buscarInput');
-    const resultadosDiv = document.getElementById('resultadosBusqueda');
+  // Autocompletar día y hora desde fecha_inicio (datetime-local)
+  if(exists(fechaInicioInput)){
+    fechaInicioInput.addEventListener('input', function () {
+      const v = this.value; // 'YYYY-MM-DDTHH:MM'
+      if(!v) return;
+      const d = new Date(v);
+      if(isNaN(d)) return;
+      const dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+      if(diaSelect) diaSelect.value = dias[d.getDay()];
+      if(horaInput){
+        const hh = String(d.getHours()).padStart(2,'0');
+        const mm = String(d.getMinutes()).padStart(2,'0');
+        horaInput.value = hh + ':' + mm;
+      }
+    });
+  }
 
+  /* ---------- Parte de búsqueda AJAX (idéntica a la tuya, pero puesta aquí sin duplicados) ---------- */
+  const formBuscar = $('formBuscarActividad');
+  const inputBuscar = $('buscarInput');
+  const resultadosDiv = $('resultadosBusqueda');
+  if (formBuscar && inputBuscar && resultadosDiv) {
     formBuscar.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const query = inputBuscar.value.trim();
-        if (!query) return;
-
-        resultadosDiv.innerHTML = "<p>Buscando...</p>";
-
-        fetch(`/actividad/ajax/search/?q=${encodeURIComponent(query)}`)
-            .then(res => res.json())
-            .then(data => {
-                if (!data.resultados || data.resultados.length === 0) {
-                                    resultadosDiv.innerHTML = "<p class='text-muted text-center mb-0'>No se encontraron actividades.</p>";
-                                    return;
-                                }
-
-                // Mostrar los resultados de a 2 por fila
-                let html = '<div class="row">';
-                data.resultados.forEach((a, i) => {
-                    html += `
-                        <div class="col-md-6 mb-3">
-                            <div class="card shadow-sm p-3" style="background-color: #E8E3D0;">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">${a.titulo}</h5>
-                                    <button class="btn btn-info btn-sm"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#detalleModal"
-                                            data-titulo="${a.titulo}"
-                                            data-categoria="${a.categoria || ''}"
-                                            data-dia="${a.dia || ''}"
-                                            data-hora="${a.hora || ''}"
-                                            data-texto="${a.texto || ''}"
-                                            data-iglesia="${a.iglesia || ''}"
-                                            data-fechavencimiento="${a.fechaVencimiento || ''}">
-                                        ℹ️ Más información
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    // Cierra la fila cada 2 tarjetas
-                    if ((i + 1) % 2 === 0 && i !== data.resultados.length - 1) {
-                        html += '</div><div class="row">';
-                    }
-                });
-                html += '</div>';
-                resultadosDiv.innerHTML = html;
-            })
-            .catch(err => {
-                resultadosDiv.innerHTML = "<p class='text-danger text-center'>Error al buscar.</p>";
-                console.error(err);
-            });
+      e.preventDefault();
+      const query = inputBuscar.value.trim();
+      if (!query) return;
+      resultadosDiv.innerHTML = "<p>Buscando...</p>";
+      fetch(`/actividad/ajax/search/?q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.resultados || data.resultados.length === 0) {
+            resultadosDiv.innerHTML = "<p class='text-muted text-center mb-0'>No se encontraron actividades.</p>";
+            return;
+          }
+          let html = '<div class="row">';
+          data.resultados.forEach((a, i) => {
+            html += `
+              <div class="col-md-6 mb-3">
+                <div class="card shadow-sm p-3" style="background-color: #E8E3D0;">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">${a.titulo}</h5>
+                    <button class="btn btn-info btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#detalleModal"
+                            data-titulo="${a.titulo}"
+                            data-categoria="${a.categoria || ''}"
+                            data-dia="${formatearFecha(a.fecha_inicio) || a.dia || ''}"
+                            data-hora="${a.hora || ''}"
+                            data-texto="${a.texto || ''}"
+                            data-iglesia="${a.iglesia || ''}"
+                            data-fecha_inicio="${a.fecha_inicio || ''}"
+                            data-fechavencimiento="${a.fechaVencimiento || ''}">
+                      ℹ️ Más información
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+          resultadosDiv.innerHTML = html;
+        })
+        .catch(err => {
+          resultadosDiv.innerHTML = "<p class='text-danger text-center'>Error al buscar.</p>";
+          console.error(err);
+        });
     });
+  }
+  /* ---------- fin búsqueda AJAX ---------- */
+  const detalleModal = document.getElementById('detalleModal');
+  if(detalleModal){
+    detalleModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      $('detalleTitulo').textContent = button.getAttribute('data-titulo') || '';
+      $('detalleCategoria').textContent = button.getAttribute('data-categoria') || '';
+      $('detalleDia').textContent = button.getAttribute('data-dia') || formatearFecha(button.getAttribute('data-fecha_inicio')) || '';
+      $('detalleHora').textContent = button.getAttribute('data-hora') || '';
+      $('detalleIglesia').textContent = button.getAttribute('data-iglesia') || '';
+      $('detalleTexto').textContent = button.getAttribute('data-texto') || '';
+    });
+  }
 });
 </script>
 {% endblock %}

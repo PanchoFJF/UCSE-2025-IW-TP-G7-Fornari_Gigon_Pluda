@@ -102,31 +102,12 @@ class EmailChangeForm(forms.Form):
 
         return nuevo_email
     
-class AutorizacionForm(forms.Form):
-    email = forms.EmailField(
-        label="Correo electrónico",
-        required=True,
-        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "ejemplo@correo.com"})
-    )
-    iglesia_id = forms.ModelChoiceField(
-        label="Iglesia",
-        queryset=Iglesia.objects.none(),
-        widget=forms.Select(attrs={"class": "form-control"}),
-        empty_label="-- Seleccionar Iglesia --"
-    )
-
-    def __init__(self, *args, **kwargs):
-        owner = kwargs.pop('owner', None) or kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-        if owner:
-            self.fields['iglesia_id'].queryset = Iglesia.objects.filter(administrador=owner)
-        else:
-            self.fields['iglesia_id'].queryset = Iglesia.objects.none()
-
 class ActividadesForm(forms.ModelForm):
-    class Meta:
-        model = Actividades
-        fields = ["categoria", "dia", "hora", "iglesia", "titulo", "texto", "fechaVencimiento"]
+    tipo = forms.ChoiceField(
+        choices=[("permanente", "Permanente"), ("especial", "Especial")],
+        required=True,
+        label="Tipo de actividad"
+    )
 
     categoria = forms.ChoiceField(choices=[
         ("Misa", "Misa"),
@@ -135,7 +116,7 @@ class ActividadesForm(forms.ModelForm):
         ("Retiro", "Retiro"),
         ("Grupo Juvenil", "Grupo Juvenil"),
         ("Otro", "Otro"),
-    ], required=True)
+    ], required=True, label="Categoría")
 
     dia = forms.ChoiceField(choices=[
         ("Lunes", "Lunes"),
@@ -145,16 +126,57 @@ class ActividadesForm(forms.ModelForm):
         ("Viernes", "Viernes"),
         ("Sábado", "Sábado"),
         ("Domingo", "Domingo"),
-    ], required=True)
+    ], required=False, label="Día")
 
     hora = forms.TimeField(
-        widget=forms.TimeInput(format='%H:%M', attrs={'placeholder': 'Ej: 17:30'}),
-        input_formats=['%H:%M']
+        widget=forms.TimeInput(attrs={"type": "time"}),
+        input_formats=['%H:%M'],
+        required=False,
+        label="Hora"
+    )
+
+    fecha_inicio = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        required=False,
+        label="Fecha y hora de inicio"
     )
 
     fechaVencimiento = forms.DateTimeField(
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
-        required=False
+        required=False,
+        label="Fecha de finalización"
     )
+
+    class Meta:
+        model = Actividades
+        fields = ["tipo", "categoria", "iglesia", "titulo", "texto", "dia", "hora", "fecha_inicio", "fechaVencimiento"]
+        labels = {
+            "texto": "Descripción",
+            "fechaVencimiento": "Fecha de finalización",
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        tipo = cleaned_data.get("tipo")
+
+        if tipo == "permanente":
+            if not cleaned_data.get("dia") or not cleaned_data.get("hora"):
+                raise forms.ValidationError("Debe completar Día y Hora para una actividad permanente.")
+            cleaned_data["fecha_inicio"] = None
+            cleaned_data["fechaVencimiento"] = None
+
+        elif tipo == "especial":
+            fecha_inicio = cleaned_data.get("fecha_inicio")
+            if not fecha_inicio:
+                raise forms.ValidationError("Debe ingresar la fecha de inicio para una actividad especial.")
+
+            # Día en español automáticamente
+            dias_es = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+            dia_nombre = dias_es[fecha_inicio.weekday()]
+            cleaned_data["dia"] = dia_nombre
+            cleaned_data["hora"] = fecha_inicio.time()
+            
+
+        return cleaned_data
 
 

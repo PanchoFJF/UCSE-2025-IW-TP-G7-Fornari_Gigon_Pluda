@@ -27,8 +27,27 @@ from django.http import JsonResponse, Http404
 from .models import Actividades
 from django.http import JsonResponse
 from haystack.query import SearchQuerySet
+from datetime import datetime
 # Create your views here.
 ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
+
+def formatear_fecha(fecha):
+    if not fecha:
+        return ""
+    if isinstance(fecha, str):
+        try:
+            fecha = datetime.strptime(fecha, "%Y-%m-%d")
+        except:
+            return fecha
+
+    dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"]
+    meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+
+    dia_semana = dias[fecha.weekday() if fecha.weekday() < 6 else 0]  # Ajuste de weekday
+    dia = fecha.day
+    mes = meses[fecha.month - 1]
+
+    return f"{dia_semana} {dia} de {mes}"
 
 def inicio(request):
     # Solo aprobadas
@@ -132,7 +151,6 @@ def calendario(request):
 
 def actividades(request):
     dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-
     perfil = getattr(request.user, "perfil_iglesias", None)
 
     if request.method == "POST":
@@ -142,14 +160,11 @@ def actividades(request):
         form = ActividadesForm(request.POST)
         if form.is_valid():
             form.save()
-
-            # reconstruir índice automáticamente
             from django.core.management import call_command
             try:
                 call_command("update_index", verbosity=0)
             except Exception as e:
                 print("Error actualizando índice:", e)
-
             return redirect("sitio:actividades")
     else:
         form = ActividadesForm()
@@ -158,13 +173,9 @@ def actividades(request):
         else:
             form.fields["iglesia"].queryset = Iglesia.objects.all()
 
-    puede_crear_actividad = False
-    if request.user.is_superuser:
-        puede_crear_actividad = True
-    elif perfil and perfil.iglesias_admin.exists():
-        puede_crear_actividad = True
+    puede_crear_actividad = request.user.is_superuser or (perfil and perfil.iglesias_admin.exists())
 
-    # Filtros dinámicos
+    # Filtros
     dia = request.GET.get("dia")
     categoria = request.GET.get("categoria")
     parroquia_nombre = request.GET.get("parroquia")
@@ -188,24 +199,23 @@ def actividades(request):
     # Agrupar por día
     actividades_por_dia = defaultdict(list)
     for act in actividades:
-        dia_normalizado = capfirst(act.dia.strip().lower())
+        dia_normalizado = capfirst(act.dia.strip().lower()) if act.dia else ""
         actividades_por_dia[dia_normalizado].append(act)
 
-    orden_dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-    actividades_por_dia_ordenadas = {dia: actividades_por_dia[dia] for dia in orden_dias if dia in actividades_por_dia}
+    orden_dias = dias
+    actividades_por_dia_ordenadas = {d: actividades_por_dia[d] for d in orden_dias if d in actividades_por_dia}
 
-    # Para selects
     categorias = Actividades.objects.values_list("categoria", flat=True).distinct()
     parroquias = Iglesia.objects.all()
 
     return render(request, "actividades.html", {
         "form": form,
-        "actividades": actividades,   
-        "dias": dias,                
+        "actividades": actividades,
+        "dias": dias,
         "categorias": categorias,
         "parroquias": parroquias,
         "puede_crear_actividad": puede_crear_actividad,
-        "filtros": {"dia": dia, "categoria": categoria, "parroquia": parroquia_nombre, "vencimiento": vencimiento}
+        "filtros": {"dia": dia, "categoria": categoria, "parroquia": parroquia_nombre, "vencimiento": vencimiento},
     })
 
 def actividad_detalle_ajax(request, pk):
@@ -214,11 +224,11 @@ def actividad_detalle_ajax(request, pk):
         data = {
             'titulo': actividad.titulo,
             'categoria': actividad.categoria,
-            'dia': actividad.dia,
+            'dia': formatear_fecha(actividad.fecha_inicio) if actividad.fecha_inicio else actividad.dia,
             'hora': actividad.hora.strftime('%H:%M') if actividad.hora else '',
             'texto': actividad.texto,
             'iglesia': actividad.iglesia.nombre if actividad.iglesia else '',
-            'fechaVencimiento': actividad.fechaVencimiento.strftime('%Y-%m-%d %H:%M') if actividad.fechaVencimiento else '',
+            'fechaVencimiento': formatear_fecha(actividad.fechaVencimiento) if actividad.fechaVencimiento else '',
         }
     except Actividades.DoesNotExist:
         data = {'error': 'Actividad no encontrada'}
@@ -228,19 +238,26 @@ def buscar_actividades_ajax(request):
     query = request.GET.get("q", "").strip()
     resultados = []
     if query:
-        sqs = SearchQuerySet().filter(content=query)
-        for r in sqs:
-            obj = r.object
-            resultados.append({
-                "id": obj.id,
-                "titulo": obj.titulo,
-                "texto": obj.texto,
-                "categoria": obj.categoria,
-                "dia": obj.dia,
-                "hora": obj.hora.strftime('%H:%M') if obj.hora else '',
-                "iglesia": obj.iglesia.nombre if obj.iglesia else "",
-                "fechaVencimiento": obj.fechaVencimiento.strftime('%Y-%m-%d') if obj.fechaVencimiento else ''
-            })
+        try:
+            sqs = SearchQuerySet().filter(content=query)
+            for r in sqs:
+                obj = r.object
+                resultados.append({
+                    "id": getattr(obj, "id", ""),
+                    "titulo": getattr(obj, "titulo", ""),
+                    "texto": getattr(obj, "texto", ""),
+                    "categoria": getattr(obj, "categoria", ""),
+                    "dia": formatear_fecha(getattr(obj, "fecha_inicio", None)) or getattr(obj, "dia", ""),
+                    "hora": getattr(obj, "hora", "").strftime('%H:%M') if getattr(obj, "hora", None) else '',
+                    "iglesia": getattr(obj.iglesia, "nombre", "") if getattr(obj, "iglesia", None) else "",
+                    "fecha_inicio": formatear_fecha(getattr(obj, "fecha_inicio", None)),
+                    "fechaVencimiento": formatear_fecha(getattr(obj, "fechaVencimiento", None)),
+                })
+        except Exception as e:
+            # Log para debugging
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({"error": f"Error al buscar: {e}"}, status=500)
     return JsonResponse({"resultados": resultados})
 
 #def actividad_detalle(request, actividad_id):
