@@ -1,46 +1,38 @@
 {% extends "base.html" %}
 {% load static %}
+{% load my_filters %}
 
 {% block title %}Calendario{% endblock %}
 
 {% block head %}
-  <!-- FullCalendar CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
 {% endblock %}
 
 {% block content %}
-  <h2>📅 Calendario de Actividades (Proximamente)</h2>
-  <div id="calendar"></div>
+<div class="d-flex justify-content-between mb-3">
+  <a href="?year={{ year }}&month={{ month|add:"-1" }}" class="btn btn-outline-secondary">← Anterior</a>
+  <a href="?year={{ year }}&month={{ month|add:"1" }}" class="btn btn-outline-secondary">Siguiente →</a>
+</div>
+
+<div class="container my-4">
+  <h2 class="text-center mb-4">Calendario de Actividades — {{ nombre_mes }} {{ year }}</h2>
+
+  <div class="calendar-grid">
+    {% for dia in 1|to:num_dias %}
+      {% with fecha=year|stringformat:"d"|add:"-"|add:month|stringformat:"02d"|add:"-"|add:dia|stringformat:"02d" %}
+      <div class="day-card {% if fecha in actividades_por_dia %}has-activity{% endif %}">
+        <div class="day-number">{{ dia }}</div>
+
+        {% if fecha in actividades_por_dia %}
+          <ul class="activity-list">
+            {% for act in actividades_por_dia|get_item:fecha %}
+              <li>{{ act.nombre }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      {% endwith %}
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}
-
-{% block extra_js %}
-  <!-- FullCalendar JS -->
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      var calendarEl = document.getElementById('calendar');
-
-      var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'es',
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        events: [
-          { title: 'Día del Catequista', start: '2025-08-21', color: '#28a745' },
-          { title: 'Pascua', start: '2025-04-20', color: '#f39c12' }
-        ],
-        dateClick: function(info) {
-          alert("Fecha seleccionada: " + info.dateStr);
-        }
-      });
-
-      calendar.render();
-    });
-  </script>
-{% endblock %}
-  

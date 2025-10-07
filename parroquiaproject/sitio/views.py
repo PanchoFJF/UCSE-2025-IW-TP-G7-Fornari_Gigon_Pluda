@@ -1,4 +1,5 @@
 from collections import defaultdict
+from multiprocessing import context
 from django.utils import timezone
 from django.contrib import messages
 from sitio.models import Actividades, Iglesia
@@ -26,8 +27,8 @@ from django.http import JsonResponse, Http404
 from .models import Actividades
 from django.http import JsonResponse
 from haystack.query import SearchQuerySet
-from datetime import datetime
-from django.core.management import call_command
+from datetime import datetime, date
+from calendar import monthrange
 # Create your views here.
 ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
 
@@ -146,8 +147,66 @@ def iglesias(request):
     })
 
 def calendario(request):
-    return render(request, "calendario.html", {
-    })
+    # Mes y año actual (o los que se indiquen por querystring)
+    hoy = timezone.localdate()
+    year = int(request.GET.get("year", hoy.year))
+    month = int(request.GET.get("month", hoy.month))
+
+    # Control de límites (si se pasa de diciembre/enero)
+    if month < 1:
+        month = 12
+        year -= 1
+    elif month > 12:
+        month = 1
+        year += 1
+
+    # Días del mes
+    _, num_dias = monthrange(year, month)
+
+    # Traemos todas las actividades especiales
+    actividades = Actividades.objects.filter(tipo__iexact="Especial")
+
+    # Convertimos las fechas en texto (dia) a objetos date, y filtramos las del mes actual
+    actividades_mes = []
+    for act in actividades:
+        try:
+            # Intentar interpretar 'dia' como fecha (formato esperado: YYYY-MM-DD o DD/MM/YYYY)
+            try:
+                fecha = datetime.strptime(act.dia, "%Y-%m-%d").date()
+            except ValueError:
+                fecha = datetime.strptime(act.dia, "%d/%m/%Y").date()
+
+            if fecha.year == year and fecha.month == month:
+                act.fecha_parsed = fecha
+                actividades_mes.append(act)
+        except Exception:
+            continue  # Ignora actividades con fecha inválida
+        
+
+    # Mapa fecha → lista de actividades
+    actividades_por_dia = {}
+    for act in actividades_mes:
+        fecha_str = act.fecha_parsed.strftime("%Y-%m-%d")
+        if fecha_str not in actividades_por_dia:
+            actividades_por_dia[fecha_str] = []
+        actividades_por_dia[fecha_str].append(act)
+
+    context = {
+        "year": year,
+        "month": month,
+        "num_dias": num_dias,
+        "actividades_por_dia": actividades_por_dia,
+        "nombre_mes": date(year, month, 1).strftime("%B").capitalize()
+    }
+
+    nombres_meses = {
+    1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril",
+    5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto",
+    9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
+    }
+    context["nombre_mes"] = nombres_meses.get(month, "")
+
+    return render(request, "calendario.html", context)
 
 def actividades(request):
     dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
