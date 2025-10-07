@@ -80,7 +80,7 @@
                       data-bs-target="#detalleModal"
                       data-titulo="{{ actividad.titulo }}"
                       data-categoria="{{ actividad.categoria }}"
-                      data-dia="{% if actividad.fecha_inicio %}{{ actividad.fecha_inicio|date:'l d \\d\\e F'|title }}{% else %}{{ actividad.dia }}{% endif %}"
+                      data-dia="{% if actividad.fecha_inicio %}{{ actividad.fecha_inicio|date:'l'|capfirst }} {{ actividad.fecha_inicio|date:'d' }} de {{ actividad.fecha_inicio|date:'F'|capfirst }}{% else %}{{ actividad.dia|capfirst }}{% endif %}"    
                       data-hora="{{ actividad.hora }}"
                       data-iglesia="{{ actividad.iglesia.nombre }}"
                       data-texto="{{ actividad.texto }}"

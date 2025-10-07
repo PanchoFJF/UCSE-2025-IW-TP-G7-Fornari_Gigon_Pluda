@@ -40,10 +40,10 @@ def formatear_fecha(fecha):
         except:
             return fecha
 
-    dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"]
+    dias = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
     meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 
-    dia_semana = dias[fecha.weekday() if fecha.weekday() < 6 else 0]  # Ajuste de weekday
+    dia_semana = dias[fecha.weekday()]  # weekday 0=Lunes
     dia = fecha.day
     mes = meses[fecha.month - 1]
 
@@ -159,10 +159,11 @@ def actividades(request):
             return HttpResponseForbidden("No tenés permisos para crear actividades.")
         form = ActividadesForm(request.POST)
         if form.is_valid():
-            form.save()
-            from django.core.management import call_command
+            actividad = form.save(commit=True)  # Guardar y tener la instancia
+            # Actualizar índice solo para esta actividad
+            from haystack.utils import update_index
             try:
-                call_command("update_index", verbosity=0)
+                update_index('default', model=actividad.__class__, instance=actividad)
             except Exception as e:
                 print("Error actualizando índice:", e)
             return redirect("sitio:actividades")
