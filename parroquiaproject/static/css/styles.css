@@ -102,29 +102,42 @@
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
+  gap: 6px;
 }
+
 .day-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  background-color: #E8E3D0;
+  border-radius: 10px;
   padding: 8px;
-  min-height: 80px;
+  min-height: 90px;
   position: relative;
-  background: #fafafa;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
+
 .day-card.has-activity {
-  background: #fff8e1;
-  border-color: #f1c40f;
+  border: 2px solid #6b705c;
 }
+
 .day-number {
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 5px;
 }
+
 .activity-list {
   list-style: none;
-  margin: 5px 0 0;
+  margin: 0;
   padding: 0;
-  font-size: 0.85rem;
+  font-size: 13px;
+}
+
+.activity-list li {
+  background: #c9cba3;
+  border-radius: 5px;
+  padding: 2px 4px;
+  margin-bottom: 2px;
+  text-align: center;
 }
 
 /* Botones pequeños con icono centrado */

@@ -147,12 +147,12 @@ def iglesias(request):
     })
 
 def calendario(request):
-    # Mes y año actual (o los que se indiquen por querystring)
+    # Año/mes (puede venir por querystring)
     hoy = timezone.localdate()
     year = int(request.GET.get("year", hoy.year))
     month = int(request.GET.get("month", hoy.month))
 
-    # Control de límites (si se pasa de diciembre/enero)
+    # Ajuste por overflow de mes
     if month < 1:
         month = 12
         year -= 1
@@ -160,52 +160,81 @@ def calendario(request):
         month = 1
         year += 1
 
-    # Días del mes
-    _, num_dias = monthrange(year, month)
+    # Primer día de la semana (0=Lunes) y cantidad de días en el mes
+    first_weekday, num_dias = monthrange(year, month)  # first_weekday: 0=Mon .. 6=Sun
 
-    # Traemos todas las actividades especiales
-    actividades = Actividades.objects.filter(tipo__iexact="Especial")
+    # Prev / next month info (para mostrar números de días de meses adyacentes)
+    prev_month = month - 1 if month > 1 else 12
+    prev_year = year if month > 1 else year - 1
+    next_month = month + 1 if month < 12 else 1
+    next_year = year if month < 12 else year + 1
+    _, prev_num_dias = monthrange(prev_year, prev_month)
 
-    # Convertimos las fechas en texto (dia) a objetos date, y filtramos las del mes actual
-    actividades_mes = []
-    for act in actividades:
+    # Traer actividades tipo "especial" (no tocar modelo). Excluir nulos de fechaVencimiento
+    actividades_qs = Actividades.objects.filter(tipo__iexact="especial").exclude(fechaVencimiento__isnull=True)
+
+    # Mapear actividades por día (día número en mes actual -> [acts])
+    actividades_por_day = {}
+    for act in actividades_qs:
+        fv = act.fechaVencimiento
+        parsed = None
+        # Soportar datetime/date o strings (robusto)
         try:
-            # Intentar interpretar 'dia' como fecha (formato esperado: YYYY-MM-DD o DD/MM/YYYY)
-            try:
-                fecha = datetime.strptime(act.dia, "%Y-%m-%d").date()
-            except ValueError:
-                fecha = datetime.strptime(act.dia, "%d/%m/%Y").date()
-
-            if fecha.year == year and fecha.month == month:
-                act.fecha_parsed = fecha
-                actividades_mes.append(act)
+            if hasattr(fv, "date"):  # datetime or date-like
+                parsed = fv.date() if hasattr(fv, "date") else fv
+            else:
+                s = str(fv)
+                for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M:%S"):
+                    try:
+                        parsed = datetime.strptime(s, fmt).date()
+                        break
+                    except Exception:
+                        pass
         except Exception:
-            continue  # Ignora actividades con fecha inválida
-        
+            parsed = None
 
-    # Mapa fecha → lista de actividades
-    actividades_por_dia = {}
-    for act in actividades_mes:
-        fecha_str = act.fecha_parsed.strftime("%Y-%m-%d")
-        if fecha_str not in actividades_por_dia:
-            actividades_por_dia[fecha_str] = []
-        actividades_por_dia[fecha_str].append(act)
+        if not parsed:
+            continue
+
+        if parsed.year == year and parsed.month == month:
+            actividades_por_day.setdefault(parsed.day, []).append(act)
+
+    # Construir semanas: cada semana = lista de 7 celdas {number, in_current_month, activities}
+    weeks = []
+    week = []
+
+    # 1) días "precedentes" del mes anterior (si first_weekday > 0)
+    for i in range(first_weekday):
+        day_num = prev_num_dias - (first_weekday - 1) + i  # últimos días del mes anterior
+        week.append({"number": day_num, "in_current_month": False, "activities": []})
+
+    # 2) días del mes actual
+    for day in range(1, num_dias + 1):
+        week.append({"number": day, "in_current_month": True, "activities": actividades_por_day.get(day, [])})
+        if len(week) == 7:
+            weeks.append(week)
+            week = []
+
+    # 3) rellenar última semana con días del mes siguiente si es necesario
+    next_day = 1
+    if week:
+        while len(week) < 7:
+            week.append({"number": next_day, "in_current_month": False, "activities": []})
+            next_day += 1
+        weeks.append(week)
+
+    nombres_meses = {
+        1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril",
+        5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto",
+        9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
+    }
 
     context = {
         "year": year,
         "month": month,
-        "num_dias": num_dias,
-        "actividades_por_dia": actividades_por_dia,
-        "nombre_mes": date(year, month, 1).strftime("%B").capitalize()
+        "weeks": weeks,
+        "nombre_mes": nombres_meses.get(month, ""),
     }
-
-    nombres_meses = {
-    1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril",
-    5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto",
-    9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
-    }
-    context["nombre_mes"] = nombres_meses.get(month, "")
-
     return render(request, "calendario.html", context)
 
 def actividades(request):
