@@ -68,11 +68,7 @@ class AutorizacionForm(forms.Form):
         user = kwargs.pop('user', None)  # recibimos opcionalmente el user
         super().__init__(*args, **kwargs)
         if user:
-            try:
-                usuario_iglesias = UsuarioIglesias.objects.get(usuario=user)
-                self.fields['iglesia_id'].queryset = usuario_iglesias.iglesias_admin.all()
-            except UsuarioIglesias.DoesNotExist:
-                self.fields['iglesia_id'].queryset = Iglesia.objects.none()
+                self.fields["iglesia_id"].queryset = Iglesia.objects.filter(administrador=user)
 
 
 class EmailChangeForm(forms.Form):
