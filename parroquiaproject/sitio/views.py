@@ -1,4 +1,5 @@
 from collections import defaultdict
+from multiprocessing import context
 from django.utils import timezone
 from django.contrib import messages
 from sitio.models import Actividades, Iglesia
@@ -26,8 +27,8 @@ from django.http import JsonResponse, Http404
 from .models import Actividades
 from django.http import JsonResponse
 from haystack.query import SearchQuerySet
-from datetime import datetime
-from django.core.management import call_command
+from datetime import datetime, date
+from calendar import monthrange
 # Create your views here.
 ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
 
@@ -146,8 +147,95 @@ def iglesias(request):
     })
 
 def calendario(request):
-    return render(request, "calendario.html", {
-    })
+    # Año/mes (puede venir por querystring)
+    hoy = timezone.localdate()
+    year = int(request.GET.get("year", hoy.year))
+    month = int(request.GET.get("month", hoy.month))
+
+    # Ajuste por overflow de mes
+    if month < 1:
+        month = 12
+        year -= 1
+    elif month > 12:
+        month = 1
+        year += 1
+
+    # Primer día de la semana (0=Lunes) y cantidad de días en el mes
+    first_weekday, num_dias = monthrange(year, month)  # first_weekday: 0=Mon .. 6=Sun
+
+    # Prev / next month info (para mostrar números de días de meses adyacentes)
+    prev_month = month - 1 if month > 1 else 12
+    prev_year = year if month > 1 else year - 1
+    next_month = month + 1 if month < 12 else 1
+    next_year = year if month < 12 else year + 1
+    _, prev_num_dias = monthrange(prev_year, prev_month)
+
+    # Traer actividades tipo "especial" (no tocar modelo). Excluir nulos de fechaVencimiento
+    actividades_qs = Actividades.objects.filter(tipo__iexact="especial").exclude(fechaVencimiento__isnull=True)
+
+    # Mapear actividades por día (día número en mes actual -> [acts])
+    actividades_por_day = {}
+    for act in actividades_qs:
+        fv = act.fechaVencimiento
+        parsed = None
+        # Soportar datetime/date o strings (robusto)
+        try:
+            if hasattr(fv, "date"):  # datetime or date-like
+                parsed = fv.date() if hasattr(fv, "date") else fv
+            else:
+                s = str(fv)
+                for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M:%S"):
+                    try:
+                        parsed = datetime.strptime(s, fmt).date()
+                        break
+                    except Exception:
+                        pass
+        except Exception:
+            parsed = None
+
+        if not parsed:
+            continue
+
+        if parsed.year == year and parsed.month == month:
+            actividades_por_day.setdefault(parsed.day, []).append(act)
+
+    # Construir semanas: cada semana = lista de 7 celdas {number, in_current_month, activities}
+    weeks = []
+    week = []
+
+    # 1) días "precedentes" del mes anterior (si first_weekday > 0)
+    for i in range(first_weekday):
+        day_num = prev_num_dias - (first_weekday - 1) + i  # últimos días del mes anterior
+        week.append({"number": day_num, "in_current_month": False, "activities": []})
+
+    # 2) días del mes actual
+    for day in range(1, num_dias + 1):
+        week.append({"number": day, "in_current_month": True, "activities": actividades_por_day.get(day, [])})
+        if len(week) == 7:
+            weeks.append(week)
+            week = []
+
+    # 3) rellenar última semana con días del mes siguiente si es necesario
+    next_day = 1
+    if week:
+        while len(week) < 7:
+            week.append({"number": next_day, "in_current_month": False, "activities": []})
+            next_day += 1
+        weeks.append(week)
+
+    nombres_meses = {
+        1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril",
+        5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto",
+        9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
+    }
+
+    context = {
+        "year": year,
+        "month": month,
+        "weeks": weeks,
+        "nombre_mes": nombres_meses.get(month, ""),
+    }
+    return render(request, "calendario.html", context)
 
 def actividades(request):
     dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
