@@ -40,13 +40,20 @@ def formatear_fecha(fecha):
             fecha = datetime.strptime(fecha, "%Y-%m-%d")
         except:
             return fecha
+        
+    if isinstance(fecha, datetime):
+        fecha_date = fecha.date()
+    elif isinstance(fecha, date):
+        fecha_date = fecha
+    else:
+        return ""
 
     dias = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
     meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 
-    dia_semana = dias[fecha.weekday()]  # weekday 0=Lunes
-    dia = fecha.day
-    mes = meses[fecha.month - 1]
+    dia_semana = dias[fecha_date.weekday()]  # weekday 0=Lunes
+    dia = fecha_date.day
+    mes = meses[fecha_date.month - 1]
 
     return f"{dia_semana} {dia} de {mes}"
 
@@ -377,6 +384,29 @@ def dashboard(request):
 
     # Solo se puede autorizar si es admin principal de al menos una iglesia
     can_authorize = admin_iglesias.exists()
+
+   # ⚙️ Preparar formato especial solo para el dashboard
+    for actividad in actividades:
+        # Convertir hora a string si existe
+        if actividad.hora:
+            try:
+                hora_str = actividad.hora.strftime("%H:%M")
+            except Exception:
+                hora_str = str(actividad.hora)
+        else:
+            hora_str = None
+
+        # Si es especial → usar fecha_inicio + hora
+        if actividad.tipo == "especial" and actividad.fecha_inicio:
+            fecha_text = formatear_fecha(actividad.fecha_inicio)
+            hora_text = hora_str or actividad.fecha_inicio.strftime("%H:%M")
+            actividad.fecha_y_hora = f"{fecha_text} - {hora_text}"
+        else:
+            # Para permanentes → usar campos normales
+            if hora_str:
+                actividad.fecha_y_hora = f"{actividad.dia} - {hora_str}"
+            else:
+                actividad.fecha_y_hora = actividad.dia or ""
 
     context = {
         "iglesias": iglesias,
