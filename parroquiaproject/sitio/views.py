@@ -29,6 +29,7 @@ from django.http import JsonResponse
 from haystack.query import SearchQuerySet
 from datetime import datetime, date
 from calendar import monthrange
+from haystack import connections
 # Create your views here.
 ORDEN_DIAS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
 
@@ -245,6 +246,14 @@ def calendario(request):
     return render(request, "calendario.html", context)
 
 def actividades(request):
+    ahora = timezone.now()
+    vencidas = Actividades.objects.filter(tipo="especial", fechaVencimiento__lt=ahora)
+    if vencidas.exists():
+        backend = connections['default'].get_backend()
+        for act in vencidas:
+            backend.remove(act)  # Borra las vencidas del índice
+        vencidas.delete()
+
     dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
     perfil = getattr(request.user, "perfil_iglesias", None)
 
@@ -385,7 +394,7 @@ def dashboard(request):
     # Solo se puede autorizar si es admin principal de al menos una iglesia
     can_authorize = admin_iglesias.exists()
 
-   # ⚙️ Preparar formato especial solo para el dashboard
+   # Preparar formato especial solo para el dashboard
     for actividad in actividades:
         # Convertir hora a string si existe
         if actividad.hora:
