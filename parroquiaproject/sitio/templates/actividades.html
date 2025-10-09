@@ -70,24 +70,49 @@
           <div class="row g-0 border rounded overflow-hidden flex-md-row shadow-sm h-md-250 position-relative" style="background-color: #E8E3D0;">
             <div class="col p-4 d-flex flex-column position-static">
               <h3 class="mb-0">{{ actividad.titulo }}</h3>
-              <div class="mb-1 text-body-secondary">Día: {{ actividad.dia }}</div>
+              <div class="mb-1 mt-2 text-body-secondary">Día: {{ actividad.dia }}</div>
               <div class="mb-1 text-body-secondary">Hora: {{ actividad.hora }}</div>
-              <p class="card-text mb-auto">Descripción: {{ actividad.texto|truncatechars:100 }}</p>
-              
-              <!-- Botón más info -->
-              <button class="btn btn-info btn-sm mt-2"
-                      data-bs-toggle="modal"
-                      data-bs-target="#detalleModal"
-                      data-titulo="{{ actividad.titulo }}"
-                      data-categoria="{{ actividad.categoria }}"
-                      data-dia="{% if actividad.fecha_inicio %}{{ actividad.fecha_inicio|date:'l'|capfirst }} {{ actividad.fecha_inicio|date:'d' }} de {{ actividad.fecha_inicio|date:'F'|capfirst }}{% else %}{{ actividad.dia|capfirst }}{% endif %}"    
-                      data-hora="{{ actividad.hora }}"
-                      data-iglesia="{{ actividad.iglesia.nombre }}"
-                      data-texto="{{ actividad.texto }}"
-                      data-fecha_inicio="{{ actividad.fecha_inicio|date:'Y-m-d' }}"
-                      data-fechavencimiento="{{ actividad.fechaVencimiento|date:'Y-m-d' }}">
-                ℹ️ Más info
-              </button>
+              <p class="card-text mb-auto text-muted">Descripción: {{ actividad.texto|truncatechars:100 }}</p>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+
+                <!-- Botones izquierda -->
+                <div class="d-flex align-items-center gap-2">
+                  <!-- Botón Editar -->
+                  <button class="btn btn-warning btn-sm btn-icon text-light"
+                          data-bs-toggle="modal"
+                          data-bs-target="#editarNoticia{{ noticia.id }}"
+                          title="Editar">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+
+                  <!-- Botón Eliminar -->
+                  <form method="post" class="d-inline eliminar-form mb-0">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="eliminar">
+                    <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
+                    <button type="button"
+                            class="btn btn-danger btn-sm btn-icon btn-eliminar"
+                            title="Eliminar">
+                      <i class="bi bi-trash3-fill"></i>
+                    </button>
+                  </form>
+                </div>
+
+                <!-- Botón Más info (derecha) -->
+                <button class="btn btn-info btn-sm btn-icon-detalles"
+                        data-bs-toggle="modal"
+                        data-bs-target="#detalleModal"
+                        data-titulo="{{ actividad.titulo }}"
+                        data-categoria="{{ actividad.categoria }}"
+                        data-dia="{% if actividad.fecha_inicio %}{{ actividad.fecha_inicio|date:'l'|capfirst }} {{ actividad.fecha_inicio|date:'d' }} de {{ actividad.fecha_inicio|date:'F'|capfirst }}{% else %}{{ actividad.dia|capfirst }}{% endif %}"    
+                        data-hora="{{ actividad.hora }}"
+                        data-iglesia="{{ actividad.iglesia.nombre }}"
+                        data-texto="{{ actividad.texto }}"
+                        data-fecha_inicio="{{ actividad.fecha_inicio|date:'Y-m-d' }}"
+                        data-fechavencimiento="{{ actividad.fechaVencimiento|date:'Y-m-d' }}">
+                  <i class="bi bi-info-circle"> Detalles</i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -179,7 +204,6 @@
 </div>
 
 <script>
-
 function formatearFecha(fechaStr){
     if(!fechaStr) return "";
     const meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -215,17 +239,43 @@ document.addEventListener('DOMContentLoaded', function () {
   function exists(el){ return typeof el !== 'undefined' && el !== null; }
 
   // Toggle UI según tipo (usa minúsculas y mayúsculas por si el value viene diferente)
-  function toggleByTipo(value){
-    if(!exists(permanenteFields) || !exists(especialFields)) return;
-    const v = (value || '').toString().toLowerCase();
-    if(v === 'especial'){
-      especialFields.style.display = 'block';
-      permanenteFields.style.display = 'none';
-    } else {
-      especialFields.style.display = 'none';
-      permanenteFields.style.display = 'block';
-    }
+function toggleByTipo(value){
+  if(!exists(permanenteFields) || !exists(especialFields)) return;
+  const v = (value || '').toString().toLowerCase();
+
+  if(v === 'especial'){
+    especialFields.style.display = 'block';
+    permanenteFields.style.display = 'none';
+
+    // Marcar requeridos para tipo especial
+    if (exists(fechaInicioInput)) fechaInicioInput.required = true;
+    if (exists(fechaVencInput)) fechaVencInput.required = true;
+
+    // Quitar requeridos de día y hora
+    if (exists(diaSelect)) diaSelect.required = false;
+    if (exists(horaInput)) horaInput.required = false;
+
+    // Limpiar valores innecesarios
+    if (exists(diaSelect)) diaSelect.value = "";
+    if (exists(horaInput)) horaInput.value = "";
+
+  } else { // permanente
+    especialFields.style.display = 'none';
+    permanenteFields.style.display = 'block';
+
+    // Marcar requeridos para tipo permanente
+    if (exists(diaSelect)) diaSelect.required = true;
+    if (exists(horaInput)) horaInput.required = true;
+
+    // Quitar requeridos de fechas
+    if (exists(fechaInicioInput)) fechaInicioInput.required = false;
+    if (exists(fechaVencInput)) fechaVencInput.required = false;
+
+    // Limpiar valores innecesarios
+    if (exists(fechaInicioInput)) fechaInicioInput.value = "";
+    if (exists(fechaVencInput)) fechaVencInput.value = "";
   }
+}
 
   // Inicializar y escuchar cambios en tipo
   if(exists(tipoSelect)){

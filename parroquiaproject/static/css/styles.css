@@ -164,6 +164,11 @@
   line-height: 1;
 }
 
+.btn-icon-detalles i {
+  font-size: 1rem;
+  line-height: 1;
+}
+
 .btn-purple {
     display: inline-block;
     background-color: #6f42c1;

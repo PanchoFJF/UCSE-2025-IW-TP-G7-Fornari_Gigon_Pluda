@@ -263,7 +263,8 @@ def actividades(request):
             return HttpResponseForbidden("No tenés permisos para crear actividades.")
         form = ActividadesForm(request.POST)
         if form.is_valid():
-            form.save()  # El índice se actualiza automáticamente
+            actividad = form.save()  # guarda y devuelve el objeto
+            messages.success(request, f"Se ha creado la actividad '{actividad.titulo}' exitosamente.")
             return redirect("sitio:actividades")
 
     else:

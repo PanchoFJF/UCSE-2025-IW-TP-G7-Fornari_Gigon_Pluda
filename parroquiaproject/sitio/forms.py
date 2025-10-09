@@ -114,6 +114,13 @@ class ActividadesForm(forms.ModelForm):
         ("Otro", "Otro"),
     ], required=True, label="Categoría")
 
+    iglesia = forms.ModelChoiceField(
+        queryset=Iglesia.objects.all(),
+        required=True,
+        label="Iglesia",
+        empty_label="--- Seleccionar ---"
+    )
+
     dia = forms.ChoiceField(choices=[
         ("Lunes", "Lunes"),
         ("Martes", "Martes"),
