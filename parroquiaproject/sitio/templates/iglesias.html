@@ -82,6 +82,55 @@
       </div>
     </div>
 
+        <!-- MODAL EDITAR IGLESIA -->
+    <div class="modal fade" id="editarIglesia{{ iglesia.id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="editar">
+            <input type="hidden" name="iglesia_id" value="{{ iglesia.id }}">
+
+            <div class="modal-header"  style="background-color: #d0ccbb;">
+              <h5 class="modal-title">Editar Iglesia</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body" style="background-color: #E8E3D0;">
+              <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" name="nombre" class="form-control" value="{{ iglesia.nombre }}" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Dirección</label>
+                <input type="text" name="direccion" class="form-control" value="{{ iglesia.direccion }}">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Contacto Secretaría</label>
+                <label class="form-text text-start"><small>(opcional)</small></label>
+                <input type="text" name="contacto_secretaria" class="form-control" value="{{ iglesia.contacto_secretaria }}">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Imagen</label>
+                <label class="form-text text-start"><small>(opcional)</small></label>
+                <input type="file" name="imagen" class="form-control">
+                <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
+              </div>
+            </div>
+
+            <div class="modal-footer flex-column gap-2" style="background-color: #E8E3D0;">
+              <button type="submit" class="btn btn-success w-100">Aplicar cambios</button>
+              <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% empty %}
+      <p class="text-muted text-center">No hay iglesias registradas.</p>
+    {% endfor %}
+
     <!-- MODAL NUEVA IGLESIA -->
     <div class="modal fade" id="formIglesiaModal" tabindex="-1" aria-labelledby="formIglesiaLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -140,55 +189,6 @@
         </div>
       </div>
     </div>
-
-    <!-- MODAL EDITAR IGLESIA -->
-    <div class="modal fade" id="editarIglesia{{ iglesia.id }}" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-          <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="editar">
-            <input type="hidden" name="iglesia_id" value="{{ iglesia.id }}">
-
-            <div class="modal-header"  style="background-color: #d0ccbb;">
-              <h5 class="modal-title">Editar Iglesia</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-
-            <div class="modal-body" style="background-color: #E8E3D0;">
-              <div class="mb-3">
-                <label class="form-label">Nombre</label>
-                <input type="text" name="nombre" class="form-control" value="{{ iglesia.nombre }}" required>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Dirección</label>
-                <input type="text" name="direccion" class="form-control" value="{{ iglesia.direccion }}">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Contacto Secretaría</label>
-                <label class="form-text text-start"><small>(opcional)</small></label>
-                <input type="text" name="contacto_secretaria" class="form-control" value="{{ iglesia.contacto_secretaria }}">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Imagen</label>
-                <label class="form-text text-start"><small>(opcional)</small></label>
-                <input type="file" name="imagen" class="form-control">
-                <div class="form-text">Dejá vacío para mantener la imagen actual.</div>
-              </div>
-            </div>
-
-            <div class="modal-footer flex-column gap-2" style="background-color: #E8E3D0;">
-              <button type="submit" class="btn btn-success w-100">Aplicar cambios</button>
-              <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    {% empty %}
-      <p class="text-muted text-center">No hay iglesias registradas.</p>
-    {% endfor %}
   </div>
 
 </div>
